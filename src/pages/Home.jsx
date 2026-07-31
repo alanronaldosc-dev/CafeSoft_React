@@ -4,6 +4,11 @@ import Productos from "./Productos";
 import Ventas from "./Ventas";
 import Usuarios from "./Usuarios";
 import CrearProducto from "./CrearProducto";
+import Insumos from "./Insumos";
+import CrearInsumo from "./CrearInsumo";
+import Lotes from "./Lotes";
+import CrearLote from "./CrearLote";
+
 
 function Home({ usuario, cerrarSesion }) {
   const [seccion, setSeccion] = useState("inicio");
@@ -17,6 +22,10 @@ function Home({ usuario, cerrarSesion }) {
     { id: "reportes", texto: "📊 Reportes" },
     { id: "carrito", texto: "🛒 Carrito de Compras" },
     { id: "registro", texto: "👤 Registrar Usuario" },
+    { id: "insumos", texto: "🧂 Ver Insumos" },
+    { id: "lotes", texto: "📦 Lotes de Insumos" },
+
+
   ];
 
   const renderContenido = () => {
@@ -128,6 +137,18 @@ function Home({ usuario, cerrarSesion }) {
             <Register cambiarVista={() => setSeccion("inicio")} />
           </div>
         );
+      
+      case "insumos":
+        return <Insumos onCrear={() => setSeccion("crearInsumo")} />;
+
+      case "crearInsumo":
+        return <CrearInsumo onVolver={() => setSeccion("insumos")} />;
+      case "lotes":
+        return <Lotes onCrear={() => setSeccion("crearLote")} />;
+      case "crearLote":
+        return <CrearLote onVolver={() => setSeccion("lotes")} />;
+
+
 
       default:
         return null;
