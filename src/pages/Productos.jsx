@@ -56,6 +56,7 @@ function Productos({ onCrear }) {
               <th>Precio</th>
               <th>Descripción</th>
               <th>Insumos</th>
+              <th>Imagen</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -79,6 +80,16 @@ function Productos({ onCrear }) {
                     <span style={{ color: "#aaa" }}>Sin insumos</span>
                   )}
                 </td>
+                <td>  {producto.imagen ? (
+                <img
+                  src={`data:image/jpeg;base64,${producto.imagen}`}
+                  alt={producto.nombre}
+                  style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "6px" }}
+                />
+              ) : (
+                <span style={{ color: "#aaa" }}>Sin imagen</span>
+              )}
+              </td>
                 <td>
                   <button onClick={() => eliminarProducto(producto.id)}>🗑️ Eliminar</button>
                 </td>

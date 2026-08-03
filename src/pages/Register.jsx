@@ -8,7 +8,7 @@ function Register({ cambiarVista }) {
     password: "",
     direccion: "",
     telefono: "",
-    user_type: 2,
+    userTipo: 2,
   });
 
   const [cargando, setCargando] = useState(false);
@@ -18,7 +18,7 @@ function Register({ cambiarVista }) {
     setCargando(true);
 
     try {
-      await api.post("/usuarios/registro", form);
+      await api.post("/usuarios", form);
 
       alert("✅ Usuario registrado correctamente");
 
@@ -28,7 +28,7 @@ function Register({ cambiarVista }) {
         password: "",
         direccion: "",
         telefono: "",
-        user_type: 2,
+        userTipo: 2,
       });
 
       cambiarVista("login");

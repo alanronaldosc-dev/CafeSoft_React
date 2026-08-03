@@ -17,11 +17,27 @@ function App() {
   };
 
   if (usuario) {
-    return <Home usuario={usuario} cerrarSesion={cerrarSesion} />;
+    return (
+      <>
+        <div className="orbes">
+          <div className="orbe orbe-1"></div>
+          <div className="orbe orbe-2"></div>
+          <div className="orbe orbe-3"></div>
+          <div className="orbe orbe-4"></div>
+        </div>
+        <Home usuario={usuario} cerrarSesion={cerrarSesion} />
+      </>
+    );
   }
 
   return (
     <>
+      <div className="orbes">
+        <div className="orbe orbe-1"></div>
+        <div className="orbe orbe-2"></div>
+        <div className="orbe orbe-3"></div>
+        <div className="orbe orbe-4"></div>
+      </div>
       {vista === "login" ? (
         <Login cambiarVista={setVista} setUsuario={setUsuario} />
       ) : (

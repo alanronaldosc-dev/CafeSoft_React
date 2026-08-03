@@ -8,6 +8,8 @@ import Insumos from "./Insumos";
 import CrearInsumo from "./CrearInsumo";
 import Lotes from "./Lotes";
 import CrearLote from "./CrearLote";
+import Carrito from "./Carrito";
+
 
 
 function Home({ usuario, cerrarSesion }) {
@@ -124,12 +126,8 @@ function Home({ usuario, cerrarSesion }) {
         );
 
       case "carrito":
-        return (
-          <section className="panel">
-            <h1>🛒 Carrito de Compras</h1>
-            <p>Aquí podrás agregar productos al carrito.</p>
-          </section>
-        );
+        return <Carrito usuario={usuario} />;
+
 
       case "registro":
         return (
@@ -147,6 +145,9 @@ function Home({ usuario, cerrarSesion }) {
         return <Lotes onCrear={() => setSeccion("crearLote")} />;
       case "crearLote":
         return <CrearLote onVolver={() => setSeccion("lotes")} />;
+      case "carrito":
+        return <Carrito usuario={usuario} />;
+
 
 
 

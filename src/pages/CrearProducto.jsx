@@ -8,6 +8,7 @@ function CrearProducto() {
     descripcion: "",
   });
 
+  const [imagenBase64, setImagenBase64] = useState(null);
   const [insumosDisponibles, setInsumosDisponibles] = useState([]);
   const [insumosSeleccionados, setInsumosSeleccionados] = useState([]);
   const [insumoSeleccionado, setInsumoSeleccionado] = useState("");
@@ -26,9 +27,19 @@ function CrearProducto() {
       });
   }, []);
 
-
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleImagen = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result.split(",")[1];
+      setImagenBase64(base64);
+    };
+    reader.readAsDataURL(file);
   };
 
   const agregarInsumo = () => {
@@ -39,7 +50,6 @@ function CrearProducto() {
     const insumo = insumosDisponibles.find((i) => i.id === parseInt(insumoSeleccionado));
     if (!insumo) return;
 
-    // Evitar duplicados
     if (insumosSeleccionados.find((i) => i.insumoId === insumo.id)) {
       alert("Este insumo ya fue agregado");
       return;
@@ -70,6 +80,7 @@ function CrearProducto() {
       nombre: form.nombre,
       precio: parseFloat(form.precio),
       descripcion: form.descripcion,
+      imagen: imagenBase64 || null,
       insumos: insumosSeleccionados.map((i) => ({
         insumoId: i.insumoId,
         cantidad: i.cantidad,
@@ -82,6 +93,7 @@ function CrearProducto() {
       alert("Producto registrado correctamente");
       setForm({ nombre: "", precio: "", descripcion: "" });
       setInsumosSeleccionados([]);
+      setImagenBase64(null);
     } catch (error) {
       if (error.response) {
         alert("Error " + error.response.status + "\n\n" + JSON.stringify(error.response.data));
@@ -106,6 +118,16 @@ function CrearProducto() {
 
         <label>Descripción</label>
         <input type="text" name="descripcion" value={form.descripcion} onChange={handleChange} required />
+
+        <label>Imagen</label>
+        <input type="file" accept="image/*" onChange={handleImagen} />
+        {imagenBase64 && (
+          <img
+            src={`data:image/jpeg;base64,${imagenBase64}`}
+            alt="preview"
+            style={{ width: "100px", marginTop: "0.5rem" }}
+          />
+        )}
 
         <hr />
         <label>Agregar insumos</label>
