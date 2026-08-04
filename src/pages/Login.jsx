@@ -11,24 +11,46 @@ function Login({ cambiarVista, setUsuario }) {
 
   const iniciarSesion = async (e) => {
     e.preventDefault();
+
+    const emailLimpio = form.email.trim().toLowerCase();
+    const passwordLimpia = form.password.trim();
+
+    if (!emailLimpio || !passwordLimpia) {
+      alert("Completa todos los campos");
+      return;
+    }
+
     setCargando(true);
 
     try {
-      const res = await api.get("/usuarios");
+      const res = await api.post("/usuarios/login", {
+        email: emailLimpio,
+        password: passwordLimpia,
+      });
 
-      const usuarioEncontrado = res.data.find(
-        (usuario) => usuario.email === form.email
-      );
+      const usuario = res.data.usuario;
 
-      if (usuarioEncontrado) {
-        localStorage.setItem("usuario", JSON.stringify(usuarioEncontrado));
-        setUsuario(usuarioEncontrado);
-      } else {
-        alert("Correo no encontrado");
+      if (!usuario) {
+        alert("La API no devolvió los datos del usuario");
+        return;
       }
+
+      localStorage.setItem("usuario", JSON.stringify(usuario));
+      setUsuario(usuario);
     } catch (error) {
-      console.error("Error al conectar con la API:", error);
-      alert("No se pudo conectar con la API");
+      console.error("Error al iniciar sesión:", error);
+
+      if (error.response?.status === 400) {
+        alert(error.response?.data?.error || "Completa correctamente los datos");
+      } else if (error.response?.status === 401) {
+        alert("Correo o contraseña incorrectos");
+      } else if (error.response?.status === 403) {
+        alert("Tu usuario no tiene permiso para entrar");
+      } else if (!error.response) {
+        alert("No se pudo conectar con la API");
+      } else {
+        alert(error.response?.data?.error || "Ocurrió un error al iniciar sesión");
+      }
     } finally {
       setCargando(false);
     }
@@ -40,28 +62,40 @@ function Login({ cambiarVista, setUsuario }) {
         <div className="auth-logo">☕</div>
 
         <h1>CafeSoft</h1>
-        <p className="auth-subtitle">Sistema de Gestión para Cafetería</p>
+        <p className="auth-subtitle">
+          Sistema de Gestión para Cafetería
+        </p>
 
         <form onSubmit={iniciarSesion} className="auth-form">
           <label>Correo electrónico</label>
+
           <input
             type="email"
             placeholder="ejemplo@gmail.com"
             value={form.email}
             onChange={(e) =>
-              setForm({ ...form, email: e.target.value })
+              setForm({
+                ...form,
+                email: e.target.value,
+              })
             }
+            autoComplete="email"
             required
           />
 
           <label>Contraseña</label>
+
           <input
             type="password"
             placeholder="Ingresa tu contraseña"
             value={form.password}
             onChange={(e) =>
-              setForm({ ...form, password: e.target.value })
+              setForm({
+                ...form,
+                password: e.target.value,
+              })
             }
+            autoComplete="current-password"
             required
           />
 
