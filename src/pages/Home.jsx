@@ -9,11 +9,17 @@ import CrearInsumo from "./CrearInsumo";
 import Lotes from "./Lotes";
 import CrearLote from "./CrearLote";
 import Carrito from "./Carrito";
+import Categorias from "./Categorias";
+import CrearCategoria from "./CrearCategoria";
+import AgregarProductosCategoria from "./AgregarProductosCategoria";
+
 
 
 
 function Home({ usuario, cerrarSesion }) {
   const [seccion, setSeccion] = useState("inicio");
+  const [categoriaParaProductos, setCategoriaParaProductos] = useState(null);
+
 
   const menu = [
     { id: "inicio", texto: "🏠 Inicio" },
@@ -26,6 +32,8 @@ function Home({ usuario, cerrarSesion }) {
     { id: "registro", texto: "👤 Registrar Usuario" },
     { id: "insumos", texto: "🧂 Ver Insumos" },
     { id: "lotes", texto: "📦 Lotes de Insumos" },
+    { id: "categorias", texto: "🏷️ Categorías" },
+
 
 
   ];
@@ -146,6 +154,28 @@ function Home({ usuario, cerrarSesion }) {
       case "crearLote":
         return <CrearLote onVolver={() => setSeccion("lotes")} />;
       case "carrito":
+      case "categorias":
+        return (
+          <Categorias
+            onCrear={() => setSeccion("crearCategoria")}
+            onAgregarProductos={(cat) => {
+              setCategoriaParaProductos(cat);
+              setSeccion("agregarProductosCategoria");
+            }}
+          />
+        );
+
+      case "crearCategoria":
+        return <CrearCategoria onVolver={() => setSeccion("categorias")} />;
+
+      case "agregarProductosCategoria":
+        return (
+          <AgregarProductosCategoria
+            categoria={categoriaParaProductos}
+            onVolver={() => setSeccion("categorias")}
+          />
+        );
+
         return <Carrito usuario={usuario} />;
 
 

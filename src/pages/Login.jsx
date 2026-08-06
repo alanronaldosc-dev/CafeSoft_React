@@ -36,6 +36,21 @@ function Login({ cambiarVista, setUsuario }) {
 
   return (
     <div className="auth-page">
+
+          {/* DERECHA — bienvenida */}
+    <div className="auth-welcome">
+      <h1>CafeSoft</h1>
+      <h1>tu sistema de gestión</h1>
+      <h1>para cafeterías y mas.</h1>
+      <ul>
+        <li>Gestión de productos e insumos</li>
+        <li>Control de ventas y carrito</li>
+        <li>Reportes y estadísticas</li>
+        <li>Administración de usuarios</li>
+      </ul>
+    </div>
+
+      {/* IZQUIERDA — formulario */}
       <div className="login-container">
         <div className="auth-logo">☕</div>
 
@@ -77,8 +92,12 @@ function Login({ cambiarVista, setUsuario }) {
           </span>
         </p>
       </div>
+
     </div>
+
+    
   );
+  
 }
 
 export default Login;
