@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import api from "../services/api";
 import Register from "./Register";
 import Productos from "./Productos";
 import Ventas from "./Ventas";
+import Pedidos from "./Pedidos";
 import Usuarios from "./Usuarios";
 import CrearProducto from "./CrearProducto";
 import Insumos from "./Insumos";
@@ -25,6 +27,7 @@ function Home({ usuario, cerrarSesion }) {
     { id: "inicio", texto: "🏠 Inicio" },
     { id: "crearProducto", texto: "☕ Crear Producto" },
     { id: "ventas", texto: "🧾 Ver Ventas" },
+    { id: "pedidos", texto: "🍽️ Pedidos" },
     { id: "productos", texto: "📦 Ver Productos" },
     { id: "usuarios", texto: "👥 Ver Usuarios" },
     { id: "reportes", texto: "📊 Reportes" },
@@ -59,6 +62,8 @@ function Home({ usuario, cerrarSesion }) {
                 Ver historial
               </button>
             </section>
+
+            
 
             <section className="cards">
               <div className="card">
@@ -118,6 +123,9 @@ function Home({ usuario, cerrarSesion }) {
 
       case "ventas":
         return <Ventas />;
+
+        case "pedidos":
+  return <Pedidos />;
 
       case "productos":
         return <Productos />;

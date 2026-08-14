@@ -15,7 +15,7 @@ function App() {
     setUsuario(null);
     setVista("login");
   };
-
+//Validacion de usuarios
   if (usuario) {
     return (
       <>
