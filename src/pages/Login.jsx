@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from "../services/api";
 
+
 function Login({ cambiarVista, setUsuario }) {
   const [form, setForm] = useState({
     email: "",
@@ -12,7 +13,6 @@ function Login({ cambiarVista, setUsuario }) {
   const iniciarSesion = async (e) => {
     e.preventDefault();
 
-    // Validación local (campos vacíos)
     if (!form.email.trim() || !form.password.trim()) {
       alert("Ingresa tu correo y contraseña");
       return;
@@ -21,8 +21,6 @@ function Login({ cambiarVista, setUsuario }) {
     setCargando(true);
 
     try {
-
-      // Validación contra la API
       const res = await api.post("/usuarios/login", {
         email: form.email.trim().toLowerCase(),
         password: form.password,
@@ -140,7 +138,7 @@ function Login({ cambiarVista, setUsuario }) {
 
           <input
             type="password"
-            placeholder="Ingresa tu contraseña"
+            placeholder="Ingresa tu nueva contraseña"
             value={form.password}
             onChange={(e) =>
               setForm({
