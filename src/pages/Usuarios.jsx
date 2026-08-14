@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 
 function Usuarios() {
+// HU-015: Gestión de roles personalizados y permisos específicos para puestos especiales.
+
   const [usuarios, setUsuarios] = useState([]);
 
   useEffect(() => {
