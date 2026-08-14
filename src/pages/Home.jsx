@@ -206,7 +206,7 @@ function Home({ usuario, cerrarSesion }) {
           <div className="avatar">
             {usuario.nombre?.charAt(0).toUpperCase()}
           </div>
-//Secion iniciada segun el rol
+
           <div>
             <h3>{usuario.nombre}</h3>
             <p>
