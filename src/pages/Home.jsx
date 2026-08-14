@@ -15,6 +15,10 @@ import Categorias from "./Categorias";
 import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
 
+// HU-013 - PROVEEDORES
+import Proveedores from "./Proveedores";
+import CrearProveedor from "./CrearProveedor";
+
 
 
 
@@ -37,6 +41,8 @@ function Home({ usuario, cerrarSesion }) {
     { id: "lotes", texto: "📦 Lotes de Insumos" },
     { id: "categorias", texto: "🏷️ Categorías" },
 
+    // HU-013
+    { id: "proveedores", texto: "🚚 Proveedores" },
 
 
   ];
@@ -63,7 +69,7 @@ function Home({ usuario, cerrarSesion }) {
               </button>
             </section>
 
-            
+             
 
             <section className="cards">
               <div className="card">
@@ -124,8 +130,8 @@ function Home({ usuario, cerrarSesion }) {
       case "ventas":
         return <Ventas />;
 
-        case "pedidos":
-  return <Pedidos />;
+      case "pedidos":
+        return <Pedidos />;
 
       case "productos":
         return <Productos />;
@@ -151,17 +157,39 @@ function Home({ usuario, cerrarSesion }) {
             <Register cambiarVista={() => setSeccion("inicio")} />
           </div>
         );
-      
+       
       case "insumos":
         return <Insumos onCrear={() => setSeccion("crearInsumo")} />;
 
       case "crearInsumo":
         return <CrearInsumo onVolver={() => setSeccion("insumos")} />;
+
       case "lotes":
         return <Lotes onCrear={() => setSeccion("crearLote")} />;
+
       case "crearLote":
         return <CrearLote onVolver={() => setSeccion("lotes")} />;
+
+      // ============================================
+      // HU-013 - PROVEEDORES
+      // ============================================
+
+      case "proveedores":
+        return (
+          <Proveedores
+            onCrear={() => setSeccion("crearProveedor")}
+          />
+        );
+
+      case "crearProveedor":
+        return (
+          <CrearProveedor
+            onVolver={() => setSeccion("proveedores")}
+          />
+        );
+
       case "carrito":
+
       case "categorias":
         return (
           <Categorias
