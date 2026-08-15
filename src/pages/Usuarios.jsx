@@ -17,6 +17,16 @@ function Usuarios() {
     }
   };
 
+  // HU-012: función para cambiar estado (activo/inactivo)
+  const cambiarEstado = async (id, nuevoEstado) => {
+    try {
+      await api.put(`/usuarios/${id}/estado`, { activo: nuevoEstado });
+      obtenerUsuarios(); // refresca la lista después del cambio
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <section className="panel">
       <h1>👥 Usuarios</h1>
@@ -28,6 +38,8 @@ function Usuarios() {
             <th>Nombre</th>
             <th>Email</th>
             <th>Teléfono</th>
+            <th>Estado</th>
+            <th>Acción</th>
           </tr>
         </thead>
 
@@ -38,6 +50,21 @@ function Usuarios() {
               <td>{usuario.nombre}</td>
               <td>{usuario.email}</td>
               <td>{usuario.telefono}</td>
+              <td>{usuario.activo ? "Activo" : "Inactivo"}</td>
+              <td>
+                <button
+                  onClick={() => cambiarEstado(usuario.idUsuario, !usuario.activo)}
+                  style={{
+                    backgroundColor: usuario.activo ? "tomato" : "lightgreen",
+                    color: "white",
+                    border: "none",
+                    padding: "5px 10px",
+                    cursor: "pointer"
+                  }}
+                >
+                  {usuario.activo ? "Suspender" : "Reactivar"}
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
