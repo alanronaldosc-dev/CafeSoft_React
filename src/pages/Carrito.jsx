@@ -10,7 +10,7 @@ function Carrito({ usuario }) {
   const [cargando, setCargando] = useState(false);
   const [ventaCompletada, setVentaCompletada] = useState(null);
 
-  // NUEVO: nombre de la persona para quien es el pedido
+  // NUEVO: nombre de la persona para quien es el pedido.
   const [nombreCliente, setNombreCliente] = useState("");
 
   // Categorías
