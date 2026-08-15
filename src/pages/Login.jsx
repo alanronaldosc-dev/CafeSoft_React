@@ -1,4 +1,10 @@
 // ============================================
+// HU-007 - RESTABLECIMIENTO DE CONTRASEÑA WEB
+// Permite al usuario recuperar su acceso mediante
+// envío de código o enlace temporal al correo.
+// ============================================
+
+// ============================================
 // HU-008 - INICIO DE SESION WEB
 // Gestiona el acceso de los usuarios a CafeSoft
 // y envia las credenciales para su autenticacion.
