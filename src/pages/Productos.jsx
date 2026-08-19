@@ -12,6 +12,7 @@ function Productos({ onCrear }) {
   const obtenerProductos = async () => {
     try {
       const res = await api.get("/productos");
+
       if (Array.isArray(res.data)) {
         setProductos(res.data);
       } else {
@@ -28,6 +29,7 @@ function Productos({ onCrear }) {
 
   const eliminarProducto = async (id) => {
     if (!confirm("¿Seguro que deseas eliminar este producto?")) return;
+
     try {
       await api.delete(`/productos/${id}`);
       setProductos(productos.filter((p) => p.id !== id));
@@ -36,68 +38,173 @@ function Productos({ onCrear }) {
     }
   };
 
+  // Obtiene la categoría independientemente de cómo
+  // venga estructurada desde la API.
+  const obtenerCategoria = (producto) => {
+    if (producto.categoria?.nombre) {
+      return producto.categoria.nombre;
+    }
+
+    if (producto.categoriaNombre) {
+      return producto.categoriaNombre;
+    }
+
+    if (typeof producto.categoria === "string") {
+      return producto.categoria;
+    }
+
+    return "Sin categoría";
+  };
+
   return (
-    <section className="panel">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h1>📦 Productos</h1>
-        {onCrear && <button onClick={onCrear}>+ Crear Producto</button>}
+    <section className="panel productos-panel">
+
+      {/* Encabezado */}
+      <div className="productos-header">
+        <div>
+          <h1>📦 Productos</h1>
+          <p className="productos-subtitle">
+            Consulta los productos disponibles.
+          </p>
+        </div>
+
+        {onCrear && (
+          <button
+            className="crear-producto-button"
+            onClick={onCrear}
+          >
+            + Crear Producto
+          </button>
+        )}
       </div>
 
+      {/* Cargando */}
       {cargando ? (
-        <p>Cargando productos...</p>
+        <div className="productos-mensaje">
+          <p>Cargando productos...</p>
+        </div>
+
       ) : productos.length === 0 ? (
-        <p>No hay productos registrados.</p>
+
+        /* Sin productos */
+        <div className="productos-mensaje">
+          <span className="productos-empty-icon">📦</span>
+          <p>No hay productos registrados.</p>
+        </div>
+
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Precio</th>
-              <th>Descripción</th>
-              <th>Insumos</th>
-              <th>Imagen</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {productos.map((producto) => (
-              <tr key={producto.id}>
-                <td>{producto.id}</td>
-                <td>{producto.nombre}</td>
-                <td>${producto.precio}</td>
-                <td>{producto.descripcion}</td>
-                <td>
-                  {producto.insumos && producto.insumos.length > 0 ? (
-                    <ul style={{ margin: 0, paddingLeft: "1rem" }}>
-                      {producto.insumos.map((insumo) => (
-                        <li key={insumo.insumoId}>
-                          {insumo.insumoNombre} — {insumo.cantidad} {insumo.unidadMedida}
-                        </li>
-                      ))}
-                    </ul>
+
+        /* Tarjetas */
+        <div className="productos-grid">
+
+          {productos.map((producto) => {
+
+            const categoria = obtenerCategoria(producto);
+
+            return (
+              <article
+                className="producto-card"
+                key={producto.id}
+              >
+
+                {/* Imagen */}
+                <div className="producto-image-container">
+
+                  {producto.imagen ? (
+                    <img
+                      src={`data:image/jpeg;base64,${producto.imagen}`}
+                      alt={`Imagen de ${producto.nombre}`}
+                      className="producto-image"
+                    />
                   ) : (
-                    <span style={{ color: "#aaa" }}>Sin insumos</span>
+                    <div className="producto-image-placeholder">
+                      <span>📦</span>
+                      <p>Sin imagen</p>
+                    </div>
                   )}
-                </td>
-                <td>  {producto.imagen ? (
-                <img
-                  src={`data:image/jpeg;base64,${producto.imagen}`}
-                  alt={producto.nombre}
-                  style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "6px" }}
-                />
-              ) : (
-                <span style={{ color: "#aaa" }}>Sin imagen</span>
-              )}
-              </td>
-                <td>
-                  <button onClick={() => eliminarProducto(producto.id)}>🗑️ Eliminar</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+                </div>
+
+                {/* Información */}
+                <div className="producto-card-content">
+
+                  <h2 className="producto-name">
+                    {producto.nombre}
+                  </h2>
+
+                  {/* Categoría */}
+                  <span className="producto-category">
+                    {categoria}
+                  </span>
+
+                  {/* Precio */}
+                  <p className="producto-price">
+                    ${producto.precio} MXN
+                  </p>
+
+                  {/* Descripción */}
+                  {producto.descripcion && (
+                    <p className="producto-description">
+                      {producto.descripcion}
+                    </p>
+                  )}
+
+                  {/* Insumos */}
+                  {producto.insumos &&
+                    producto.insumos.length > 0 && (
+                      <details className="producto-insumos">
+
+                        <summary>
+                          Insumos utilizados
+                        </summary>
+
+                        <ul>
+                          {producto.insumos
+                            .slice(0, 3)
+                            .map((insumo) => (
+                              <li key={insumo.insumoId}>
+                                {insumo.insumoNombre}
+                                {" — "}
+                                {insumo.cantidad}{" "}
+                                {insumo.unidadMedida}
+                              </li>
+                            ))}
+                        </ul>
+
+                        {producto.insumos.length > 3 && (
+                          <small>
+                            +
+                            {producto.insumos.length - 3}
+                            {" "}insumos más
+                          </small>
+                        )}
+
+                      </details>
+                    )}
+
+                  {/* Acciones */}
+                  <div className="producto-actions">
+
+                    <button
+                      className="producto-delete-button"
+                      onClick={() =>
+                        eliminarProducto(producto.id)
+                      }
+                    >
+                      🗑️ Eliminar
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </article>
+            );
+          })}
+
+        </div>
       )}
+
     </section>
   );
 }
