@@ -19,15 +19,29 @@ import AgregarProductosCategoria from "./AgregarProductosCategoria";
 import Proveedores from "./Proveedores";
 import CrearProveedor from "./CrearProveedor";
 
+function Home({
+  usuario,
+  cerrarSesion,
+}) {
 
+  const [seccion, setSeccion] =
+    useState("inicio");
 
+  const [
+    categoriaParaProductos,
+    setCategoriaParaProductos,
+  ] = useState(null);
 
-function Home({ usuario, cerrarSesion }) {
-  const [seccion, setSeccion] = useState("inicio");
-  const [categoriaParaProductos, setCategoriaParaProductos] = useState(null);
-
+  /*
+   * ============================================
+   * HU-015
+   *
+   * Todos los módulos disponibles
+   * ============================================
+   */
 
   const menu = [
+
     { id: "inicio", texto: "🏠 Inicio" },
     { id: "crearProducto", texto: "☕ Crear Producto" },
     { id: "ventas", texto: "🧾 Ver Ventas" },
@@ -45,123 +59,446 @@ function Home({ usuario, cerrarSesion }) {
     { id: "proveedores", texto: "🚚 Proveedores" },
 
 
+
+    {
+      id: "inicio",
+      texto: "🏠 Inicio",
+    },
+    {
+      id: "crearProducto",
+      texto: "☕ Crear Producto",
+    },
+    {
+      id: "ventas",
+      texto: "🧾 Ver Ventas",
+    },
+    {
+      id: "pedidos",
+      texto: "🍽️ Pedidos",
+    },
+    {
+      id: "productos",
+      texto: "📦 Ver Productos",
+    },
+    {
+      id: "usuarios",
+      texto: "👥 Ver Usuarios",
+    },
+    {
+      id: "reportes",
+      texto: "📊 Reportes",
+    },
+    {
+      id: "carrito",
+      texto: "🛒 Carrito de Compras",
+    },
+    {
+      id: "registro",
+      texto: "👤 Registrar Usuario",
+    },
+    {
+      id: "insumos",
+      texto: "🧂 Ver Insumos",
+    },
+    {
+      id: "lotes",
+      texto: "📦 Lotes de Insumos",
+    },
+    {
+      id: "categorias",
+      texto: "🏷️ Categorías",
+    },
+    {
+      id: "proveedores",
+      texto: "🚚 Proveedores",
+    },
+
   ];
 
+  /*
+   * ============================================
+   * HU-015
+   *
+   * Determina si el usuario puede visualizar
+   * un módulo determinado.
+   * ============================================
+   */
+
+  const tienePermiso = (permiso) => {
+
+    /*
+     * Administrador:
+     * acceso completo.
+     */
+    if (usuario.userTipo === 0) {
+      return true;
+    }
+
+    /*
+     * Personalizado:
+     * solamente permisos asignados.
+     */
+    if (usuario.userTipo === 3) {
+
+      return (
+        usuario.permisos?.includes(
+          permiso
+        ) || false
+      );
+    }
+
+    /*
+     * Usuario normal:
+     * permisos predeterminados.
+     */
+    if (usuario.userTipo === 1) {
+
+      const permisosUsuario = [
+        "productos",
+        "pedidos",
+        "ventas",
+        "carrito",
+      ];
+
+      return permisosUsuario.includes(
+        permiso
+      );
+    }
+
+    /*
+     * Cliente:
+     * dejamos acceso básico.
+     */
+    if (usuario.userTipo === 2) {
+
+      const permisosCliente = [
+        "productos",
+        "pedidos",
+        "carrito",
+      ];
+
+      return permisosCliente.includes(
+        permiso
+      );
+    }
+
+    return false;
+  };
+
+  /*
+   * ============================================
+   * HU-015
+   *
+   * Evita que un usuario entre directamente
+   * escribiendo una sección que no tiene.
+   * ============================================
+   */
+
+  const cambiarSeccion = (nuevaSeccion) => {
+
+    if (nuevaSeccion === "inicio") {
+
+      setSeccion("inicio");
+      return;
+    }
+
+    if (!tienePermiso(nuevaSeccion)) {
+
+      alert(
+        "No tienes permisos para acceder a este apartado."
+      );
+
+      setSeccion("inicio");
+      return;
+    }
+
+    setSeccion(nuevaSeccion);
+  };
+
+  /*
+   * ============================================
+   * CONTENIDO
+   * ============================================
+   */
+
   const renderContenido = () => {
+
+    /*
+     * Protección adicional.
+     */
+    if (
+      seccion !== "inicio" &&
+      !tienePermiso(seccion)
+    ) {
+
+      return (
+        <section className="panel">
+
+          <h1>
+            🔒 Acceso restringido
+          </h1>
+
+          <p>
+            No tienes permisos para
+            acceder a este apartado.
+          </p>
+
+        </section>
+      );
+    }
+
     switch (seccion) {
+
       case "inicio":
+
         return (
           <>
             <section className="header">
+
               <div>
-                <h1>Bienvenido a CafeSoft</h1>
+
+                <h1>
+                  Bienvenido a CafeSoft
+                </h1>
+
                 <p>
-                  Hola, {usuario.nombre}. Administra tu cafetería desde un solo
-                  lugar.
+                  Hola, {usuario.nombre}.
+                  Administra tu cafetería
+                  desde un solo lugar.
                 </p>
+
               </div>
 
-              <button
-                className="history-btn"
-                onClick={() => setSeccion("ventas")}
-              >
-                Ver historial
-              </button>
+              {tienePermiso("ventas") && (
+                <button
+                  className="history-btn"
+                  onClick={() =>
+                    cambiarSeccion(
+                      "ventas"
+                    )
+                  }
+                >
+                  Ver historial
+                </button>
+              )}
+
             </section>
 
              
 
             <section className="cards">
+
               <div className="card">
-                <span className="card-icon">💵</span>
-                <p>Total vendido hoy</p>
-                <h2>$470.00</h2>
+
+                <span className="card-icon">
+                  💵
+                </span>
+
+                <p>
+                  Total vendido hoy
+                </p>
+
+                <h2>
+                  $470.00
+                </h2>
+
               </div>
 
               <div className="card">
-                <span className="card-icon">🧾</span>
-                <p>Tickets generados</p>
-                <h2>1</h2>
+
+                <span className="card-icon">
+                  🧾
+                </span>
+
+                <p>
+                  Tickets generados
+                </p>
+
+                <h2>
+                  1
+                </h2>
+
               </div>
+
             </section>
 
             <section className="dashboard-grid">
+
               <div className="panel">
-                <h2>👑 Top productos de hoy</h2>
+
+                <h2>
+                  👑 Top productos de hoy
+                </h2>
 
                 <div className="donut"></div>
 
                 <div className="legend">
-                  <p>☕ Café Americano</p>
-                  <p>🍫 Chocolate Caliente</p>
-                  <p>🍵 Té Chai Latte</p>
-                  <p>🥕 Pastel de Zanahoria</p>
+
+                  <p>
+                    ☕ Café Americano
+                  </p>
+
+                  <p>
+                    🍫 Chocolate Caliente
+                  </p>
+
+                  <p>
+                    🍵 Té Chai Latte
+                  </p>
+
+                  <p>
+                    🥕 Pastel de Zanahoria
+                  </p>
+
                 </div>
+
               </div>
 
               <div className="panel">
-                <h2>🕒 Detalle de ventas</h2>
+
+                <h2>
+                  🕒 Detalle de ventas
+                </h2>
 
                 <table>
+
                   <thead>
+
                     <tr>
-                      <th>Hora</th>
-                      <th>Mesa</th>
-                      <th>Total</th>
+
+                      <th>
+                        Hora
+                      </th>
+
+                      <th>
+                        Mesa
+                      </th>
+
+                      <th>
+                        Total
+                      </th>
+
                     </tr>
+
                   </thead>
 
                   <tbody>
+
                     <tr>
-                      <td>11:29 PM</td>
-                      <td>Mesa 9</td>
-                      <td>$470.00</td>
+
+                      <td>
+                        11:29 PM
+                      </td>
+
+                      <td>
+                        Mesa 9
+                      </td>
+
+                      <td>
+                        $470.00
+                      </td>
+
                     </tr>
+
                   </tbody>
+
                 </table>
+
               </div>
+
             </section>
           </>
         );
 
       case "crearProducto":
-        return <CrearProducto />;
+
+        return (
+          <CrearProducto />
+        );
 
       case "ventas":
-        return <Ventas />;
+
+        return (
+          <Ventas />
+        );
+
+      case "pedidos":
+
+        return (
+          <Pedidos />
+        );
 
       case "pedidos":
         return <Pedidos />;
 
       case "productos":
-        return <Productos />;
+
+        return (
+          <Productos />
+        );
 
       case "usuarios":
-        return <Usuarios />;
+
+        return (
+          <Usuarios />
+        );
 
       case "reportes":
+
         return (
           <section className="panel">
-            <h1>📊 Reportes</h1>
-            <p>Aquí irán las gráficas y reportes del sistema.</p>
+
+            <h1>
+              📊 Reportes
+            </h1>
+
+            <p>
+              Aquí irán las gráficas
+              y reportes del sistema.
+            </p>
+
           </section>
         );
 
       case "carrito":
-        return <Carrito usuario={usuario} />;
 
+        return (
+          <Carrito
+            usuario={usuario}
+          />
+        );
 
       case "registro":
+
         return (
           <div className="dashboard-form">
-            <Register cambiarVista={() => setSeccion("inicio")} />
+
+            <Register
+              cambiarVista={() =>
+                setSeccion("inicio")
+              }
+              esAdministrador={
+                usuario.userTipo === 0
+              }
+            />
+
           </div>
         );
-       
+
       case "insumos":
-        return <Insumos onCrear={() => setSeccion("crearInsumo")} />;
+
+        return (
+          <Insumos
+            onCrear={() =>
+              cambiarSeccion(
+                "crearInsumo"
+              )
+            }
+          />
+        );
 
       case "crearInsumo":
+
         return <CrearInsumo onVolver={() => setSeccion("insumos")} />;
 
       case "lotes":
@@ -174,14 +511,93 @@ function Home({ usuario, cerrarSesion }) {
       // HU-013 - PROVEEDORES
       // ============================================
 
-      case "proveedores":
+            case "proveedores":
+
         return (
           <Proveedores
-            onCrear={() => setSeccion("crearProveedor")}
+            onCrear={() =>
+              cambiarSeccion(
+                "crearProveedor"
+              )
+            }
           />
         );
 
       case "crearProveedor":
+
+        if (
+          !tienePermiso("proveedores")
+        ) {
+
+          return null;
+        }
+
+        return (
+          <CrearProveedor
+            onVolver={() =>
+              cambiarSeccion(
+                "proveedores"
+              )
+            }
+          />
+        );
+
+        return (
+          <CrearInsumo
+            onVolver={() =>
+              cambiarSeccion(
+                "insumos"
+              )
+            }
+          />
+        );
+
+      case "lotes":
+
+        return (
+          <Lotes
+            onCrear={() =>
+              cambiarSeccion(
+                "crearLote"
+              )
+            }
+          />
+        );
+
+      case "crearLote":
+
+        if (
+          !tienePermiso("lotes")
+        ) {
+
+          return null;
+        }
+
+        return (
+          <CrearLote
+            onVolver={() =>
+              cambiarSeccion(
+                "lotes"
+              )
+            }
+          />
+        );
+
+      case "proveedores":
+
+        return (
+          <Proveedores
+            onCrear={() =>
+              cambiarSeccion(
+                "crearProveedor"
+              )
+            }
+
+          />
+        );
+
+      case "crearProveedor":
+
         return (
           <CrearProveedor
             onVolver={() => setSeccion("proveedores")}
@@ -190,82 +606,228 @@ function Home({ usuario, cerrarSesion }) {
 
       case "carrito":
 
+
+
+        if (
+          !tienePermiso("proveedores")
+        ) {
+
+          return null;
+        }
+
+        return (
+          <CrearProveedor
+            onVolver={() =>
+              cambiarSeccion(
+                "proveedores"
+              )
+            }
+          />
+        );
+
+
       case "categorias":
+
         return (
           <Categorias
-            onCrear={() => setSeccion("crearCategoria")}
-            onAgregarProductos={(cat) => {
-              setCategoriaParaProductos(cat);
-              setSeccion("agregarProductosCategoria");
+            onCrear={() =>
+              cambiarSeccion(
+                "crearCategoria"
+              )
+            }
+            onAgregarProductos={(
+              categoria
+            ) => {
+
+              setCategoriaParaProductos(
+                categoria
+              );
+
+              setSeccion(
+                "agregarProductosCategoria"
+              );
+
             }}
           />
         );
 
       case "crearCategoria":
-        return <CrearCategoria onVolver={() => setSeccion("categorias")} />;
 
-      case "agregarProductosCategoria":
+        if (
+          !tienePermiso("categorias")
+        ) {
+
+          return null;
+        }
+
         return (
-          <AgregarProductosCategoria
-            categoria={categoriaParaProductos}
-            onVolver={() => setSeccion("categorias")}
+          <CrearCategoria
+            onVolver={() =>
+              cambiarSeccion(
+                "categorias"
+              )
+            }
           />
         );
 
-        return <Carrito usuario={usuario} />;
+      case "agregarProductosCategoria":
 
+        if (
+          !tienePermiso(
+            "categorias"
+          )
+        ) {
 
+          return null;
+        }
 
+        return (
+          <AgregarProductosCategoria
+            categoria={
+              categoriaParaProductos
+            }
+            onVolver={() =>
+              cambiarSeccion(
+                "categorias"
+              )
+            }
+          />
+        );
 
       default:
+
         return null;
     }
   };
 
+  /*
+   * ============================================
+   * ROL PARA MOSTRAR EN LA INTERFAZ
+   * ============================================
+   */
+
+  const obtenerNombreRol = () => {
+
+    if (usuario.userTipo === 0) {
+      return "Administrador";
+    }
+
+    if (usuario.userTipo === 1) {
+      return "Usuario";
+    }
+
+    if (usuario.userTipo === 3) {
+      return "Personalizado";
+    }
+
+    return "Cliente";
+  };
+
+  /*
+   * ============================================
+   * INTERFAZ
+   * ============================================
+   */
+
   return (
     <div className="home">
+
       <aside className="sidebar">
+
         <div className="logo">
+
           ☕ CafeSoft
-          <span>Sistema de Gestión</span>
+
+          <span>
+            Sistema de Gestión
+          </span>
+
         </div>
 
         <div className="user-card">
+
           <div className="avatar">
-            {usuario.nombre?.charAt(0).toUpperCase()}
+
+            {usuario.nombre
+              ?.charAt(0)
+              .toUpperCase()}
+
           </div>
 
           <div>
-            <h3>{usuario.nombre}</h3>
+
+            <h3>
+              {usuario.nombre}
+            </h3>
+
             <p>
-              {usuario.userTipo === 0
-                ? "Administrador"
-                : usuario.userTipo === 1
-                ? "Empleado"
-                : "Cliente"}
+              {obtenerNombreRol()}
             </p>
+
           </div>
+
         </div>
 
         <nav className="menu">
-          {menu.map((item) => (
-            <p
-              key={item.id}
-              onClick={() => setSeccion(item.id)}
-              className={seccion === item.id ? "active-menu" : ""}
-              style={{ cursor: "pointer" }}
-            >
-              {item.texto}
-            </p>
-          ))}
+
+          {menu
+            .filter((item) => {
+
+              /*
+               * Inicio siempre aparece.
+               */
+              if (
+                item.id === "inicio"
+              ) {
+                return true;
+              }
+
+              return tienePermiso(
+                item.id
+              );
+            })
+            .map((item) => (
+
+              <p
+                key={item.id}
+                onClick={() =>
+                  cambiarSeccion(
+                    item.id
+                  )
+                }
+                className={
+                  seccion === item.id
+                    ? "active-menu"
+                    : ""
+                }
+                style={{
+                  cursor: "pointer",
+                }}
+              >
+
+                {item.texto}
+
+              </p>
+
+            ))}
+
         </nav>
 
-        <button className="logout" onClick={cerrarSesion}>
+        <button
+          className="logout"
+          onClick={cerrarSesion}
+        >
           Cerrar sesión
         </button>
+
       </aside>
 
-      <main className="content">{renderContenido()}</main>
+      <main className="content">
+
+        {renderContenido()}
+
+      </main>
+
     </div>
   );
 }
