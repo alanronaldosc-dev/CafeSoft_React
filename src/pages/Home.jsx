@@ -15,14 +15,18 @@ import Categorias from "./Categorias";
 import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
 
-
-
+// HU-013 - PROVEEDORES
+import Proveedores from "./Proveedores";
+import CrearProveedor from "./CrearProveedor";
 
 function Home({ usuario, cerrarSesion }) {
   const [seccion, setSeccion] = useState("inicio");
   const [categoriaParaProductos, setCategoriaParaProductos] = useState(null);
 
-
+  // ============================================
+  // HU-015
+  // Todos los módulos disponibles
+  // ============================================
   const menu = [
     { id: "inicio", texto: "🏠 Inicio" },
     { id: "crearProducto", texto: "☕ Crear Producto" },
@@ -36,12 +40,77 @@ function Home({ usuario, cerrarSesion }) {
     { id: "insumos", texto: "🧂 Ver Insumos" },
     { id: "lotes", texto: "📦 Lotes de Insumos" },
     { id: "categorias", texto: "🏷️ Categorías" },
-
-
-
+    // HU-013
+    { id: "proveedores", texto: "🚚 Proveedores" },
   ];
 
+  // ============================================
+  // HU-015
+  // Determina si el usuario puede visualizar
+  // un módulo determinado.
+  // ============================================
+  const tienePermiso = (permiso) => {
+    // Administrador: acceso completo.
+    if (usuario.userTipo === 0) return true;
+
+    // Personalizado: solamente permisos asignados.
+    if (usuario.userTipo === 3) return usuario.permisos?.includes(permiso) || false;
+
+    // Usuario normal: permisos predeterminados.
+    if (usuario.userTipo === 1) {
+      return ["productos", "pedidos", "ventas", "carrito"].includes(permiso);
+    }
+
+    // Cliente: acceso básico.
+    if (usuario.userTipo === 2) {
+      return ["productos", "pedidos", "carrito"].includes(permiso);
+    }
+
+    return false;
+  };
+
+  // ============================================
+  // HU-015
+  // Evita que un usuario entre directamente
+  // escribiendo una sección que no tiene.
+  // ============================================
+  const cambiarSeccion = (nuevaSeccion) => {
+    if (nuevaSeccion === "inicio") {
+      setSeccion("inicio");
+      return;
+    }
+    if (!tienePermiso(nuevaSeccion)) {
+      alert("No tienes permisos para acceder a este apartado.");
+      setSeccion("inicio");
+      return;
+    }
+    setSeccion(nuevaSeccion);
+  };
+
+  // ============================================
+  // ROL PARA MOSTRAR EN LA INTERFAZ
+  // ============================================
+  const obtenerNombreRol = () => {
+    if (usuario.userTipo === 0) return "Administrador";
+    if (usuario.userTipo === 1) return "Usuario";
+    if (usuario.userTipo === 3) return "Personalizado";
+    return "Cliente";
+  };
+
+  // ============================================
+  // CONTENIDO
+  // ============================================
   const renderContenido = () => {
+    // Protección adicional.
+    if (seccion !== "inicio" && !tienePermiso(seccion)) {
+      return (
+        <section className="panel">
+          <h1>🔒 Acceso restringido</h1>
+          <p>No tienes permisos para acceder a este apartado.</p>
+        </section>
+      );
+    }
+
     switch (seccion) {
       case "inicio":
         return (
@@ -55,15 +124,15 @@ function Home({ usuario, cerrarSesion }) {
                 </p>
               </div>
 
-              <button
-                className="history-btn"
-                onClick={() => setSeccion("ventas")}
-              >
-                Ver historial
-              </button>
+              {tienePermiso("ventas") && (
+                <button
+                  className="history-btn"
+                  onClick={() => cambiarSeccion("ventas")}
+                >
+                  Ver historial
+                </button>
+              )}
             </section>
-
-            
 
             <section className="cards">
               <div className="card">
@@ -82,9 +151,7 @@ function Home({ usuario, cerrarSesion }) {
             <section className="dashboard-grid">
               <div className="panel">
                 <h2>👑 Top productos de hoy</h2>
-
                 <div className="donut"></div>
-
                 <div className="legend">
                   <p>☕ Café Americano</p>
                   <p>🍫 Chocolate Caliente</p>
@@ -95,7 +162,6 @@ function Home({ usuario, cerrarSesion }) {
 
               <div className="panel">
                 <h2>🕒 Detalle de ventas</h2>
-
                 <table>
                   <thead>
                     <tr>
@@ -104,7 +170,6 @@ function Home({ usuario, cerrarSesion }) {
                       <th>Total</th>
                     </tr>
                   </thead>
-
                   <tbody>
                     <tr>
                       <td>11:29 PM</td>
@@ -124,8 +189,8 @@ function Home({ usuario, cerrarSesion }) {
       case "ventas":
         return <Ventas />;
 
-        case "pedidos":
-  return <Pedidos />;
+      case "pedidos":
+        return <Pedidos />;
 
       case "productos":
         return <Productos />;
@@ -144,50 +209,62 @@ function Home({ usuario, cerrarSesion }) {
       case "carrito":
         return <Carrito usuario={usuario} />;
 
-
       case "registro":
         return (
           <div className="dashboard-form">
-            <Register cambiarVista={() => setSeccion("inicio")} />
+            <Register
+              cambiarVista={() => setSeccion("inicio")}
+              esAdministrador={usuario.userTipo === 0}
+            />
           </div>
         );
-      
+
       case "insumos":
-        return <Insumos onCrear={() => setSeccion("crearInsumo")} />;
+        return <Insumos onCrear={() => cambiarSeccion("crearInsumo")} />;
 
       case "crearInsumo":
-        return <CrearInsumo onVolver={() => setSeccion("insumos")} />;
+        return <CrearInsumo onVolver={() => cambiarSeccion("insumos")} />;
+
       case "lotes":
-        return <Lotes onCrear={() => setSeccion("crearLote")} />;
+        return <Lotes onCrear={() => cambiarSeccion("crearLote")} />;
+
       case "crearLote":
-        return <CrearLote onVolver={() => setSeccion("lotes")} />;
-      case "carrito":
+        return <CrearLote onVolver={() => cambiarSeccion("lotes")} />;
+
+      // ============================================
+      // HU-013 - PROVEEDORES
+      // ============================================
+      case "proveedores":
+        return (
+          <Proveedores onCrear={() => cambiarSeccion("crearProveedor")} />
+        );
+
+      case "crearProveedor":
+        return (
+          <CrearProveedor onVolver={() => cambiarSeccion("proveedores")} />
+        );
+
       case "categorias":
         return (
           <Categorias
-            onCrear={() => setSeccion("crearCategoria")}
-            onAgregarProductos={(cat) => {
-              setCategoriaParaProductos(cat);
-              setSeccion("agregarProductosCategoria");
+            onCrear={() => cambiarSeccion("crearCategoria")}
+            onAgregarProductos={(categoria) => {
+              setCategoriaParaProductos(categoria);
+              cambiarSeccion("agregarProductosCategoria");
             }}
           />
         );
 
       case "crearCategoria":
-        return <CrearCategoria onVolver={() => setSeccion("categorias")} />;
+        return <CrearCategoria onVolver={() => cambiarSeccion("categorias")} />;
 
       case "agregarProductosCategoria":
         return (
           <AgregarProductosCategoria
             categoria={categoriaParaProductos}
-            onVolver={() => setSeccion("categorias")}
+            onVolver={() => cambiarSeccion("categorias")}
           />
         );
-
-        return <Carrito usuario={usuario} />;
-
-
-
 
       default:
         return null;
@@ -206,30 +283,28 @@ function Home({ usuario, cerrarSesion }) {
           <div className="avatar">
             {usuario.nombre?.charAt(0).toUpperCase()}
           </div>
-
           <div>
             <h3>{usuario.nombre}</h3>
-            <p>
-              {usuario.userTipo === 0
-                ? "Administrador"
-                : usuario.userTipo === 1
-                ? "Empleado"
-                : "Cliente"}
-            </p>
+            <p>{obtenerNombreRol()}</p>
           </div>
         </div>
 
         <nav className="menu">
-          {menu.map((item) => (
-            <p
-              key={item.id}
-              onClick={() => setSeccion(item.id)}
-              className={seccion === item.id ? "active-menu" : ""}
-              style={{ cursor: "pointer" }}
-            >
-              {item.texto}
-            </p>
-          ))}
+          {menu
+            .filter((item) => {
+              if (item.id === "inicio") return true;
+              return tienePermiso(item.id);
+            })
+            .map((item) => (
+              <p
+                key={item.id}
+                onClick={() => cambiarSeccion(item.id)}
+                className={seccion === item.id ? "active-menu" : ""}
+                style={{ cursor: "pointer" }}
+              >
+                {item.texto}
+              </p>
+            ))}
         </nav>
 
         <button className="logout" onClick={cerrarSesion}>
