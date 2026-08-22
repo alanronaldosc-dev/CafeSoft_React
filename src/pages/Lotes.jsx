@@ -32,7 +32,13 @@ function Lotes({ onCrear }) {
 
   return (
     <section className="panel">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <h1>📦 Lotes de Insumos</h1>
         <button onClick={onCrear}>+ Registrar Lote</button>
       </div>
@@ -47,6 +53,7 @@ function Lotes({ onCrear }) {
             <tr>
               <th>ID</th>
               <th>Insumo</th>
+              <th>Proveedor</th>
               <th>Cantidad</th>
               <th>Fecha Entrada</th>
               <th>Fecha Caducidad</th>
@@ -59,12 +66,17 @@ function Lotes({ onCrear }) {
               <tr key={lote.id}>
                 <td>{lote.id}</td>
                 <td>{lote.insumoNombre}</td>
-                <td>{lote.cantidad} {lote.insumoUnidad}</td>
+                <td>{lote.proveedorNombre || "—"}</td>
+                <td>
+                  {lote.cantidad} {lote.insumoUnidad}
+                </td>
                 <td>{lote.fechaEntrada}</td>
                 <td>{lote.fechaCaducidad}</td>
                 <td>{lote.observaciones || "—"}</td>
                 <td>
-                  <button onClick={() => eliminarLote(lote.id)}>🗑️ Eliminar</button>
+                  <button onClick={() => eliminarLote(lote.id)}>
+                    🗑️ Eliminar
+                  </button>
                 </td>
               </tr>
             ))}
