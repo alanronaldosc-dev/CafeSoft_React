@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import InventarioAnalisis from "./InventarioAnalisis";
 
+
 function Insumos({ onCrear }) {
   const [insumos, setInsumos] = useState([]);
   const [cargando, setCargando] = useState(true);

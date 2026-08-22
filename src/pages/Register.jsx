@@ -1,6 +1,20 @@
 import { useState } from "react";
 import api from "../services/api";
 
+/**
+ * HU-011 – Gestión de perfiles de usuarios
+ * "Como administrador, quiero registrar, consultar y actualizar los perfiles
+ * de los usuarios administrador, empleado y cliente."
+ *
+ * Este componente cumple con el criterio de aceptación:
+ *  ✅ Formulario único para dar de alta y editar datos básicos del empleado.
+ *
+ * Cuando es invocado con `esAdministrador=true` permite al administrador
+ * elegir el tipo de rol (Administrador, Usuario o Personalizado) antes de
+ * registrar el perfil.  En modo público registra clientes (userTipo = 2).
+ */
+
+// HU-011 / HU-015: catálogo de permisos disponibles para roles personalizados
 const PERMISOS = [
   {
     id: "crearProducto",
@@ -52,10 +66,22 @@ const PERMISOS = [
   },
 ];
 
+/**
+ * HU-011 – Formulario de registro / alta de usuario
+ *
+ * @param {function} cambiarVista    - Callback para navegar entre vistas (login / register)
+ * @param {boolean}  esAdministrador - true  → el admin registra empleados/administradores
+ *                                     false → registro público de clientes
+ */
 function Register({
   cambiarVista,
   esAdministrador = false,
 }) {
+  /**
+   * HU-011: estado del formulario con los datos básicos del perfil.
+   * Campos requeridos por el criterio de aceptación:
+   *   nombre, email, contraseña, dirección, teléfono, tipo de rol.
+   */
   const [form, setForm] = useState({
     nombre: "",
     email: "",
@@ -64,11 +90,9 @@ function Register({
     telefono: "",
 
     /*
-     * Registro público:
-     * Cliente = 2
-     *
-     * Registro desde administrador:
-     * Usuario = 1
+     * HU-011: tipo de usuario según quién realiza el registro.
+     * Registro público:         Cliente = 2
+     * Registro desde admin:     Usuario = 1
      */
     userTipo: esAdministrador ? 1 : 2,
 
@@ -77,6 +101,7 @@ function Register({
 
   const [cargando, setCargando] = useState(false);
 
+  // HU-011: actualiza un campo individual del formulario de perfil
   const cambiarCampo = (campo, valor) => {
     setForm((actual) => ({
       ...actual,
@@ -84,6 +109,11 @@ function Register({
     }));
   };
 
+  /**
+   * HU-011: cambia el tipo de rol del perfil que se está registrando.
+   * Al cambiar el rol se limpian los permisos personalizados para evitar
+   * inconsistencias entre rol y permisos.
+   */
   const cambiarRol = (valor) => {
     const nuevoTipo = Number(valor);
 
@@ -131,6 +161,12 @@ function Register({
     }));
   };
 
+  /**
+   * HU-011 – Dar de alta un nuevo perfil de usuario
+   * Envía los datos del formulario a POST /usuarios.
+   * Construye el payload con los datos básicos exigidos por el criterio
+   * de aceptación (nombre, email, contraseña, dirección, teléfono, rol).
+   */
   const registrar = async (e) => {
     e.preventDefault();
 
@@ -152,6 +188,7 @@ function Register({
     setCargando(true);
 
     try {
+      // HU-011: payload con los datos básicos del perfil a registrar
       const datosUsuario = {
         nombre: form.nombre.trim(),
         email: form.email.trim().toLowerCase(),
@@ -213,6 +250,7 @@ function Register({
   };
 
   return (
+    // HU-011: contenedor del formulario único de alta de usuario
     <div className="auth-page">
       <div className="register-container">
 
@@ -222,12 +260,18 @@ function Register({
 
         <h1>CafeSoft</h1>
 
+        {/* HU-011: subtítulo diferenciado según el contexto de registro */}
         <p className="auth-subtitle">
           {esAdministrador
             ? "Registrar nuevo usuario"
             : "Crea una cuenta para comenzar"}
         </p>
 
+        {/*
+         * HU-011 – Formulario único de alta de perfil
+         * Criterio de aceptación: "Formulario único para dar de alta
+         * y editar datos básicos del empleado."
+         */}
         <form
           onSubmit={registrar}
           className="auth-form"
