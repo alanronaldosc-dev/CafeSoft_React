@@ -1,3 +1,9 @@
+// ============================================
+// HU-008 - INICIO DE SESION WEB
+// Gestiona el acceso de los usuarios a CafeSoft
+// y envia las credenciales para su autenticacion.
+// ============================================
+
 import { useState } from "react";
 import api from "../services/api";
 
