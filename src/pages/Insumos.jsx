@@ -1,151 +1,200 @@
+// src/pages/InventarioAnalisis.jsx
+
 import { useEffect, useState } from "react";
 import api from "../services/api";
-import InventarioAnalisis from "./InventarioAnalisis";
 
-
-function Insumos({ onCrear }) {
+function InventarioAnalisis() {
   const [insumos, setInsumos] = useState([]);
+  const [lotes, setLotes] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [vista, setVista] = useState("inventario");
 
   useEffect(() => {
-    obtenerInsumos();
+    Promise.all([api.get("/insumos"), api.get("/lotes")])
+      .then(([resInsumos, resLotes]) => {
+        setInsumos(Array.isArray(resInsumos.data) ? resInsumos.data : []);
+        setLotes(Array.isArray(resLotes.data) ? resLotes.data : []);
+      })
+      .catch((err) => console.error("Error al cargar análisis:", err))
+      .finally(() => setCargando(false));
   }, []);
 
-  const obtenerInsumos = async () => {
-    try {
-      const res = await api.get("/insumos");
-      if (Array.isArray(res.data)) {
-        setInsumos(res.data);
-      } else {
-        setInsumos([]);
-        console.error("La API no devolvió un arreglo:", res.data);
-      }
-    } catch (error) {
-      console.error("Error al cargar insumos:", error);
-      alert("No se pudieron cargar los insumos");
-    } finally {
-      setCargando(false);
-    }
-  };
+  if (cargando) {
+    return <p style={{ color: "var(--texto-suave)" }}>Cargando análisis...</p>;
+  }
 
-  const eliminarInsumo = async (id) => {
-    if (!confirm("¿Seguro que deseas eliminar este insumo?")) {
-      return;
-    }
-    try {
-      await api.delete(`/insumos/${id}`);
-      setInsumos((anteriores) =>
-        anteriores.filter((insumo) => insumo.id !== id)
-      );
-    } catch (error) {
-      console.error("Error al eliminar:", error);
-      alert("No se pudo eliminar el insumo");
-    }
-  };
+  // ── Calcular stock total por insumo sumando cantidades de lotes ──
+  const stockPorInsumo = insumos.map((insumo) => {
+    const lotesDelInsumo = lotes.filter(
+      (l) => l.insumoId === insumo.id || l.insumoNombre === insumo.nombre
+    );
+    const stockTotal = lotesDelInsumo.reduce(
+      (acc, l) => acc + (Number(l.cantidad) || 0),
+      0
+    );
+    const proximoVencer = lotesDelInsumo
+      .filter((l) => l.fechaVencimiento)
+      .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))[0];
+
+    return { ...insumo, stockTotal, proximoVencer, totalLotes: lotesDelInsumo.length };
+  });
+
+  // ── Clasificar por nivel de stock ──
+  const criticos  = stockPorInsumo.filter((i) => i.stockTotal === 0);
+  const bajos     = stockPorInsumo.filter((i) => i.stockTotal > 0 && i.stockTotal <= 5);
+  const normales  = stockPorInsumo.filter((i) => i.stockTotal > 5);
+
+  const hoy = new Date();
+  const en7dias = new Date(hoy);
+  en7dias.setDate(hoy.getDate() + 7);
+
+  const porVencer = lotes.filter((l) => {
+    if (!l.fechaVencimiento) return false;
+    const fecha = new Date(l.fechaVencimiento);
+    return fecha >= hoy && fecha <= en7dias;
+  });
+
+  const tarjetaStyle = (color, bg) => ({
+    background: bg,
+    border: `1px solid ${color}33`,
+    borderRadius: "var(--r-md)",
+    padding: "18px 22px",
+  });
+
+  const Badge = ({ color, bg, texto }) => (
+    <span style={{
+      background: bg,
+      color,
+      border: `1px solid ${color}33`,
+      borderRadius: "999px",
+      padding: "3px 12px",
+      fontSize: "12px",
+      fontWeight: "600",
+    }}>
+      {texto}
+    </span>
+  );
 
   return (
-    <section className="panel insumos-panel">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "20px",
-        }}
-      >
-        <div>
-          <h1>🧂 Insumos</h1>
-          <p>Gestión y análisis del inventario de materias primas.</p>
+    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+
+      {/* ── Resumen ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px" }}>
+        <div style={tarjetaStyle("#E05252", "#FEF0EE")}>
+          <p style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase",
+            letterSpacing: "0.5px", color: "#E05252", marginBottom: "6px" }}>
+            🔴 Sin stock
+          </p>
+          <p style={{ fontSize: "28px", fontWeight: "800", color: "#E05252" }}>
+            {criticos.length}
+          </p>
+          <p style={{ fontSize: "12px", color: "#9B3A3A" }}>insumos agotados</p>
         </div>
 
-        {vista === "inventario" && (
-          <button onClick={onCrear}>＋ Agregar Insumo</button>
-        )}
+        <div style={tarjetaStyle("#C8783A", "#FEF3E8")}>
+          <p style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase",
+            letterSpacing: "0.5px", color: "#C8783A", marginBottom: "6px" }}>
+            🟠 Stock bajo
+          </p>
+          <p style={{ fontSize: "28px", fontWeight: "800", color: "#C8783A" }}>
+            {bajos.length}
+          </p>
+          <p style={{ fontSize: "12px", color: "#8B5E3C" }}>5 unidades o menos</p>
+        </div>
+
+        <div style={tarjetaStyle("#3AC87A", "#E8FEF0")}>
+          <p style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase",
+            letterSpacing: "0.5px", color: "#3AC87A", marginBottom: "6px" }}>
+            🟢 Stock normal
+          </p>
+          <p style={{ fontSize: "28px", fontWeight: "800", color: "#3AC87A" }}>
+            {normales.length}
+          </p>
+          <p style={{ fontSize: "12px", color: "#2A8B5A" }}>insumos bien abastecidos</p>
+        </div>
       </div>
 
-      <div className="ventas-tabs">
-        <button
-          className={
-            vista === "inventario"
-              ? "ventas-tab ventas-tab-activo"
-              : "ventas-tab"
-          }
-          onClick={() => setVista("inventario")}
-        >
-          📦 Inventario
-        </button>
-
-        <button
-          className={
-            vista === "analisis"
-              ? "ventas-tab ventas-tab-activo"
-              : "ventas-tab"
-          }
-          onClick={() => setVista("analisis")}
-        >
-          📈 Análisis predictivo
-        </button>
-      </div>
-
-      {vista === "inventario" && (
-        <div>
-          {cargando ? (
-            <p>Cargando insumos...</p>
-          ) : insumos.length === 0 ? (
-            <div className="sin-datos">
-              <p>No hay insumos registrados.</p>
-            </div>
-          ) : (
-            <div className="ventas-tabla-contenedor">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Tipo</th>
-                    <th>Unidad</th>
-                    <th>Proveedor</th>
-                    <th>Precio</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {insumos.map((insumo) => (
-                    <tr key={insumo.id}>
-                      <td>{insumo.id}</td>
-                      <td>
-                        <strong>{insumo.nombre}</strong>
-                      </td>
-                      <td>{insumo.tipo || "—"}</td>
-                      <td>{insumo.unidadMedida || "—"}</td>
-                      <td>
-                        {insumo.proveedorNombre || insumo.proveedor || "—"}
-                      </td>
-                      <td>
-                        ${Number(insumo.precio || 0).toFixed(2)}
-                      </td>
-                      <td>
-                        <button onClick={() => eliminarInsumo(insumo.id)}>
-                          🗑️ Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+      {/* ── Por vencer ── */}
+      {porVencer.length > 0 && (
+        <div style={tarjetaStyle("#C8783A", "#FEF3E8")}>
+          <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#C8783A",
+            marginBottom: "12px" }}>
+            ⚠️ Lotes por vencer en los próximos 7 días
+          </h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {porVencer.map((l, i) => (
+              <div key={i} style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                background: "rgba(255,255,255,0.6)", borderRadius: "var(--r-sm)",
+                padding: "10px 14px",
+              }}>
+                <span style={{ fontWeight: "600", fontSize: "14px", color: "var(--texto)" }}>
+                  {l.insumoNombre || "Insumo"}
+                </span>
+                <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+                  <span style={{ fontSize: "13px", color: "var(--texto-suave)" }}>
+                    {l.cantidad} {l.unidadMedida || "uds"}
+                  </span>
+                  <Badge color="#C8783A" bg="#FDEBD0"
+                    texto={`Vence: ${new Date(l.fechaVencimiento).toLocaleDateString("es-MX")}`} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {vista === "analisis" && (
-        <div style={{ marginTop: "10px" }}>
-          <InventarioAnalisis />
+      {/* ── Tabla completa de insumos ── */}
+      <div style={{ background: "var(--fondo-card)", border: "1px solid var(--borde)",
+        borderRadius: "var(--r-md)", overflow: "hidden" }}>
+        <div style={{ padding: "18px 22px", borderBottom: "1px solid var(--borde)" }}>
+          <h3 style={{ fontSize: "15px", fontWeight: "700", color: "var(--texto)", margin: 0 }}>
+            📊 Estado de inventario por insumo
+          </h3>
         </div>
-      )}
-    </section>
+        <table>
+          <thead>
+            <tr>
+              <th>Insumo</th>
+              <th>Unidad</th>
+              <th>Stock total</th>
+              <th>Lotes</th>
+              <th>Próx. vencimiento</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stockPorInsumo.map((insumo) => {
+              const estado = insumo.stockTotal === 0
+                ? { label: "Agotado",    color: "#E05252", bg: "#FEF0EE" }
+                : insumo.stockTotal <= 5
+                ? { label: "Stock bajo", color: "#C8783A", bg: "#FEF3E8" }
+                : { label: "Normal",     color: "#3AC87A", bg: "#E8FEF0" };
+
+              return (
+                <tr key={insumo.id}>
+                  <td><strong>{insumo.nombre}</strong></td>
+                  <td>{insumo.unidadMedida || "—"}</td>
+                  <td style={{ fontWeight: "700", color: estado.color }}>
+                    {insumo.stockTotal}
+                  </td>
+                  <td>{insumo.totalLotes}</td>
+                  <td style={{ fontSize: "13px", color: "var(--texto-suave)" }}>
+                    {insumo.proximoVencer
+                      ? new Date(insumo.proximoVencer.fechaVencimiento)
+                          .toLocaleDateString("es-MX")
+                      : "—"}
+                  </td>
+                  <td>
+                    <Badge color={estado.color} bg={estado.bg} texto={estado.label} />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
-export default Insumos;
+export default InventarioAnalisis;
