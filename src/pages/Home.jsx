@@ -14,6 +14,9 @@ import Carrito from "./Carrito";
 import Categorias from "./Categorias";
 import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
+import ProductoShowcase from "./ProductoShowcase";
+import PerfilUsuario from "./PerfilUsuario";
+
 
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
@@ -133,6 +136,7 @@ function Home({ usuario, cerrarSesion }) {
                 </button>
               )}
             </section>
+              <ProductoShowcase />
 
             <section className="cards">
               <div className="card">
@@ -266,6 +270,16 @@ function Home({ usuario, cerrarSesion }) {
           />
         );
 
+        case "miPerfil":
+  return (
+    <PerfilUsuario
+      usuario={usuario}
+      onVolver={() => setSeccion("inicio")}
+      esPropio={true}
+    />
+  );
+
+
       default:
         return null;
     }
@@ -279,7 +293,12 @@ function Home({ usuario, cerrarSesion }) {
           <span>Sistema de Gestión</span>
         </div>
 
-        <div className="user-card">
+        <div
+          className="user-card"
+          onClick={() => cambiarSeccion("miPerfil")}
+          style={{ cursor: "pointer" }}
+          title="Ver mi perfil"
+        >
           <div className="avatar">
             {usuario.nombre?.charAt(0).toUpperCase()}
           </div>
@@ -288,6 +307,7 @@ function Home({ usuario, cerrarSesion }) {
             <p>{obtenerNombreRol()}</p>
           </div>
         </div>
+
 
         <nav className="menu">
           {menu
@@ -313,6 +333,7 @@ function Home({ usuario, cerrarSesion }) {
       </aside>
 
       <main className="content">{renderContenido()}</main>
+      
     </div>
   );
 }
