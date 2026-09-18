@@ -545,7 +545,7 @@ function Register({
               cursor: "pointer",
             }}
           >
-            Iniciar sesión
+            Iniciar
           </span>
 
         </p>
