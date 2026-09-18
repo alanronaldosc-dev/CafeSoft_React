@@ -18,6 +18,9 @@ import ProductoShowcase from "./ProductoShowcase";
 import PerfilUsuario from "./PerfilUsuario";
 
 
+//HU consultas de existencias 
+import Existencias from "./Existencias";
+
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
 import CrearProveedor from "./CrearProveedor";
@@ -42,6 +45,8 @@ function Home({ usuario, cerrarSesion }) {
     { id: "registro", texto: "👤 Registrar Usuario" },
     { id: "insumos", texto: "🧂 Ver Insumos" },
     { id: "lotes", texto: "📦 Lotes de Insumos" },
+    // HU-consulta de existencias 
+    { id: "existencias", texto: "📊 Consulta de Existencias" },
     { id: "categorias", texto: "🏷️ Categorías" },
     // HU-013
     { id: "proveedores", texto: "🚚 Proveedores" },
@@ -234,6 +239,10 @@ function Home({ usuario, cerrarSesion }) {
 
       case "crearLote":
         return <CrearLote onVolver={() => cambiarSeccion("lotes")} />;
+
+      //HU consulta de existencias 
+      case "existencias":
+        return <Existencias />;
 
       // ============================================
       // HU-013 - PROVEEDORES
