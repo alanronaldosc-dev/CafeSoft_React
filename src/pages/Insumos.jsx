@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function InventarioAnalisis() {
+function InventarioAnalisis({ onCrear }) {
   const [insumos, setInsumos] = useState([]);
   const [lotes, setLotes] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -76,6 +76,24 @@ function InventarioAnalisis() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+
+      {/* ── Encabezado ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h1 style={{ margin: 0 }}>🧂 Insumos</h1>
+          <p style={{ margin: "4px 0 0", color: "var(--texto-suave)", fontSize: "14px" }}>
+            Análisis de inventario y stock
+          </p>
+        </div>
+        {onCrear && (
+          <button
+            onClick={onCrear}
+            style={{ padding: "10px 18px", cursor: "pointer" }}
+          >
+            + Nuevo Insumo
+          </button>
+        )}
+      </div>
 
       {/* ── Resumen ── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px" }}>
