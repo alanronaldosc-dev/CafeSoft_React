@@ -18,8 +18,33 @@ function InventarioAnalisis({ onCrear }) {
       .finally(() => setCargando(false));
   }, []);
 
+  // El encabezado con el botón se renderiza siempre, independiente del estado de carga
+  const encabezado = (
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div>
+        <h1 style={{ margin: 0 }}>🧂 Insumos</h1>
+        <p style={{ margin: "4px 0 0", color: "var(--texto-suave)", fontSize: "14px" }}>
+          Análisis de inventario y stock
+        </p>
+      </div>
+      {onCrear && (
+        <button
+          onClick={onCrear}
+          style={{ padding: "10px 18px", cursor: "pointer" }}
+        >
+          + Nuevo Insumo
+        </button>
+      )}
+    </div>
+  );
+
   if (cargando) {
-    return <p style={{ color: "var(--texto-suave)" }}>Cargando análisis...</p>;
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        {encabezado}
+        <p style={{ color: "var(--texto-suave)" }}>Cargando análisis...</p>
+      </div>
+    );
   }
 
   // ── Calcular stock total por insumo sumando cantidades de lotes ──
@@ -78,22 +103,7 @@ function InventarioAnalisis({ onCrear }) {
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
       {/* ── Encabezado ── */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <h1 style={{ margin: 0 }}>🧂 Insumos</h1>
-          <p style={{ margin: "4px 0 0", color: "var(--texto-suave)", fontSize: "14px" }}>
-            Análisis de inventario y stock
-          </p>
-        </div>
-        {onCrear && (
-          <button
-            onClick={onCrear}
-            style={{ padding: "10px 18px", cursor: "pointer" }}
-          >
-            + Nuevo Insumo
-          </button>
-        )}
-      </div>
+      {encabezado}
 
       {/* ── Resumen ── */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px" }}>
