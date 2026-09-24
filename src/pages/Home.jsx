@@ -16,13 +16,17 @@ import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
 import ProductoShowcase from "./ProductoShowcase";
 import PerfilUsuario from "./PerfilUsuario";
+import Dashboard from "./Dashboard";
+import InventarioProductos from "./InventarioProductos";
+import RecibirProducto from "./RecibirProducto";
+import Cargas from "./Cargas";
 
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
 import CrearProveedor from "./CrearProveedor";
 
-// HU-005 - CARGAS DE GARRAFONES
-import Cargas from "./Cargas";
+// HU-009 - MERMA DE GARRAFONES
+import MermaGarrafon from "./MermaGarrafon";
 
 function Home({ usuario, cerrarSesion }) {
   const [seccion, setSeccion] = useState("inicio");
@@ -45,10 +49,15 @@ function Home({ usuario, cerrarSesion }) {
     { id: "insumos", texto: "🧂 Ver Insumos" },
     { id: "lotes", texto: "📦 Lotes de Insumos" },
     { id: "categorias", texto: "🏷️ Categorías" },
+    { id: "dashboard", texto: "📊 Panel de Estado" },
+    { id: "inventarioProductos", texto: "🏭 Inventario Productos" },
+    { id: "cargas", texto: "🚰 Cargas de Garrafones" },
+
+
     // HU-013
     { id: "proveedores", texto: "🚚 Proveedores" },
-    // HU-005
-    { id: "cargas", texto: "🚰 Cargas de Garrafones" },
+    // HU-009
+    { id: "mermas", texto: "⚠️ Merma de Garrafón" },
   ];
 
   // ============================================
@@ -120,6 +129,8 @@ function Home({ usuario, cerrarSesion }) {
     }
 
     switch (seccion) {
+      case "cargas":
+        return <Cargas usuario={usuario} />;
       case "inicio":
         return (
           <>
@@ -191,6 +202,19 @@ function Home({ usuario, cerrarSesion }) {
             </section>
           </>
         );
+
+      case "inventarioProductos":
+        return (
+          <InventarioProductos
+            onRecibirProducto={() => cambiarSeccion("recibirProducto")}
+          />
+        );
+
+      case "recibirProducto":
+        return (
+          <RecibirProducto onVolver={() => cambiarSeccion("inventarioProductos")} />
+        );
+
 
       case "crearProducto":
         return <CrearProducto />;
@@ -284,11 +308,20 @@ function Home({ usuario, cerrarSesion }) {
           />
         );
 
+      case "dashboard":
+        return <Dashboard />;
+
       // ==========================================
       // HU-005 - CARGAS
       // ==========================================
       case "cargas":
         return <Cargas usuario={usuario} />;
+
+      // ==========================================
+      // HU-009 - MERMA DE GARRAFONES
+      // ==========================================
+      case "mermas":
+        return <MermaGarrafon />;
 
       default:
         return null;
