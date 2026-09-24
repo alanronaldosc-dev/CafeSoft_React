@@ -63,23 +63,29 @@ function Lotes({ onCrear }) {
           </thead>
           <tbody>
             {lotes.map((lote) => (
-              <tr key={lote.id}>
+              <tr key={lote.id} style={{
+                background: lote.tipoLote === "produccion" ? "#f0f9f0" : undefined
+              }}>
                 <td>{lote.id}</td>
-                <td>{lote.insumoNombre}</td>
-                <td>{lote.proveedorNombre || "—"}</td>
                 <td>
-                  {lote.cantidad} {lote.insumoUnidad}
+                  {lote.tipoLote === "produccion"
+                    ? <span>🏭 <strong>{lote.productoNombre}</strong></span>
+                    : lote.insumoNombre}
                 </td>
+                <td>{lote.proveedorNombre || (lote.tipoLote === "produccion" ? "Producción propia" : "—")}</td>
+                <td>{lote.cantidad} {lote.tipoLote === "produccion" ? "pzs" : lote.insumoUnidad}</td>
                 <td>{lote.fechaEntrada}</td>
                 <td>{lote.fechaCaducidad}</td>
                 <td>{lote.observaciones || "—"}</td>
                 <td>
-                  <button onClick={() => eliminarLote(lote.id)}>
-                    🗑️ Eliminar
-                  </button>
+                  {lote.tipoLote === "produccion"
+                    ? <span style={{ background: "#e8f4fd", color: "#1a6fa8", borderRadius: "999px",
+                        padding: "3px 10px", fontSize: "12px", fontWeight: "600" }}>Producción</span>
+                    : <button onClick={() => eliminarLote(lote.id)}>🗑️ Eliminar</button>}
                 </td>
               </tr>
             ))}
+
           </tbody>
         </table>
       )}

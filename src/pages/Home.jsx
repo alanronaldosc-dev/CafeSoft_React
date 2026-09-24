@@ -16,6 +16,12 @@ import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
 import ProductoShowcase from "./ProductoShowcase";
 import PerfilUsuario from "./PerfilUsuario";
+import Dashboard from "./Dashboard";
+import InventarioProductos from "./InventarioProductos";
+import RecibirProducto from "./RecibirProducto";
+import Cargas from "./Cargas";
+
+
 
 
 // HU-013 - PROVEEDORES
@@ -43,6 +49,11 @@ function Home({ usuario, cerrarSesion }) {
     { id: "insumos", texto: "🧂 Ver Insumos" },
     { id: "lotes", texto: "📦 Lotes de Insumos" },
     { id: "categorias", texto: "🏷️ Categorías" },
+    { id: "dashboard", texto: "📊 Panel de Estado" },
+    { id: "inventarioProductos", texto: "🏭 Inventario Productos" },
+    { id: "cargas", texto: "🚰 Cargas de Garrafones" },
+
+
     // HU-013
     { id: "proveedores", texto: "🚚 Proveedores" },
   ];
@@ -116,6 +127,8 @@ function Home({ usuario, cerrarSesion }) {
     }
 
     switch (seccion) {
+      case "cargas":
+        return <Cargas usuario={usuario} />;
       case "inicio":
         return (
           <>
@@ -187,6 +200,19 @@ function Home({ usuario, cerrarSesion }) {
             </section>
           </>
         );
+
+      case "inventarioProductos":
+        return (
+          <InventarioProductos
+            onRecibirProducto={() => cambiarSeccion("recibirProducto")}
+          />
+        );
+
+      case "recibirProducto":
+        return (
+          <RecibirProducto onVolver={() => cambiarSeccion("inventarioProductos")} />
+        );
+
 
       case "crearProducto":
         return <CrearProducto />;
@@ -278,12 +304,18 @@ function Home({ usuario, cerrarSesion }) {
       onVolver={() => setSeccion("inicio")}
       esPropio={true}
     />
+
+    
   );
+        case "dashboard":
+    return <Dashboard />;
 
 
       default:
         return null;
     }
+
+    
   };
 
   return (
