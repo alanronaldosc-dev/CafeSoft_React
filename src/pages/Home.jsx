@@ -17,10 +17,12 @@ import AgregarProductosCategoria from "./AgregarProductosCategoria";
 import ProductoShowcase from "./ProductoShowcase";
 import PerfilUsuario from "./PerfilUsuario";
 
-
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
 import CrearProveedor from "./CrearProveedor";
+
+// HU-005 - CARGAS DE GARRAFONES
+import Cargas from "./Cargas";
 
 function Home({ usuario, cerrarSesion }) {
   const [seccion, setSeccion] = useState("inicio");
@@ -45,6 +47,8 @@ function Home({ usuario, cerrarSesion }) {
     { id: "categorias", texto: "🏷️ Categorías" },
     // HU-013
     { id: "proveedores", texto: "🚚 Proveedores" },
+    // HU-005
+    { id: "cargas", texto: "🚰 Cargas de Garrafones" },
   ];
 
   // ============================================
@@ -271,15 +275,20 @@ function Home({ usuario, cerrarSesion }) {
           />
         );
 
-        case "miPerfil":
-  return (
-    <PerfilUsuario
-      usuario={usuario}
-      onVolver={() => setSeccion("inicio")}
-      esPropio={true}
-    />
-  );
+      case "miPerfil":
+        return (
+          <PerfilUsuario
+            usuario={usuario}
+            onVolver={() => setSeccion("inicio")}
+            esPropio={true}
+          />
+        );
 
+      // ==========================================
+      // HU-005 - CARGAS
+      // ==========================================
+      case "cargas":
+        return <Cargas usuario={usuario} />;
 
       default:
         return null;
@@ -308,7 +317,6 @@ function Home({ usuario, cerrarSesion }) {
             <p>{obtenerNombreRol()}</p>
           </div>
         </div>
-
 
         <nav className="menu">
           {menu
