@@ -49,6 +49,7 @@ function Usuarios() {
             <th>Nombre</th>
             <th>Email</th>
             <th>Teléfono</th>
+            <th>Rol</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -56,11 +57,18 @@ function Usuarios() {
 
         <tbody>
           {usuarios.map((usuario) => (
-            <tr key={usuario.idUsuario}>
-              <td>{usuario.idUsuario}</td>
+            <tr key={usuario.id}>
+              <td>{usuario.id}</td>
               <td>{usuario.nombre}</td>
               <td>{usuario.email}</td>
               <td>{usuario.telefono}</td>
+              <td>
+                {usuario.userTipo === 0 && "👑 Administrador"}
+                {usuario.userTipo === 1 && "👔 Usuario"}
+                {usuario.userTipo === 2 && "👤 Cliente"}
+                {usuario.userTipo === 3 && "⚙️ Personalizado"}
+                {usuario.userTipo === 4 && "🛵 Repartidor"}
+              </td>
               <td>
                 <span
                   style={{
@@ -100,7 +108,7 @@ function Usuarios() {
 
                   {/* Suspender / Reactivar */}
                   <button
-                    onClick={() => cambiarEstado(usuario.idUsuario, !usuario.activo)}
+                    onClick={() => cambiarEstado(usuario.id, !usuario.activo)}
                     style={{
                       width: "auto",
                       padding: "6px 14px",

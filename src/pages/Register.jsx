@@ -398,7 +398,12 @@ function Register({
                 <option value={0}>
                   Administrador
                 </option>
+
+                <option value={4}>
+                  Repartidor
+                </option>
               </select>
+
             </>
           )}
 

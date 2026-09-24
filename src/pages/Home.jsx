@@ -97,6 +97,7 @@ function Home({ usuario, cerrarSesion }) {
     if (usuario.userTipo === 0) return "Administrador";
     if (usuario.userTipo === 1) return "Usuario";
     if (usuario.userTipo === 3) return "Personalizado";
+    if (usuario.userTipo === 4) return "Repartidor";
     return "Cliente";
   };
 
