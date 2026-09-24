@@ -1,3 +1,9 @@
+// ============================================
+// HU-003 - ALTA Y CATEGORIZACIÓN DE GARRAFONES
+// Permite registrar productos especificando
+// tipo de garrafón (20L, 10L, nuevo, retornable)
+// ============================================
+
 import { useState, useEffect } from "react";
 import api from "../services/api";
 
@@ -6,6 +12,7 @@ function CrearProducto() {
     nombre: "",
     precio: "",
     descripcion: "",
+    tipoGarrafon: "", // agregado HU-003
   });
 
   const [imagenBase64, setImagenBase64] = useState(null);
@@ -18,7 +25,6 @@ function CrearProducto() {
   useEffect(() => {
     api.get("/inventario")
       .then((res) => {
-        console.log("Inventario cargado:", res.data);
         setInsumosDisponibles(res.data);
       })
       .catch((err) => {
@@ -80,6 +86,7 @@ function CrearProducto() {
       nombre: form.nombre,
       precio: parseFloat(form.precio),
       descripcion: form.descripcion,
+      tipoGarrafon: form.tipoGarrafon, // agregado HU-003
       imagen: imagenBase64 || null,
       insumos: insumosSeleccionados.map((i) => ({
         insumoId: i.insumoId,
@@ -91,7 +98,7 @@ function CrearProducto() {
     try {
       await api.post("/productos", payload);
       alert("Producto registrado correctamente");
-      setForm({ nombre: "", precio: "", descripcion: "" });
+      setForm({ nombre: "", precio: "", descripcion: "", tipoGarrafon: "" });
       setInsumosSeleccionados([]);
       setImagenBase64(null);
     } catch (error) {
@@ -107,7 +114,7 @@ function CrearProducto() {
 
   return (
     <section className="panel">
-      <h1>☕ Crear Producto</h1>
+      <h1>🧴 Crear Producto</h1>
 
       <form onSubmit={registrarProducto} className="auth-form">
         <label>Nombre del producto</label>
@@ -118,6 +125,16 @@ function CrearProducto() {
 
         <label>Descripción</label>
         <input type="text" name="descripcion" value={form.descripcion} onChange={handleChange} required />
+
+        {/* Campo HU-003: tipo de garrafón */}
+        <label>Tipo de garrafón</label>
+        <select name="tipoGarrafon" value={form.tipoGarrafon} onChange={handleChange} required>
+          <option value="">-- Selecciona --</option>
+          <option value="20L">Garrafón 20L</option>
+          <option value="10L">Garrafón 10L</option>
+          <option value="Nuevo">Envase Nuevo</option>
+          <option value="Retornable">Envase Retornable</option>
+        </select>
 
         <label>Imagen</label>
         <input type="file" accept="image/*" onChange={handleImagen} />
