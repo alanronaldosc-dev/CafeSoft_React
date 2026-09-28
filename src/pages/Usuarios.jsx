@@ -1,3 +1,10 @@
+// ============================================
+// HU-004 - REGISTRO Y CONSULTA DE CLIENTES
+// Permite registrar clientes y consultar su
+// información con buscador en tiempo real
+// por nombre o teléfono.
+// ============================================
+
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import PerfilUsuario from "./PerfilUsuario";
@@ -5,6 +12,7 @@ import PerfilUsuario from "./PerfilUsuario";
 function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioPerfil, setUsuarioPerfil] = useState(null);
+  const [search, setSearch] = useState(""); // agregado HU-004
 
   useEffect(() => {
     obtenerUsuarios();
@@ -28,6 +36,12 @@ function Usuarios() {
     }
   };
 
+  // Filtrado HU-004
+  const usuariosFiltrados = usuarios.filter((usuario) =>
+    usuario.nombre.toLowerCase().includes(search.toLowerCase()) ||
+    usuario.telefono.includes(search)
+  );
+
   // Si hay un usuario seleccionado, muestra su perfil
   if (usuarioPerfil) {
     return (
@@ -41,6 +55,15 @@ function Usuarios() {
   return (
     <section className="panel">
       <h1>👥 Usuarios</h1>
+
+      {/* Buscador HU-004 */}
+      <input
+        type="text"
+        placeholder="Buscar usuario por nombre o teléfono"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ marginBottom: "1rem", padding: "0.5rem", width: "100%" }}
+      />
 
       <table>
         <thead>
@@ -56,7 +79,7 @@ function Usuarios() {
         </thead>
 
         <tbody>
-          {usuarios.map((usuario) => (
+          {usuariosFiltrados.map((usuario) => (
             <tr key={usuario.id}>
               <td>{usuario.id}</td>
               <td>{usuario.nombre}</td>
