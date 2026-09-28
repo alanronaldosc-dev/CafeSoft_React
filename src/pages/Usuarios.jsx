@@ -12,7 +12,7 @@ import PerfilUsuario from "./PerfilUsuario";
 function Usuarios() {
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioPerfil, setUsuarioPerfil] = useState(null);
-  const [search, setSearch] = useState(""); // agregado HU-004
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     obtenerUsuarios();
@@ -42,7 +42,6 @@ function Usuarios() {
     usuario.telefono.includes(search)
   );
 
-  // Si hay un usuario seleccionado, muestra su perfil
   if (usuarioPerfil) {
     return (
       <PerfilUsuario
@@ -110,7 +109,6 @@ function Usuarios() {
               </td>
               <td>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  {/* Ver perfil */}
                   <button
                     onClick={() => setUsuarioPerfil(usuario)}
                     style={{
@@ -129,7 +127,6 @@ function Usuarios() {
                     👤 Ver perfil
                   </button>
 
-                  {/* Suspender / Reactivar */}
                   <button
                     onClick={() => cambiarEstado(usuario.id, !usuario.activo)}
                     style={{

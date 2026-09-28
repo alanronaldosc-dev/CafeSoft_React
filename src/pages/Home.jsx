@@ -74,7 +74,7 @@ function Home({ usuario, cerrarSesion }) {
 
     // Usuario normal: permisos predeterminados.
     if (usuario.userTipo === 1) {
-      return ["productos", "pedidos", "ventas", "carrito"].includes(permiso);
+      return ["productos", "pedidos", "ventas", "carrito", "mermas"].includes(permiso);
     }
 
     // Cliente: acceso básico.
@@ -316,6 +316,12 @@ function Home({ usuario, cerrarSesion }) {
       // ==========================================
       case "cargas":
         return <Cargas usuario={usuario} />;
+
+      // ==========================================
+      // HU-009 - MERMA DE GARRAFONES
+      // ==========================================
+      case "mermas":
+        return <MermaGarrafon />;
 
       // ==========================================
       // HU-009 - MERMA DE GARRAFONES

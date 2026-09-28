@@ -7,11 +7,26 @@ function Dashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    cargarInventario();
+  }, []);
+
+  const cargarInventario = () => {
     api.get("/inventario")
       .then((res) => setInventario(Array.isArray(res.data) ? res.data : []))
       .catch(() => setError("No se pudo cargar el inventario."))
       .finally(() => setCargando(false));
-  }, []);
+  };
+
+  const eliminarInsumo = async (id, nombre) => {
+    if (!confirm(`¿Eliminar el insumo "${nombre}"? Esta acción no se puede deshacer.`)) return;
+    try {
+      await api.delete(`/inventario/${id}`);
+      setInventario((prev) => prev.filter((i) => i.id !== id));
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.error || "No se pudo eliminar el insumo";
+      alert("Error: " + msg);
+    }
+  };
 
   if (cargando) {
     return (
@@ -122,6 +137,7 @@ function Dashboard() {
                 <th style={th}>Mínimo</th>
                 <th style={th}>Proveedor</th>
                 <th style={th}>Estado</th>
+                <th style={th}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -138,6 +154,23 @@ function Dashboard() {
                     <td style={{ ...td, color: "#888" }}>{ins.cantidadMinima}</td>
                     <td style={td}>{ins.proveedor || "—"}</td>
                     <td style={td}><Badge color={badge.color} bg={badge.bg} label={badge.label} /></td>
+                    <td style={td}>
+                      <button
+                        onClick={() => eliminarInsumo(ins.id, ins.nombre)}
+                        style={{
+                          background: "#FEF0EE",
+                          color: "#E05252",
+                          border: "1px solid #E0525233",
+                          borderRadius: "6px",
+                          padding: "4px 10px",
+                          cursor: "pointer",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                        }}
+                      >
+                        🗑️ Eliminar
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
