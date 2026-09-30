@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function InventarioAnalisis({ onCrear }) {
+function InventarioAnalisis({ onCrear, usuario }) {
   const [insumos, setInsumos] = useState([]);
   const [lotes, setLotes] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -13,8 +13,22 @@ function InventarioAnalisis({ onCrear }) {
   const cargarDatos = () => {
     Promise.all([api.get("/insumos"), api.get("/lotes")])
       .then(([resInsumos, resLotes]) => {
-        setInsumos(Array.isArray(resInsumos.data) ? resInsumos.data : []);
-        setLotes(Array.isArray(resLotes.data) ? resLotes.data : []);
+        const todosInsumos = Array.isArray(resInsumos.data) ? resInsumos.data : [];
+        const todosLotes   = Array.isArray(resLotes.data)   ? resLotes.data   : [];
+
+        // Admin ve todo; el resto filtra por su sucursal
+        const insumosFiltrados =
+          usuario?.userTipo === 0
+            ? todosInsumos
+            : todosInsumos.filter((i) => i.sucursalId === usuario?.sucursalId);
+
+        const lotesFiltrados =
+          usuario?.userTipo === 0
+            ? todosLotes
+            : todosLotes.filter((l) => l.sucursalId === usuario?.sucursalId);
+
+        setInsumos(insumosFiltrados);
+        setLotes(lotesFiltrados);
       })
       .catch((err) => console.error("Error al cargar análisis:", err))
       .finally(() => setCargando(false));
@@ -30,6 +44,8 @@ function InventarioAnalisis({ onCrear }) {
       alert("Error: " + msg);
     }
   };
+
+
 
   const encabezado = (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

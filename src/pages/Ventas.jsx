@@ -1,21 +1,53 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function Ventas() {
+function Ventas({ usuario }) {
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    api.get("/ventas")
-      .then((res) => setVentas(Array.isArray(res.data) ? res.data : []))
-      .catch(() => alert("No se pudieron cargar las ventas"))
-      .finally(() => setCargando(false));
+    cargarVentas();
   }, []);
+
+  const cargarVentas = async () => {
+    try {
+      const sucursalId = usuario?.sucursalId;
+
+      if (!sucursalId) {
+        setError("Tu cuenta no tiene una sucursal asignada. Contacta al administrador.");
+        setCargando(false);
+        return;
+      }
+
+      const res = await api.get("/ventas");
+      const todas = Array.isArray(res.data) ? res.data : [];
+
+      // Filtrar solo las ventas de la sucursal del usuario logueado
+      const filtradas = todas.filter((v) => v.sucursalId === sucursalId);
+
+      setVentas(filtradas);
+    } catch (err) {
+      console.error(err);
+      setError("No se pudieron cargar las ventas.");
+    } finally {
+      setCargando(false);
+    }
+  };
 
   return (
     <section className="panel">
       <h1>🧾 Ventas</h1>
-      {cargando ? <p>Cargando...</p> : ventas.length === 0 ? <p>No hay ventas registradas.</p> : (
+
+      {error && (
+        <p style={{ color: "#E05252", marginBottom: "1rem" }}>⚠️ {error}</p>
+      )}
+
+      {cargando ? (
+        <p>Cargando...</p>
+      ) : ventas.length === 0 ? (
+        <p>No hay ventas registradas para esta sucursal.</p>
+      ) : (
         <table>
           <thead>
             <tr>
@@ -27,6 +59,7 @@ function Ventas() {
               <th>Pago</th>
               <th>Cambio</th>
               <th>Cajero</th>
+              <th>Sucursal</th>
             </tr>
           </thead>
           <tbody>
@@ -40,6 +73,7 @@ function Ventas() {
                 <td>{v.metodoPago}</td>
                 <td>{v.cambio != null ? `$${v.cambio.toFixed(2)}` : "—"}</td>
                 <td>{v.usuarioNombre}</td>
+                <td>{v.sucursalNombre || "—"}</td>
               </tr>
             ))}
           </tbody>

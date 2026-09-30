@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function Lotes({ onCrear }) {
+function Lotes({ onCrear, usuario }) {
   const [lotes, setLotes] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -12,7 +12,15 @@ function Lotes({ onCrear }) {
   const obtenerLotes = async () => {
     try {
       const res = await api.get("/lotes");
-      setLotes(Array.isArray(res.data) ? res.data : []);
+      const todos = Array.isArray(res.data) ? res.data : [];
+
+      // Filtrar por sucursal del usuario logueado
+      const sucursalId = usuario?.sucursalId;
+      const filtrados = sucursalId
+        ? todos.filter((l) => l.sucursalId === sucursalId)
+        : todos;
+
+      setLotes(filtrados);
     } catch (error) {
       alert("No se pudieron cargar los lotes");
     } finally {
@@ -32,13 +40,7 @@ function Lotes({ onCrear }) {
 
   return (
     <section className="panel">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1>📦 Lotes de Insumos</h1>
         <button onClick={onCrear}>+ Registrar Lote</button>
       </div>
@@ -46,7 +48,7 @@ function Lotes({ onCrear }) {
       {cargando ? (
         <p>Cargando lotes...</p>
       ) : lotes.length === 0 ? (
-        <p>No hay lotes registrados.</p>
+        <p>No hay lotes registrados para esta sucursal.</p>
       ) : (
         <table>
           <thead>
@@ -57,6 +59,7 @@ function Lotes({ onCrear }) {
               <th>Cantidad</th>
               <th>Fecha Entrada</th>
               <th>Fecha Caducidad</th>
+              <th>Sucursal</th>
               <th>Observaciones</th>
               <th>Acciones</th>
             </tr>
@@ -76,6 +79,7 @@ function Lotes({ onCrear }) {
                 <td>{lote.cantidad} {lote.tipoLote === "produccion" ? "pzs" : lote.insumoUnidad}</td>
                 <td>{lote.fechaEntrada}</td>
                 <td>{lote.fechaCaducidad}</td>
+                <td>{lote.sucursalNombre || "—"}</td>
                 <td>{lote.observaciones || "—"}</td>
                 <td>
                   {lote.tipoLote === "produccion"
@@ -85,7 +89,6 @@ function Lotes({ onCrear }) {
                 </td>
               </tr>
             ))}
-
           </tbody>
         </table>
       )}
