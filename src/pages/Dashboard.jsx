@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function Dashboard() {
+function Dashboard({ usuario }) {
   const [inventario, setInventario] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -11,7 +11,14 @@ function Dashboard() {
   }, []);
 
   const cargarInventario = () => {
-    api.get("/inventario")
+    const sucursalId = usuario?.sucursalId;
+
+    // Todos ven solo su sucursal, sin excepción
+    const url = sucursalId
+      ? `/inventario/sucursal/${sucursalId}`
+      : "/inventario";
+
+    api.get(url)
       .then((res) => setInventario(Array.isArray(res.data) ? res.data : []))
       .catch(() => setError("No se pudo cargar el inventario."))
       .finally(() => setCargando(false));
@@ -28,42 +35,34 @@ function Dashboard() {
     }
   };
 
-  if (cargando) {
-    return (
-      <section className="panel">
-        <h1>📊 Panel de Estado</h1>
-        <p>Cargando datos...</p>
-      </section>
-    );
-  }
+  if (cargando) return (
+    <section className="panel">
+      <h1>📊 Panel de Estado</h1>
+      <p>Cargando datos...</p>
+    </section>
+  );
 
-  if (error) {
-    return (
-      <section className="panel">
-        <h1>📊 Panel de Estado</h1>
-        <p style={{ color: "red" }}>{error}</p>
-      </section>
-    );
-  }
+  if (error) return (
+    <section className="panel">
+      <h1>📊 Panel de Estado</h1>
+      <p style={{ color: "red" }}>{error}</p>
+    </section>
+  );
 
-  // Separar insumos de productos
   const insumos   = inventario.filter((i) => i.tipo !== "producto");
   const productos = inventario.filter((i) => i.tipo === "producto");
 
   const getBadge = (cantidad, minima) => {
-    if (cantidad <= 0)       return { label: "Agotado",    color: "#E05252", bg: "#FEF0EE" };
-    if (cantidad <= minima)  return { label: "Stock bajo", color: "#C8783A", bg: "#FEF3E8" };
-    return                          { label: "Normal",     color: "#3AC87A", bg: "#E8FEF0" };
+    if (cantidad <= 0)      return { label: "Agotado",    color: "#E05252", bg: "#FEF0EE" };
+    if (cantidad <= minima) return { label: "Stock bajo", color: "#C8783A", bg: "#FEF3E8" };
+    return                         { label: "Normal",     color: "#3AC87A", bg: "#E8FEF0" };
   };
 
   const Badge = ({ color, bg, label }) => (
     <span style={{
-      background: bg, color,
-      border: `1px solid ${color}33`,
-      borderRadius: "999px",
-      padding: "3px 12px",
-      fontSize: "12px",
-      fontWeight: "600",
+      background: bg, color, border: `1px solid ${color}33`,
+      borderRadius: "999px", padding: "3px 12px",
+      fontSize: "12px", fontWeight: "600",
     }}>
       {label}
     </span>
@@ -76,31 +75,21 @@ function Dashboard() {
         Existencias en tiempo real de insumos y productos terminados.
       </p>
 
-      {/* ── PRODUCTOS TERMINADOS ── */}
+      {/* PRODUCTOS TERMINADOS */}
       <div style={{ marginBottom: "2.5rem" }}>
         <h2 style={{ borderBottom: "2px solid #e0e0e0", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
           📦 Productos terminados ({productos.length})
         </h2>
-
         {productos.length === 0 ? (
-          <p style={{ color: "#aaa" }}>
-            Sin productos en inventario. Produce unidades desde "Crear Producto → Producir Unidades".
-          </p>
+          <p style={{ color: "#aaa" }}>Sin productos en inventario.</p>
         ) : (
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-            gap: "1rem",
-          }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1rem" }}>
             {productos.map((p) => {
               const badge = getBadge(p.cantidad, p.cantidadMinima);
               return (
                 <div key={p.id} style={{
-                  background: "#f0f9f0",
-                  border: `1px solid ${badge.color}44`,
-                  borderRadius: "10px",
-                  padding: "1rem",
-                  textAlign: "center",
+                  background: "#f0f9f0", border: `1px solid ${badge.color}44`,
+                  borderRadius: "10px", padding: "1rem", textAlign: "center",
                 }}>
                   <span style={{ fontSize: "2rem" }}>📦</span>
                   <h3 style={{ margin: "0.5rem 0 0.25rem", fontSize: "1rem" }}>{p.nombre}</h3>
@@ -118,12 +107,11 @@ function Dashboard() {
         )}
       </div>
 
-      {/* ── INSUMOS EN INVENTARIO ── */}
+      {/* INSUMOS */}
       <div>
         <h2 style={{ borderBottom: "2px solid #e0e0e0", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
           🧂 Insumos en inventario ({insumos.length})
         </h2>
-
         {insumos.length === 0 ? (
           <p style={{ color: "#aaa" }}>Sin insumos registrados.</p>
         ) : (
@@ -147,27 +135,17 @@ function Dashboard() {
                   <tr key={ins.id} style={{ borderBottom: "1px solid #eee" }}>
                     <td style={td}><strong>{ins.nombre}</strong></td>
                     <td style={td}>{ins.tipo}</td>
-                    <td style={{ ...td, fontWeight: "700", color: badge.color, fontSize: "1rem" }}>
-                      {ins.cantidad}
-                    </td>
+                    <td style={{ ...td, fontWeight: "700", color: badge.color, fontSize: "1rem" }}>{ins.cantidad}</td>
                     <td style={td}>{ins.unidadMedida}</td>
                     <td style={{ ...td, color: "#888" }}>{ins.cantidadMinima}</td>
                     <td style={td}>{ins.proveedor || "—"}</td>
                     <td style={td}><Badge color={badge.color} bg={badge.bg} label={badge.label} /></td>
                     <td style={td}>
-                      <button
-                        onClick={() => eliminarInsumo(ins.id, ins.nombre)}
-                        style={{
-                          background: "#FEF0EE",
-                          color: "#E05252",
-                          border: "1px solid #E0525233",
-                          borderRadius: "6px",
-                          padding: "4px 10px",
-                          cursor: "pointer",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                        }}
-                      >
+                      <button onClick={() => eliminarInsumo(ins.id, ins.nombre)} style={{
+                        background: "#FEF0EE", color: "#E05252", border: "1px solid #E0525233",
+                        borderRadius: "6px", padding: "4px 10px", cursor: "pointer",
+                        fontSize: "12px", fontWeight: "600",
+                      }}>
                         🗑️ Eliminar
                       </button>
                     </td>
@@ -182,18 +160,7 @@ function Dashboard() {
   );
 }
 
-const th = {
-  textAlign: "left",
-  padding: "0.6rem 1rem",
-  fontWeight: "600",
-  fontSize: "0.85rem",
-  color: "#444",
-};
-
-const td = {
-  padding: "0.6rem 1rem",
-  fontSize: "0.9rem",
-  color: "#333",
-};
+const th = { textAlign: "left", padding: "0.6rem 1rem", fontWeight: "600", fontSize: "0.85rem", color: "#444" };
+const td = { padding: "0.6rem 1rem", fontSize: "0.9rem", color: "#333" };
 
 export default Dashboard;

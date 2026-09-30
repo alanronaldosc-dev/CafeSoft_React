@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
 
-function CrearProducto() {
+function CrearProducto({ usuario }) {
   const [modo, setModo] = useState("definir"); // "definir" | "producir"
 
   // --- Modo definir (receta) ---
@@ -79,6 +79,7 @@ function CrearProducto() {
       precio: parseFloat(form.precio),
       descripcion: form.descripcion,
       imagen: imagenBase64 || null,
+      sucursalId: usuario?.sucursalId || null,   // ← línea nueva
       insumos: insumosSeleccionados.map((i) => ({
         insumoId: i.insumoId,
         cantidad: i.cantidad,
@@ -91,7 +92,6 @@ function CrearProducto() {
       setForm({ nombre: "", precio: "", descripcion: "" });
       setInsumosSeleccionados([]);
       setImagenBase64(null);
-      // Refrescar lista de productos para el modo producir
       const res = await api.get("/productos");
       setProductos(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
@@ -119,6 +119,7 @@ function CrearProducto() {
         cantidad: Number(producirForm.cantidad),
         fechaCaducidad: producirForm.fechaCaducidad || null,
         observaciones: producirForm.observaciones || null,
+        sucursalId: usuario?.sucursalId ? Number(usuario.sucursalId) : null,
       });
       setMensajeProducir({ tipo: "ok", texto: `✅ Se produjeron ${producirForm.cantidad} unidades y se descontaron los insumos del inventario.` });
       setProducirForm({ productoId: "", cantidad: "", fechaCaducidad: "", observaciones: "" });

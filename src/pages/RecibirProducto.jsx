@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function RecibirProducto({ onVolver }) {
+function RecibirProducto({ onVolver, usuario }) {
   const [productos, setProductos] = useState([]);
   const [productoId, setProductoId] = useState("");
   const [cantidad, setCantidad] = useState("");
@@ -28,6 +28,7 @@ function RecibirProducto({ onVolver }) {
       await api.post("/inventario/producto", {
         productoId: Number(productoId),
         cantidad: Number(cantidad),
+        sucursalId: usuario?.sucursalId ? Number(usuario.sucursalId) : null,
       });
       setMensaje({ tipo: "ok", texto: "✅ Producto recibido correctamente en inventario." });
       setProductoId("");

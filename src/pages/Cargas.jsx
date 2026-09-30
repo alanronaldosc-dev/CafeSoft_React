@@ -35,13 +35,19 @@ function Cargas({ usuario }) {
       setCargando(true);
       setError("");
 
+      const sucursalId = usuario?.sucursalId;
+
       const [
         repartidoresResponse,
         inventarioResponse,
         cargasResponse,
       ] = await Promise.all([
-        api.get("/usuarios/tipo/4"),
-        api.get("/inventario"),
+        sucursalId
+          ? api.get(`/usuarios/sucursal/${sucursalId}`)
+          : api.get("/usuarios/tipo/4"),
+        sucursalId
+          ? api.get(`/inventario/sucursal/${sucursalId}`)
+          : api.get("/inventario"),
         api.get("/cargas"),
       ]);
 
@@ -87,7 +93,7 @@ function Cargas({ usuario }) {
         listaRepartidores = datosRep.data;
       }
 
-      // Solo repartidores activos
+      // Solo repartidores activos (userTipo 4)
       listaRepartidores = listaRepartidores.filter(
         (repartidor) =>
           repartidor.userTipo === 4 &&

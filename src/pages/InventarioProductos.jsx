@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function InventarioProductos({ onRecibirProducto }) {
+function InventarioProductos({ onRecibirProducto, usuario }) {
   const [productosInventario, setProductosInventario] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -11,8 +11,22 @@ function InventarioProductos({ onRecibirProducto }) {
 
   const cargarProductos = async () => {
     try {
-      const res = await api.get("/inventario/productos");
-      setProductosInventario(Array.isArray(res.data) ? res.data : []);
+      const sucursalId = usuario?.sucursalId;
+
+      // Todos ven solo su sucursal
+      const url = sucursalId
+        ? `/inventario/sucursal/${sucursalId}`
+        : "/inventario/productos";
+
+      const res = await api.get(url);
+      const todos = Array.isArray(res.data) ? res.data : [];
+
+      // Si usamos el endpoint general de sucursal, filtrar solo tipo "producto"
+      const soloProductos = sucursalId
+        ? todos.filter((i) => i.tipo === "producto")
+        : todos;
+
+      setProductosInventario(soloProductos);
     } catch (err) {
       console.error("Error al cargar productos en inventario:", err);
     } finally {
@@ -31,15 +45,13 @@ function InventarioProductos({ onRecibirProducto }) {
   );
 
   const getEstado = (cantidad, minima) => {
-    if (cantidad <= 0)        return { label: "Agotado",    color: "#E05252", bg: "#FEF0EE" };
-    if (cantidad <= minima)   return { label: "Stock bajo", color: "#C8783A", bg: "#FEF3E8" };
-    return                           { label: "Normal",     color: "#3AC87A", bg: "#E8FEF0" };
+    if (cantidad <= 0)      return { label: "Agotado",    color: "#E05252", bg: "#FEF0EE" };
+    if (cantidad <= minima) return { label: "Stock bajo", color: "#C8783A", bg: "#FEF3E8" };
+    return                         { label: "Normal",     color: "#3AC87A", bg: "#E8FEF0" };
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-
-      {/* Encabezado */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h1 style={{ margin: 0 }}>📦 Inventario de Productos</h1>
@@ -54,7 +66,6 @@ function InventarioProductos({ onRecibirProducto }) {
         )}
       </div>
 
-      {/* Tabla */}
       <div style={{
         background: "var(--fondo-card)", border: "1px solid var(--borde)",
         borderRadius: "var(--r-md)", overflow: "hidden",
@@ -69,7 +80,7 @@ function InventarioProductos({ onRecibirProducto }) {
           <p style={{ padding: "20px" }}>Cargando...</p>
         ) : productosInventario.length === 0 ? (
           <p style={{ padding: "20px", color: "var(--texto-suave)" }}>
-            No hay productos en inventario. Usa "Recibir Producto" para agregar existencias.
+            No hay productos en inventario para esta sucursal.
           </p>
         ) : (
           <table>

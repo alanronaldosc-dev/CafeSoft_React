@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function Productos({ onCrear }) {
+function Productos({ onCrear, usuario }) {
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -11,15 +11,16 @@ function Productos({ onCrear }) {
 
   const obtenerProductos = async () => {
     try {
-      const res = await api.get("/productos");
-      if (Array.isArray(res.data)) {
-        setProductos(res.data);
-      } else {
-        setProductos([]);
-        console.error("La API no devolvió un arreglo:", res.data);
-      }
+      const sucursalId = usuario?.sucursalId;
+
+      const url = sucursalId
+        ? `/productos/sucursal/${sucursalId}`
+        : "/productos";
+
+      const res = await api.get(url);
+      setProductos(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
-      console.error("Error completo:", error);
+      console.error("Error al cargar productos:", error);
       alert("No se pudieron cargar los productos");
     } finally {
       setCargando(false);
@@ -80,16 +81,17 @@ function Productos({ onCrear }) {
                     <span style={{ color: "#aaa" }}>Sin insumos</span>
                   )}
                 </td>
-                <td>  {producto.imagen ? (
-                <img
-                  src={`data:image/jpeg;base64,${producto.imagen}`}
-                  alt={producto.nombre}
-                  style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "6px" }}
-                />
-              ) : (
-                <span style={{ color: "#aaa" }}>Sin imagen</span>
-              )}
-              </td>
+                <td>
+                  {producto.imagen ? (
+                    <img
+                      src={`data:image/jpeg;base64,${producto.imagen}`}
+                      alt={producto.nombre}
+                      style={{ width: "60px", height: "60px", objectFit: "cover", borderRadius: "6px" }}
+                    />
+                  ) : (
+                    <span style={{ color: "#aaa" }}>Sin imagen</span>
+                  )}
+                </td>
                 <td>
                   <button onClick={() => eliminarProducto(producto.id)}>🗑️ Eliminar</button>
                 </td>
