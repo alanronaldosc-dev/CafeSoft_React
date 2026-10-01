@@ -16,17 +16,16 @@ import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
 import ProductoShowcase from "./ProductoShowcase";
 import PerfilUsuario from "./PerfilUsuario";
-import Dashboard from "./Dashboard";
-import InventarioProductos from "./InventarioProductos";
-import RecibirProducto from "./RecibirProducto";
-import Cargas from "./Cargas";
 
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
 import CrearProveedor from "./CrearProveedor";
 
-// HU-009 - MERMA DE GARRAFONES
-import MermaGarrafon from "./MermaGarrafon";
+// HU-005 - CARGAS DE GARRAFONES
+import Cargas from "./Cargas";
+
+// HU-016 - LIQUIDACIÓN DE REPARTIDORES
+import Liquidaciones from "./Liquidaciones";
 
 function Home({ usuario, cerrarSesion }) {
   const [seccion, setSeccion] = useState("inicio");
@@ -47,17 +46,14 @@ function Home({ usuario, cerrarSesion }) {
     { id: "carrito", texto: "🛒 Carrito de Compras" },
     { id: "registro", texto: "👤 Registrar Usuario" },
     { id: "insumos", texto: "🧂 Ver Insumos" },
-    { id: "lotes", texto: "📦 Cargas de insumos" },
+    { id: "lotes", texto: "📦 Lotes de Insumos" },
     { id: "categorias", texto: "🏷️ Categorías" },
-    { id: "dashboard", texto: "📊 Estado de Inventario" },
-    { id: "inventarioProductos", texto: "🏭 Cargas de productos" },
-    { id: "cargas", texto: "🚰 Cargas de Garrafones" },
-
-
     // HU-013
     { id: "proveedores", texto: "🚚 Proveedores" },
-    // HU-009
-    { id: "mermas", texto: "⚠️ Merma de Garrafón" },
+    // HU-005
+    { id: "cargas", texto: "🚰 Cargas de Garrafones" },
+    // HU-016
+    { id: "liquidaciones", texto: "💵 Liquidación de Repartidores" },
   ];
 
   // ============================================
@@ -74,7 +70,7 @@ function Home({ usuario, cerrarSesion }) {
 
     // Usuario normal: permisos predeterminados.
     if (usuario.userTipo === 1) {
-      return ["productos", "pedidos", "ventas", "carrito", "mermas"].includes(permiso);
+      return ["productos", "pedidos", "ventas", "carrito", "cargas", "liquidaciones"].includes(permiso);
     }
 
     // Cliente: acceso básico.
@@ -129,8 +125,6 @@ function Home({ usuario, cerrarSesion }) {
     }
 
     switch (seccion) {
-      case "cargas":
-        return <Cargas usuario={usuario} />;
       case "inicio":
         return (
           <>
@@ -203,37 +197,20 @@ function Home({ usuario, cerrarSesion }) {
           </>
         );
 
-      case "inventarioProductos":
-        return (
-          <InventarioProductos
-            onRecibirProducto={() => cambiarSeccion("recibirProducto")}
-            usuario={usuario}
-          />
-        );
-
-      case "recibirProducto":
-        return (
-          <RecibirProducto onVolver={() => cambiarSeccion("inventarioProductos")} usuario={usuario} />
-        );
-
-
       case "crearProducto":
-        return <CrearProducto usuario={usuario} />;
+        return <CrearProducto />;
 
       case "ventas":
-        return <Ventas usuario={usuario} />;
-
+        return <Ventas />;
 
       case "pedidos":
         return <Pedidos />;
 
       case "productos":
-        return <Productos usuario={usuario} />;
-
+        return <Productos />;
 
       case "usuarios":
-        return <Usuarios usuario={usuario} />;
-
+        return <Usuarios />;
 
       case "reportes":
         return (
@@ -252,23 +229,21 @@ function Home({ usuario, cerrarSesion }) {
             <Register
               cambiarVista={() => setSeccion("inicio")}
               esAdministrador={usuario.userTipo === 0}
-              usuario={usuario}
             />
           </div>
         );
 
       case "insumos":
-        return <Insumos onCrear={() => cambiarSeccion("crearInsumo")} usuario={usuario} />;
-
+        return <Insumos onCrear={() => cambiarSeccion("crearInsumo")} />;
 
       case "crearInsumo":
-        return <CrearInsumo onVolver={() => cambiarSeccion("insumos")} usuario={usuario} />;
+        return <CrearInsumo onVolver={() => cambiarSeccion("insumos")} />;
 
       case "lotes":
-        return <Lotes onCrear={() => cambiarSeccion("crearLote")} usuario={usuario} />;
+        return <Lotes onCrear={() => cambiarSeccion("crearLote")} />;
 
       case "crearLote":
-        return <CrearLote onVolver={() => cambiarSeccion("lotes")} usuario={usuario} />;
+        return <CrearLote onVolver={() => cambiarSeccion("lotes")} />;
 
       // ============================================
       // HU-013 - PROVEEDORES
@@ -314,15 +289,17 @@ function Home({ usuario, cerrarSesion }) {
           />
         );
 
-      case "dashboard":
-        return <Dashboard usuario={usuario} />;
-
+      // ==========================================
+      // HU-005 - CARGAS
+      // ==========================================
+      case "cargas":
+        return <Cargas usuario={usuario} />;
 
       // ==========================================
-      // HU-009 - MERMA DE GARRAFONES
+      // HU-016 - LIQUIDACIONES
       // ==========================================
-      case "mermas":
-        return <MermaGarrafon />;
+      case "liquidaciones":
+        return <Liquidaciones />;
 
       default:
         return null;
