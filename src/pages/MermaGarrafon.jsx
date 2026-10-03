@@ -226,10 +226,8 @@ function MermaGarrafon() {
           />
         </div>
 
-        <button type="submit" disabled={cargando}>
-          {cargando
-            ? "Registrando..."
-            : "Registrar merma"}
+        <button type="submit" className="btn-glow" disabled={cargando}>
+          <span>{cargando ? "Registrando..." : "Registrar merma"}</span>
         </button>
       </form>
 

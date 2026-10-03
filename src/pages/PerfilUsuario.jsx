@@ -2,13 +2,13 @@ import api from "../services/api";
 import { useEffect, useState } from "react";
 
 const ROLES = {
-  0: { label: "Administrador", color: "#C8783A", bg: "#FEF3E8", icon: "👑" },
-  1: { label: "Empleado",      color: "#3A7AC8", bg: "#E8F0FE", icon: "🧑‍💼" },
-  2: { label: "Cliente",       color: "#3AC87A", bg: "#E8FEF0", icon: "🙋" },
-  3: { label: "Personalizado", color: "#9B3AC8", bg: "#F5E8FE", icon: "⚙️" },
+  0: { label: "Administrador", color: "#FF9900", bg: "#1A1500", icon: "👑" },
+  1: { label: "Empleado",      color: "#4A9FD4", bg: "#0D1E2B", icon: "🧑‍💼" },
+  2: { label: "Cliente",       color: "#3AC87A", bg: "#0D2B1A", icon: "🙋" },
+  3: { label: "Personalizado", color: "#9B7AC8", bg: "#1A0D2B", icon: "⚙️" },
 };
 
-function PerfilUsuario({ usuario, onVolver, esPropio = false }) {
+function PerfilUsuario({ usuario, onVolver, esPropio = false, tema, toggleTema }) {
   const [datos, setDatos] = useState(null);
   const [cargando, setCargando] = useState(true);
 
@@ -102,7 +102,7 @@ function PerfilUsuario({ usuario, onVolver, esPropio = false }) {
             fontSize: "34px",
             fontWeight: "800",
             flexShrink: 0,
-            boxShadow: "0 6px 20px rgba(200,120,58,0.30)",
+            boxShadow: "0 6px 20px rgba(0,115,187,0.35)",
           }}
         >
           {iniciales}
@@ -220,6 +220,63 @@ function PerfilUsuario({ usuario, onVolver, esPropio = false }) {
               </span>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ── Toggle de tema — solo visible en perfil propio ── */}
+      {esPropio && toggleTema && (
+        <div style={{
+          marginTop: "14px",
+          background: "var(--fondo-card)",
+          border: "1px solid var(--borde)",
+          borderRadius: "var(--r-md)",
+          padding: "24px 20px 48px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "8px",
+        }}>
+          <p style={{
+            margin: "0 0 16px",
+            fontSize: "11px", fontWeight: "700",
+            letterSpacing: "0.5px", textTransform: "uppercase",
+            color: "var(--texto-suave)", alignSelf: "flex-start",
+          }}>
+            🎨 Apariencia
+          </p>
+
+          {/* Antorcha 3D */}
+          <label className="torch-container" title={`Cambiar a tema ${tema === "oscuro" ? "claro" : "oscuro"}`}>
+            <input
+              type="checkbox"
+              checked={tema === "claro"}
+              onChange={toggleTema}
+            />
+            <div className="torch">
+              <div className="torch-head">
+                <div className="torch-face torch-top">
+                  <div /><div /><div /><div />
+                </div>
+                <div className="torch-face torch-left">
+                  <div /><div /><div /><div />
+                </div>
+                <div className="torch-face torch-right">
+                  <div /><div /><div /><div />
+                </div>
+              </div>
+              <div className="torch-stick">
+                <div className="torch-side torch-side-left">
+                  {Array.from({ length: 16 }).map((_, i) => <div key={i} />)}
+                </div>
+                <div className="torch-side torch-side-right">
+                  {Array.from({ length: 16 }).map((_, i) => <div key={i} />)}
+                </div>
+              </div>
+            </div>
+            <span className="torch-label">
+              {tema === "oscuro" ? "Tema oscuro" : "Tema claro"}
+            </span>
+          </label>
         </div>
       )}
     </section>

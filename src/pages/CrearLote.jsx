@@ -153,8 +153,8 @@ function CrearLote({ onVolver, usuario }) {
           rows={3}
         />
 
-        <button type="submit" disabled={cargando}>
-          {cargando ? "Guardando..." : "Registrar Lote"}
+        <button type="submit" className="btn-glow" disabled={cargando}>
+          <span>{cargando ? "Guardando..." : "Registrar Lote"}</span>
         </button>
       </form>
     </section>
