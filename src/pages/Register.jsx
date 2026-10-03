@@ -254,9 +254,9 @@ function Register({
               style={{
                 marginTop: "20px",
                 padding: "20px",
-                border: "1px solid #ddd",
+                border: "1px solid var(--borde)",
                 borderRadius: "10px",
-                background: "#fafafa",
+                background: "var(--humo)",
               }}
             >
               <h3>Permisos personalizados</h3>
@@ -296,8 +296,8 @@ function Register({
             </div>
           )}
 
-          <button type="submit" disabled={cargando}>
-            {cargando ? "Registrando..." : "Crear Cuenta"}
+          <button type="submit" className="btn-glow" disabled={cargando}>
+            <span>{cargando ? "Registrando..." : "Crear Cuenta"}</span>
           </button>
 
         </form>

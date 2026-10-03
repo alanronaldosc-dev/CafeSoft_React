@@ -45,9 +45,9 @@ function InventarioProductos({ onRecibirProducto, usuario }) {
   );
 
   const getEstado = (cantidad, minima) => {
-    if (cantidad <= 0)      return { label: "Agotado",    color: "#E05252", bg: "#FEF0EE" };
-    if (cantidad <= minima) return { label: "Stock bajo", color: "#C8783A", bg: "#FEF3E8" };
-    return                         { label: "Normal",     color: "#3AC87A", bg: "#E8FEF0" };
+    if (cantidad <= 0)      return { label: "Agotado",    color: "#E05252", bg: "#2B0D0D" };
+    if (cantidad <= minima) return { label: "Stock bajo", color: "#FF9900", bg: "#1A1500" };
+    return                         { label: "Normal",     color: "#3AC87A", bg: "#0D2B1A" };
   };
 
   return (

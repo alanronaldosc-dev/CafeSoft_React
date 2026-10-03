@@ -75,33 +75,27 @@ function Login({ cambiarVista, setUsuario }) {
   return (
     <div className="auth-page">
 
-      {/* DERECHA — bienvenida */}
-      <div className="auth-welcome">
-        <h1>CafeSoft</h1>
-        <h1>tu sistema de gestión</h1>
-        <h1>para cafeterías y más.</h1>
+      {/* IZQUIERDA — animación camión */}
+      <div className="auth-welcome-car">
+        <h2>☕ CafeSoft</h2>
+        <p>Tu sistema de gestión para cafeterías</p>
 
-        <ul>
-          <li>
-            Gestión de productos e insumos
-          </li>
-
-          <li>
-            Control de ventas y carrito
-          </li>
-
-          <li>
-            Reportes y estadísticas
-          </li>
-
-          <li>
-            Administración de usuarios
-          </li>
-        </ul>
+        {/* Escena del camión */}
+        <div className="car-scene">
+          <div className="car-body">
+            <div className="car-window" />
+            <div className="car-cargo" />
+            <div className="car-door" />
+            <div className="car-lights" />
+          </div>
+          <div className="car-wheels" />
+          <div className="car-wheels car-wheels-2" />
+          <div className="car-street" />
+          <div className="car-post" />
+        </div>
       </div>
 
-
-      {/* IZQUIERDA — formulario */}
+      {/* DERECHA — formulario */}
       <div className="login-container">
 
         <div className="auth-logo">
@@ -162,11 +156,10 @@ function Login({ cambiarVista, setUsuario }) {
           {/* BOTÓN */}
           <button
             type="submit"
+            className="btn-glow"
             disabled={cargando}
           >
-            {cargando
-              ? "Entrando..."
-              : "Iniciar Sesión"}
+            <span>{cargando ? "Entrando..." : "Iniciar Sesión"}</span>
           </button>
 
         </form>

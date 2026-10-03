@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import api from "../services/api";
+import { useState } from "react";
 import Register from "./Register";
 import Productos from "./Productos";
 import Ventas from "./Ventas";
@@ -14,12 +13,12 @@ import Carrito from "./Carrito";
 import Categorias from "./Categorias";
 import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
-import ProductoShowcase from "./ProductoShowcase";
 import PerfilUsuario from "./PerfilUsuario";
 import Dashboard from "./Dashboard";
 import InventarioProductos from "./InventarioProductos";
 import RecibirProducto from "./RecibirProducto";
 import Cargas from "./Cargas";
+import InicioPage from "./InicioPage";
 
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
@@ -28,7 +27,7 @@ import CrearProveedor from "./CrearProveedor";
 // HU-009 - MERMA DE GARRAFONES
 import MermaGarrafon from "./MermaGarrafon";
 
-function Home({ usuario, cerrarSesion }) {
+function Home({ usuario, cerrarSesion, tema, toggleTema }) {
   const [seccion, setSeccion] = useState("inicio");
   const [categoriaParaProductos, setCategoriaParaProductos] = useState(null);
 
@@ -133,74 +132,11 @@ function Home({ usuario, cerrarSesion }) {
         return <Cargas usuario={usuario} />;
       case "inicio":
         return (
-          <>
-            <section className="header">
-              <div>
-                <h1>Bienvenido a CafeSoft</h1>
-                <p>
-                  Hola, {usuario.nombre}. Administra tu cafetería desde un solo
-                  lugar.
-                </p>
-              </div>
-
-              {tienePermiso("ventas") && (
-                <button
-                  className="history-btn"
-                  onClick={() => cambiarSeccion("ventas")}
-                >
-                  Ver historial
-                </button>
-              )}
-            </section>
-              <ProductoShowcase />
-
-            <section className="cards">
-              <div className="card">
-                <span className="card-icon">💵</span>
-                <p>Total vendido hoy</p>
-                <h2>$470.00</h2>
-              </div>
-
-              <div className="card">
-                <span className="card-icon">🧾</span>
-                <p>Tickets generados</p>
-                <h2>1</h2>
-              </div>
-            </section>
-
-            <section className="dashboard-grid">
-              <div className="panel">
-                <h2>👑 Top productos de hoy</h2>
-                <div className="donut"></div>
-                <div className="legend">
-                  <p>☕ Café Americano</p>
-                  <p>🍫 Chocolate Caliente</p>
-                  <p>🍵 Té Chai Latte</p>
-                  <p>🥕 Pastel de Zanahoria</p>
-                </div>
-              </div>
-
-              <div className="panel">
-                <h2>🕒 Detalle de ventas</h2>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Hora</th>
-                      <th>Mesa</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>11:29 PM</td>
-                      <td>Mesa 9</td>
-                      <td>$470.00</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </>
+          <InicioPage
+            usuario={usuario}
+            tienePermiso={tienePermiso}
+            onNavegar={cambiarSeccion}
+          />
         );
 
       case "inventarioProductos":
@@ -311,6 +247,8 @@ function Home({ usuario, cerrarSesion }) {
             usuario={usuario}
             onVolver={() => setSeccion("inicio")}
             esPropio={true}
+            tema={tema}
+            toggleTema={toggleTema}
           />
         );
 

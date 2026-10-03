@@ -71,8 +71,8 @@ function CrearCategoria({ onVolver }) {
           Categoría activa
         </label>
 
-        <button type="submit" disabled={cargando}>
-          {cargando ? "Guardando..." : "Crear Categoría"}
+        <button type="submit" className="btn-glow" disabled={cargando}>
+          <span>{cargando ? "Guardando..." : "Crear Categoría"}</span>
         </button>
       </form>
     </section>
