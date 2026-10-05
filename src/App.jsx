@@ -14,10 +14,18 @@ function App() {
     JSON.parse(localStorage.getItem("usuario")) || null
   );
 
+
   // ── Tema oscuro/claro — persiste en localStorage ─────────
+=======
+  // ── Tema: persiste en localStorage ──────────────────────
+
   const [tema, setTema] = useState(
     localStorage.getItem("tema") || "oscuro"
   );
+
+
+=======
+  // Aplica / quita clase en #root cuando cambia el tema
 
   useEffect(() => {
     const root = document.getElementById("root");
@@ -30,12 +38,21 @@ function App() {
     localStorage.setItem("tema", tema);
   }, [tema]);
 
+
   const toggleTema = () =>
     setTema((prev) => (prev === "oscuro" ? "claro" : "oscuro"));
 
   const cerrarSesion = () => {
     localStorage.removeItem("usuario");
     localStorage.removeItem("jwt_token");
+=======
+
+  const toggleTema = () =>
+    setTema((prev) => (prev === "oscuro" ? "claro" : "oscuro"));
+
+  const cerrarSesion = () => {
+    localStorage.removeItem("usuario");
+
     setUsuario(null);
     setVista("login");
   };

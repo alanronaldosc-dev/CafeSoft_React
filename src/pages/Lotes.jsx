@@ -66,7 +66,7 @@ function Lotes({ onCrear, usuario }) {
           <tbody>
             {lotes.map((lote) => (
               <tr key={lote.id} style={{
-                background: lote.tipoLote === "produccion" ? "#f0f9f0" : undefined
+                background: lote.tipoLote === "produccion" ? "#1A2B1A" : undefined
               }}>
                 <td>{lote.id}</td>
                 <td>
@@ -82,8 +82,9 @@ function Lotes({ onCrear, usuario }) {
                 <td>{lote.observaciones || "—"}</td>
                 <td>
                   {lote.tipoLote === "produccion"
-                    ? <span style={{ background: "#e8f4fd", color: "#1a6fa8", borderRadius: "999px",
-                        padding: "3px 10px", fontSize: "12px", fontWeight: "600" }}>Producción</span>
+                    ? <span style={{ background: "#0D1E2B", color: "#4A9FD4", borderRadius: "999px",
+                        padding: "3px 10px", fontSize: "12px", fontWeight: "600",
+                        border: "1px solid #4A9FD433" }}>Producción</span>
                     : <button onClick={() => eliminarLote(lote.id)}>🗑️ Eliminar</button>}
                 </td>
               </tr>

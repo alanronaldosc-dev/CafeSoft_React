@@ -1,5 +1,8 @@
 import { useState } from "react";
+
 import InicioPage from "./InicioPage";
+
+=======
 
 import Register from "./Register";
 import Productos from "./Productos";
@@ -16,6 +19,14 @@ import Categorias from "./Categorias";
 import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
 import PerfilUsuario from "./PerfilUsuario";
+
+=======
+import Dashboard from "./Dashboard";
+import InventarioProductos from "./InventarioProductos";
+import RecibirProducto from "./RecibirProducto";
+import Cargas from "./Cargas";
+import InicioPage from "./InicioPage";
+
 
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
@@ -37,7 +48,7 @@ import Cargas from "./Cargas";
 // HU-016 - LIQUIDACIÓN DE REPARTIDORES
 import Liquidaciones from "./Liquidaciones";
 
-function Home({ usuario, cerrarSesion }) {
+function Home({ usuario, cerrarSesion, tema, toggleTema }) {
   const [seccion, setSeccion] = useState("inicio");
   const [categoriaParaProductos, setCategoriaParaProductos] = useState(null);
   const [clienteParaEditar, setClienteParaEditar] = useState(null);
@@ -149,6 +160,19 @@ function Home({ usuario, cerrarSesion }) {
       case "inicio":
         return (
           <InicioPage
+
+=======
+            usuario={usuario}
+            tienePermiso={tienePermiso}
+            onNavegar={cambiarSeccion}
+          />
+        );
+
+      case "inventarioProductos":
+        return (
+          <InventarioProductos
+            onRecibirProducto={() => cambiarSeccion("recibirProducto")}
+
             usuario={usuario}
             tienePermiso={tienePermiso}
             onNavegar={cambiarSeccion}
@@ -293,6 +317,8 @@ function Home({ usuario, cerrarSesion }) {
             usuario={usuario}
             onVolver={() => setSeccion("inicio")}
             esPropio={true}
+            tema={tema}
+            toggleTema={toggleTema}
           />
         );
 

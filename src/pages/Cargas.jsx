@@ -494,9 +494,8 @@ function Cargas({ usuario }) {
                 padding: "16px",
                 marginBottom: "20px",
                 borderRadius: "8px",
-                background: "#f5f1ea",
-                border:
-                  "1px solid #ddd",
+                background: "var(--humo)",
+                border: "1px solid var(--borde)",
               }}
             >
 
@@ -626,24 +625,13 @@ function Cargas({ usuario }) {
 
           <button
             type="submit"
+            className="btn-glow"
             disabled={
               cargando ||
               inventario.length === 0
             }
-            style={{
-              padding:
-                "12px 25px",
-              border: "none",
-              borderRadius: "8px",
-              cursor:
-                cargando
-                  ? "not-allowed"
-                  : "pointer",
-            }}
           >
-            {cargando
-              ? "⏳ Registrando..."
-              : "🚰 Asignar carga"}
+            <span>{cargando ? "⏳ Registrando..." : "🚰 Asignar carga"}</span>
           </button>
 
         </form>

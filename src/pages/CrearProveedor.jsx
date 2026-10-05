@@ -188,11 +188,10 @@ function CrearProveedor({ onVolver }) {
 
           <button
             type="submit"
+            className="btn-glow"
             disabled={guardando}
           >
-            {guardando
-              ? "Guardando..."
-              : "Guardar proveedor"}
+            <span>{guardando ? "Guardando..." : "Guardar proveedor"}</span>
           </button>
 
           {onVolver && (

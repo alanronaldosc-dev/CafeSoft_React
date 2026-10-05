@@ -38,14 +38,14 @@ function Dashboard({ usuario }) {
   if (cargando) return (
     <section className="panel">
       <h1>📊 Panel de Estado</h1>
-      <p>Cargando datos...</p>
+      <p style={{ color: "#8D9DB6" }}>Cargando datos...</p>
     </section>
   );
 
   if (error) return (
     <section className="panel">
       <h1>📊 Panel de Estado</h1>
-      <p style={{ color: "red" }}>{error}</p>
+      <p style={{ color: "#E05252" }}>{error}</p>
     </section>
   );
 
@@ -71,32 +71,32 @@ function Dashboard({ usuario }) {
   return (
     <section className="panel">
       <h1>📊 Panel de Estado</h1>
-      <p style={{ color: "#888", marginBottom: "1.5rem" }}>
+      <p style={{ color: "#8D9DB6", marginBottom: "1.5rem" }}>
         Existencias en tiempo real de insumos y productos terminados.
       </p>
 
       {/* PRODUCTOS TERMINADOS */}
       <div style={{ marginBottom: "2.5rem" }}>
-        <h2 style={{ borderBottom: "2px solid #e0e0e0", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
+        <h2 style={{ borderBottom: "2px solid #2D3B4E", paddingBottom: "0.5rem", marginBottom: "1rem", color: "#D4E5F5" }}>
           📦 Productos terminados ({productos.length})
         </h2>
         {productos.length === 0 ? (
-          <p style={{ color: "#aaa" }}>Sin productos en inventario.</p>
+          <p style={{ color: "#5A6B7E" }}>Sin productos en inventario.</p>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "1rem" }}>
             {productos.map((p) => {
               const badge = getBadge(p.cantidad, p.cantidadMinima);
               return (
                 <div key={p.id} style={{
-                  background: "#f0f9f0", border: `1px solid ${badge.color}44`,
+                  background: "#1E2B3A", border: `1px solid ${badge.color}44`,
                   borderRadius: "10px", padding: "1rem", textAlign: "center",
                 }}>
                   <span style={{ fontSize: "2rem" }}>📦</span>
-                  <h3 style={{ margin: "0.5rem 0 0.25rem", fontSize: "1rem" }}>{p.nombre}</h3>
+                  <h3 style={{ margin: "0.5rem 0 0.25rem", fontSize: "1rem", color: "#D4E5F5" }}>{p.nombre}</h3>
                   <p style={{ fontSize: "1.8rem", fontWeight: "800", color: badge.color, margin: "0.25rem 0" }}>
                     {p.cantidad}
                   </p>
-                  <p style={{ color: "#888", fontSize: "0.8rem", margin: 0 }}>piezas en existencia</p>
+                  <p style={{ color: "#8D9DB6", fontSize: "0.8rem", margin: 0 }}>piezas en existencia</p>
                   <div style={{ marginTop: "0.5rem" }}>
                     <Badge color={badge.color} bg={badge.bg} label={badge.label} />
                   </div>
@@ -109,15 +109,15 @@ function Dashboard({ usuario }) {
 
       {/* INSUMOS */}
       <div>
-        <h2 style={{ borderBottom: "2px solid #e0e0e0", paddingBottom: "0.5rem", marginBottom: "1rem" }}>
+        <h2 style={{ borderBottom: "2px solid #2D3B4E", paddingBottom: "0.5rem", marginBottom: "1rem", color: "#D4E5F5" }}>
           🧂 Insumos en inventario ({insumos.length})
         </h2>
         {insumos.length === 0 ? (
-          <p style={{ color: "#aaa" }}>Sin insumos registrados.</p>
+          <p style={{ color: "#5A6B7E" }}>Sin insumos registrados.</p>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ background: "#f5f5f5" }}>
+              <tr style={{ background: "#1A2332" }}>
                 <th style={th}>Insumo</th>
                 <th style={th}>Tipo</th>
                 <th style={th}>Existencia</th>
@@ -132,17 +132,17 @@ function Dashboard({ usuario }) {
               {insumos.map((ins) => {
                 const badge = getBadge(ins.cantidad, ins.cantidadMinima);
                 return (
-                  <tr key={ins.id} style={{ borderBottom: "1px solid #eee" }}>
+                  <tr key={ins.id} style={{ borderBottom: "1px solid #2D3B4E" }}>
                     <td style={td}><strong>{ins.nombre}</strong></td>
                     <td style={td}>{ins.tipo}</td>
                     <td style={{ ...td, fontWeight: "700", color: badge.color, fontSize: "1rem" }}>{ins.cantidad}</td>
                     <td style={td}>{ins.unidadMedida}</td>
-                    <td style={{ ...td, color: "#888" }}>{ins.cantidadMinima}</td>
+                    <td style={{ ...td, color: "#8D9DB6" }}>{ins.cantidadMinima}</td>
                     <td style={td}>{ins.proveedor || "—"}</td>
                     <td style={td}><Badge color={badge.color} bg={badge.bg} label={badge.label} /></td>
                     <td style={td}>
                       <button onClick={() => eliminarInsumo(ins.id, ins.nombre)} style={{
-                        background: "#FEF0EE", color: "#E05252", border: "1px solid #E0525233",
+                        background: "#2D1A1A", color: "#E05252", border: "1px solid #E0525233",
                         borderRadius: "6px", padding: "4px 10px", cursor: "pointer",
                         fontSize: "12px", fontWeight: "600",
                       }}>
@@ -160,7 +160,7 @@ function Dashboard({ usuario }) {
   );
 }
 
-const th = { textAlign: "left", padding: "0.6rem 1rem", fontWeight: "600", fontSize: "0.85rem", color: "#444" };
-const td = { padding: "0.6rem 1rem", fontSize: "0.9rem", color: "#333" };
+const th = { textAlign: "left", padding: "0.6rem 1rem", fontWeight: "600", fontSize: "0.85rem", color: "#8D9DB6" };
+const td = { padding: "0.6rem 1rem", fontSize: "0.9rem", color: "#D4E5F5" };
 
 export default Dashboard;

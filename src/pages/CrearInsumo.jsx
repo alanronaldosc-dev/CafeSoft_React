@@ -131,8 +131,8 @@ function CrearInsumo({ onVolver, usuario }) {
           required
         />
 
-        <button type="submit" disabled={cargando}>
-          {cargando ? "Guardando..." : "Registrar Insumo"}
+        <button type="submit" className="btn-glow" disabled={cargando}>
+          <span>{cargando ? "Guardando..." : "Registrar Insumo"}</span>
         </button>
       </form>
     </section>

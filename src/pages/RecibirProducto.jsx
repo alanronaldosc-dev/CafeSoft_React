@@ -106,8 +106,9 @@ function RecibirProducto({ onVolver, usuario }) {
           {mensaje && (
             <div style={{
               padding: "10px 14px", borderRadius: "8px",
-              background: mensaje.tipo === "ok" ? "#E8FEF0" : "#FEF0EE",
-              color: mensaje.tipo === "ok" ? "#2A8B5A" : "#E05252",
+              background: mensaje.tipo === "ok" ? "#0D2B1A" : "#2B0D0D",
+              color: mensaje.tipo === "ok" ? "#3AC87A" : "#E05252",
+              border: `1px solid ${mensaje.tipo === "ok" ? "#3AC87A33" : "#E0525233"}`,
               fontSize: "14px", fontWeight: "500",
             }}>
               {mensaje.texto}
@@ -116,10 +117,10 @@ function RecibirProducto({ onVolver, usuario }) {
 
           <button
             type="submit"
+            className="btn-glow"
             disabled={guardando}
-            style={{ padding: "12px", cursor: "pointer", fontWeight: "600" }}
           >
-            {guardando ? "Registrando..." : "Registrar ingreso"}
+            <span>{guardando ? "Registrando..." : "Registrar ingreso"}</span>
           </button>
         </form>
       </div>

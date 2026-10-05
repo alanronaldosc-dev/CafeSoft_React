@@ -52,10 +52,18 @@ function Login({ cambiarVista, setUsuario }) {
   return (
     <div className="auth-page">
 
+
       {/* Izquierda — animación camión */}
+=======
+      {/* IZQUIERDA — animación camión */}
+
       <div className="auth-welcome-car">
         <h2>☕ CafeSoft</h2>
         <p>Tu sistema de gestión para cafeterías</p>
+
+
+=======
+        {/* Escena del camión */}
 
         <div className="car-scene">
           <div className="car-body">
@@ -71,7 +79,11 @@ function Login({ cambiarVista, setUsuario }) {
         </div>
       </div>
 
+
       {/* Derecha — formulario */}
+=======
+      {/* DERECHA — formulario */}
+
       <div className="login-container">
 
         <div className="auth-logo">☕</div>
@@ -101,6 +113,15 @@ function Login({ cambiarVista, setUsuario }) {
           />
 
           <button type="submit" className="btn-glow" disabled={cargando}>
+=======
+
+          {/* BOTÓN */}
+          <button
+            type="submit"
+            className="btn-glow"
+            disabled={cargando}
+          >
+
             <span>{cargando ? "Entrando..." : "Iniciar Sesión"}</span>
           </button>
 

@@ -67,8 +67,9 @@ function Categorias({ onCrear, onAgregarProductos }) {
                 <td>
                   <span style={{
                     padding: "2px 10px", borderRadius: "20px", fontSize: "0.8rem",
-                    background: cat.activo ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.2)",
+                    background: cat.activo ? "rgba(34,197,94,0.15)" : "rgba(239,68,68,0.15)",
                     color: cat.activo ? "#22c55e" : "#ef4444",
+                    border: `1px solid ${cat.activo ? "#22c55e33" : "#ef444433"}`,
                   }}>
                     {cat.activo ? "Activo" : "Inactivo"}
                   </span>

@@ -140,9 +140,9 @@ function CrearProducto({ usuario }) {
           onClick={() => setModo("definir")}
           style={{
             padding: "10px 20px",
-            background: modo === "definir" ? "var(--primario, #3a2010)" : "transparent",
-            color: modo === "definir" ? "#fff" : "inherit",
-            border: "1px solid var(--borde, #ccc)",
+            background: modo === "definir" ? "var(--cafe-oscuro)" : "transparent",
+            color: modo === "definir" ? "#fff" : "var(--texto-suave)",
+            border: "1px solid var(--borde)",
             borderRadius: "8px",
             cursor: "pointer",
             fontWeight: "600",
@@ -155,9 +155,9 @@ function CrearProducto({ usuario }) {
           onClick={() => setModo("producir")}
           style={{
             padding: "10px 20px",
-            background: modo === "producir" ? "var(--primario, #3a2010)" : "transparent",
-            color: modo === "producir" ? "#fff" : "inherit",
-            border: "1px solid var(--borde, #ccc)",
+            background: modo === "producir" ? "var(--cafe-oscuro)" : "transparent",
+            color: modo === "producir" ? "#fff" : "var(--texto-suave)",
+            border: "1px solid var(--borde)",
             borderRadius: "8px",
             cursor: "pointer",
             fontWeight: "600",
@@ -224,8 +224,8 @@ function CrearProducto({ usuario }) {
               </table>
             )}
 
-            <button type="submit" disabled={cargando} style={{ marginTop: "1rem" }}>
-              {cargando ? "Guardando..." : "Registrar Receta"}
+            <button type="submit" className="btn-glow" disabled={cargando} style={{ marginTop: "1rem" }}>
+              <span>{cargando ? "Guardando..." : "Registrar Receta"}</span>
             </button>
           </form>
         </>
@@ -257,7 +257,7 @@ function CrearProducto({ usuario }) {
               const prod = productos.find((p) => p.id === Number(producirForm.productoId));
               if (!prod || !prod.insumos?.length) return null;
               return (
-                <div style={{ background: "#f5f0eb", borderRadius: "8px", padding: "12px", marginBottom: "8px" }}>
+                <div style={{ background: "var(--humo)", borderRadius: "8px", padding: "12px", marginBottom: "8px", border: "1px solid var(--borde)" }}>
                   <p style={{ fontWeight: "700", marginBottom: "8px", fontSize: "13px" }}>
                     📋 Receta (por unidad):
                   </p>
@@ -280,7 +280,7 @@ function CrearProducto({ usuario }) {
               const prod = productos.find((p) => p.id === Number(producirForm.productoId));
               if (!prod || !prod.insumos?.length) return null;
               return (
-                <div style={{ background: "#e8f4fd", borderRadius: "8px", padding: "10px", fontSize: "13px" }}>
+                <div style={{ background: "var(--humo)", borderRadius: "8px", padding: "10px", fontSize: "13px", border: "1px solid var(--borde)" }}>
                   <strong>📦 Insumos que se descontarán:</strong>
                   {prod.insumos.map((ins) => (
                     <p key={ins.insumoId} style={{ margin: "3px 0" }}>
@@ -303,16 +303,17 @@ function CrearProducto({ usuario }) {
             {mensajeProducir && (
               <div style={{
                 padding: "10px 14px", borderRadius: "8px",
-                background: mensajeProducir.tipo === "ok" ? "#E8FEF0" : "#FEF0EE",
-                color: mensajeProducir.tipo === "ok" ? "#2A8B5A" : "#E05252",
+                background: mensajeProducir.tipo === "ok" ? "#0D2B1A" : "#2B0D0D",
+                color: mensajeProducir.tipo === "ok" ? "#3AC87A" : "#E05252",
+                border: `1px solid ${mensajeProducir.tipo === "ok" ? "#3AC87A33" : "#E0525233"}`,
                 fontSize: "14px", fontWeight: "500",
               }}>
                 {mensajeProducir.texto}
               </div>
             )}
 
-            <button type="submit" disabled={produciendo} style={{ marginTop: "1rem" }}>
-              {produciendo ? "Produciendo..." : "🏭 Confirmar Producción"}
+            <button type="submit" className="btn-glow" disabled={produciendo} style={{ marginTop: "1rem" }}>
+              <span>{produciendo ? "Produciendo..." : "🏭 Confirmar Producción"}</span>
             </button>
           </form>
         </>

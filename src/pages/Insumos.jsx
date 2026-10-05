@@ -99,8 +99,8 @@ function InventarioAnalisis({ onCrear, usuario }) {
   });
 
   const tarjetaStyle = (color, bg) => ({
-    background: bg,
-    border: `1px solid ${color}33`,
+    background: "#1A2332",
+    border: `1px solid ${color}44`,
     borderRadius: "var(--r-md)",
     padding: "18px 22px",
   });
@@ -125,23 +125,23 @@ function InventarioAnalisis({ onCrear, usuario }) {
 
       {/* Resumen */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px" }}>
-        <div style={tarjetaStyle("#E05252", "#FEF0EE")}>
+        <div style={tarjetaStyle("#E05252", "")}>
           <p style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase",
             letterSpacing: "0.5px", color: "#E05252", marginBottom: "6px" }}>🔴 Sin stock</p>
           <p style={{ fontSize: "28px", fontWeight: "800", color: "#E05252" }}>{criticos.length}</p>
-          <p style={{ fontSize: "12px", color: "#9B3A3A" }}>insumos agotados</p>
+          <p style={{ fontSize: "12px", color: "#8D9DB6" }}>insumos agotados</p>
         </div>
-        <div style={tarjetaStyle("#C8783A", "#FEF3E8")}>
+        <div style={tarjetaStyle("#FF9900", "")}>
           <p style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase",
-            letterSpacing: "0.5px", color: "#C8783A", marginBottom: "6px" }}>🟠 Stock bajo</p>
-          <p style={{ fontSize: "28px", fontWeight: "800", color: "#C8783A" }}>{bajos.length}</p>
-          <p style={{ fontSize: "12px", color: "#8B5E3C" }}>5 unidades o menos</p>
+            letterSpacing: "0.5px", color: "#FF9900", marginBottom: "6px" }}>🟠 Stock bajo</p>
+          <p style={{ fontSize: "28px", fontWeight: "800", color: "#FF9900" }}>{bajos.length}</p>
+          <p style={{ fontSize: "12px", color: "#8D9DB6" }}>5 unidades o menos</p>
         </div>
-        <div style={tarjetaStyle("#3AC87A", "#E8FEF0")}>
+        <div style={tarjetaStyle("#3AC87A", "")}>
           <p style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase",
             letterSpacing: "0.5px", color: "#3AC87A", marginBottom: "6px" }}>🟢 Stock normal</p>
           <p style={{ fontSize: "28px", fontWeight: "800", color: "#3AC87A" }}>{normales.length}</p>
-          <p style={{ fontSize: "12px", color: "#2A8B5A" }}>insumos bien abastecidos</p>
+          <p style={{ fontSize: "12px", color: "#8D9DB6" }}>insumos bien abastecidos</p>
         </div>
       </div>
 
@@ -155,7 +155,7 @@ function InventarioAnalisis({ onCrear, usuario }) {
             {porVencer.map((l, i) => (
               <div key={i} style={{
                 display: "flex", justifyContent: "space-between", alignItems: "center",
-                background: "rgba(255,255,255,0.6)", borderRadius: "var(--r-sm)", padding: "10px 14px",
+                background: "rgba(255,255,255,0.06)", borderRadius: "var(--r-sm)", padding: "10px 14px",
               }}>
                 <span style={{ fontWeight: "600", fontSize: "14px" }}>{l.insumoNombre || "Insumo"}</span>
                 <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -217,7 +217,7 @@ function InventarioAnalisis({ onCrear, usuario }) {
                     <button
                       onClick={() => eliminarInsumo(insumo.id, insumo.nombre)}
                       style={{
-                        background: "#FEF0EE",
+                        background: "#2D1A1A",
                         color: "#E05252",
                         border: "1px solid #E0525233",
                         borderRadius: "6px",
