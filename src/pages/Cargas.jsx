@@ -6,11 +6,9 @@ function Cargas({ usuario }) {
   // ESTADOS
   // ============================================
 
-  const [repartidores, setRepartidores] = useState([]);
   const [inventario, setInventario] = useState([]);
   const [cargas, setCargas] = useState([]);
 
-  const [repartidorId, setRepartidorId] = useState("");
   const [inventarioId, setInventarioId] = useState("");
   const [cantidad, setCantidad] = useState("");
 
@@ -37,24 +35,12 @@ function Cargas({ usuario }) {
 
       const sucursalId = usuario?.sucursalId;
 
-      const [
-        repartidoresResponse,
-        inventarioResponse,
-        cargasResponse,
-      ] = await Promise.all([
-        sucursalId
-          ? api.get(`/usuarios/sucursal/${sucursalId}`)
-          : api.get("/usuarios/tipo/4"),
+      const [inventarioResponse, cargasResponse] = await Promise.all([
         sucursalId
           ? api.get(`/inventario/sucursal/${sucursalId}`)
           : api.get("/inventario"),
         api.get("/cargas"),
       ]);
-
-      console.log(
-        "Respuesta repartidores:",
-        repartidoresResponse.data
-      );
 
       console.log(
         "Respuesta inventario:",
@@ -65,42 +51,6 @@ function Cargas({ usuario }) {
         "Respuesta cargas:",
         cargasResponse.data
       );
-
-      // ========================================
-      // REPARTIDORES
-      // ========================================
-      //
-      // La API devuelve:
-      //
-      // {
-      //   mensaje: "...",
-      //   cantidad: 1,
-      //   usuarios: [...]
-      // }
-      //
-      // Por eso necesitamos obtener .usuarios
-      // ========================================
-
-      const datosRep = repartidoresResponse.data;
-
-      let listaRepartidores = [];
-
-      if (Array.isArray(datosRep)) {
-        listaRepartidores = datosRep;
-      } else if (Array.isArray(datosRep?.usuarios)) {
-        listaRepartidores = datosRep.usuarios;
-      } else if (Array.isArray(datosRep?.data)) {
-        listaRepartidores = datosRep.data;
-      }
-
-      // Solo repartidores activos (userTipo 4)
-      listaRepartidores = listaRepartidores.filter(
-        (repartidor) =>
-          repartidor.userTipo === 4 &&
-          repartidor.activo !== false
-      );
-
-      setRepartidores(listaRepartidores);
 
       // ========================================
       // INVENTARIO
@@ -175,17 +125,6 @@ function Cargas({ usuario }) {
     Number(inventarioSeleccionado?.cantidad || 0);
 
   // ============================================
-  // REPARTIDOR SELECCIONADO
-  // ============================================
-
-  const repartidorSeleccionado =
-    repartidores.find(
-      (item) =>
-        String(item.id) ===
-        String(repartidorId)
-    );
-
-  // ============================================
   // REGISTRAR CARGA
   // ============================================
 
@@ -198,13 +137,6 @@ function Cargas({ usuario }) {
     // ========================================
     // VALIDACIONES
     // ========================================
-
-    if (!repartidorId) {
-      setError(
-        "Selecciona un repartidor."
-      );
-      return;
-    }
 
     if (!inventarioId) {
       setError(
@@ -238,7 +170,6 @@ function Cargas({ usuario }) {
     // ========================================
 
     const datos = {
-      repartidorId: Number(repartidorId),
       inventarioId: Number(inventarioId),
       cantidad: Number(cantidad),
     };
@@ -267,14 +198,13 @@ function Cargas({ usuario }) {
       // ======================================
 
       setMensaje(
-        `✅ Se asignaron ${cantidad} unidades a ${repartidorSeleccionado?.nombre || "el repartidor"}.`
+        `✅ Se registraron ${cantidad} unidades. La carga queda SIN ASIGNAR hasta que se active una ruta.`
       );
 
       // ======================================
       // LIMPIAR FORMULARIO
       // ======================================
 
-      setRepartidorId("");
       setInventarioId("");
       setCantidad("");
 
@@ -469,85 +399,15 @@ function Cargas({ usuario }) {
             marginBottom: "25px",
           }}
         >
-          Selecciona el repartidor,
-          el tipo de garrafón y la
-          cantidad que llevará durante
-          su ruta.
+          Selecciona el tipo de garrafón y la
+          cantidad que llevará la ruta.
+          La carga quedará sin asignar hasta
+          activar una ruta.
         </p>
 
         <form
           onSubmit={registrarCarga}
         >
-
-          {/* ==================================
-              REPARTIDOR
-          ================================== */}
-
-          <div
-            style={{
-              marginBottom: "20px",
-            }}
-          >
-
-            <label>
-              <strong>
-                👤 Repartidor
-              </strong>
-            </label>
-
-            <select
-              value={repartidorId}
-              onChange={(e) =>
-                setRepartidorId(
-                  e.target.value
-                )
-              }
-              style={{
-                width: "100%",
-                padding: "10px",
-                marginTop: "8px",
-              }}
-              disabled={cargando}
-            >
-
-              <option value="">
-                Selecciona un repartidor
-              </option>
-
-              {repartidores.map(
-                (repartidor) => (
-                  <option
-                    key={
-                      repartidor.id
-                    }
-                    value={
-                      repartidor.id
-                    }
-                  >
-                    {repartidor.nombre}
-                    {" - "}
-                    {repartidor.telefono ||
-                      "Sin teléfono"}
-                  </option>
-                )
-              )}
-
-            </select>
-
-            {repartidores.length === 0 && (
-              <small
-                style={{
-                  display: "block",
-                  marginTop: "8px",
-                  color: "#b02a37",
-                }}
-              >
-                No hay repartidores
-                activos registrados.
-              </small>
-            )}
-
-          </div>
 
           {/* ==================================
               INVENTARIO
@@ -768,7 +628,6 @@ function Cargas({ usuario }) {
             type="submit"
             disabled={
               cargando ||
-              repartidores.length === 0 ||
               inventario.length === 0
             }
             style={{

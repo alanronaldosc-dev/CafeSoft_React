@@ -174,11 +174,12 @@ function Liquidaciones() {
       {error && (
         <div
           style={{
-            background: "#fff1f1",
-            border: "1px solid #e59b9b",
+            background: "#2B0D0D",
+            border: "1px solid #E0525255",
             padding: 12,
             borderRadius: 10,
             marginBottom: 16,
+            color: "#E05252",
           }}
         >
           ⚠️ {error}
@@ -210,14 +211,14 @@ function Liquidaciones() {
               <div
                 key={titulo}
                 style={{
-                  border: "1px solid #e4ddd8",
+                  border: "1px solid var(--borde)",
                   borderRadius: 12,
                   padding: 14,
-                  background: "#fff",
+                  background: "var(--fondo-card)",
                 }}
               >
-                <div style={{ fontSize: 13, opacity: 0.72 }}>{titulo}</div>
-                <strong style={{ fontSize: 24 }}>{valor}</strong>
+                <div style={{ fontSize: 13, color: "var(--texto-suave)" }}>{titulo}</div>
+                <strong style={{ fontSize: 24, color: "var(--texto)" }}>{valor}</strong>
               </div>
             ))}
           </div>
@@ -301,11 +302,11 @@ function Liquidaciones() {
             marginTop: 20,
             padding: 16,
             borderRadius: 12,
-            border: "1px solid #b8d7ba",
-            background: "#f2fff3",
+            border: "1px solid #3AC87A55",
+            background: "#0D2B1A",
           }}
         >
-          <h2 style={{ marginTop: 0 }}>Cierre registrado</h2>
+          <h2 style={{ marginTop: 0, color: "#3AC87A" }}>Cierre registrado</h2>
           <p>
             <strong>Estado:</strong> {resultado.estado}
           </p>

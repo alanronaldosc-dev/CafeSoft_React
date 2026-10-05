@@ -21,6 +21,16 @@ import PerfilUsuario from "./PerfilUsuario";
 import Proveedores from "./Proveedores";
 import CrearProveedor from "./CrearProveedor";
 
+// HU-011 - CLIENTES
+import Clientes from "./Clientes";
+import CrearCliente from "./CrearCliente";
+import EditarCliente from "./EditarCliente";
+
+// RUTAS
+import Rutas from "./Rutas";
+import CrearRuta from "./CrearRuta";
+import EditarRuta from "./EditarRuta";
+
 // HU-005 - CARGAS DE GARRAFONES
 import Cargas from "./Cargas";
 
@@ -30,6 +40,8 @@ import Liquidaciones from "./Liquidaciones";
 function Home({ usuario, cerrarSesion }) {
   const [seccion, setSeccion] = useState("inicio");
   const [categoriaParaProductos, setCategoriaParaProductos] = useState(null);
+  const [clienteParaEditar, setClienteParaEditar] = useState(null);
+  const [rutaParaEditar, setRutaParaEditar] = useState(null);
 
   // ============================================
   // HU-015
@@ -50,6 +62,10 @@ function Home({ usuario, cerrarSesion }) {
     { id: "categorias", texto: "🏷️ Categorías" },
     // HU-013
     { id: "proveedores", texto: "🚚 Proveedores" },
+    // HU-011
+    { id: "clientes", texto: "🧑 Clientes" },
+    // RUTAS
+    { id: "rutas", texto: "🗺️ Rutas" },
     // HU-005
     { id: "cargas", texto: "🚰 Cargas de Garrafones" },
     // HU-016
@@ -70,12 +86,17 @@ function Home({ usuario, cerrarSesion }) {
 
     // Usuario normal: permisos predeterminados.
     if (usuario.userTipo === 1) {
-      return ["productos", "pedidos", "ventas", "carrito", "cargas", "liquidaciones"].includes(permiso);
+      return ["productos", "pedidos", "ventas", "carrito", "cargas", "liquidaciones", "rutas", "crearRuta", "editarRuta"].includes(permiso);
     }
 
     // Cliente: acceso básico.
     if (usuario.userTipo === 2) {
       return ["productos", "pedidos", "carrito"].includes(permiso);
+    }
+
+    // Repartidor: puede gestionar clientes (sus rutas).
+    if (usuario.userTipo === 4) {
+      return ["clientes", "crearCliente", "editarCliente", "rutas", "crearRuta", "editarRuta"].includes(permiso);
     }
 
     return false;
@@ -196,6 +217,53 @@ function Home({ usuario, cerrarSesion }) {
         return (
           <CrearProveedor onVolver={() => cambiarSeccion("proveedores")} />
         );
+
+      // ============================================
+      // HU-011 - CLIENTES
+      // ============================================
+      case "clientes":
+        return (
+          <Clientes
+            onCrear={() => cambiarSeccion("crearCliente")}
+            onEditar={(cliente) => {
+              setClienteParaEditar(cliente);
+              cambiarSeccion("editarCliente");
+            }}
+          />
+        );
+
+      case "crearCliente":
+        return (
+          <CrearCliente onVolver={() => cambiarSeccion("clientes")} />
+        );
+
+      case "editarCliente":
+        return (
+          <EditarCliente
+            cliente={clienteParaEditar}
+            onVolver={() => cambiarSeccion("clientes")}
+          />
+        );
+
+      // ============================================
+      // RUTAS
+      // ============================================
+      case "rutas":
+        return (
+          <Rutas
+            onCrear={() => cambiarSeccion("crearRuta")}
+            onEditar={(ruta) => {
+              setRutaParaEditar(ruta);
+              cambiarSeccion("editarRuta");
+            }}
+          />
+        );
+
+      case "crearRuta":
+        return <CrearRuta onVolver={() => cambiarSeccion("rutas")} />;
+
+      case "editarRuta":
+        return <EditarRuta ruta={rutaParaEditar} onVolver={() => cambiarSeccion("rutas")} />;
 
       case "categorias":
         return (
