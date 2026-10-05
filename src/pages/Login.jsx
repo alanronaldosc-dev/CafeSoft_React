@@ -1,24 +1,13 @@
-// ============================================
-// HU-008 - INICIO DE SESION WEB
-// Gestiona el acceso de los usuarios a CafeSoft
-// y envia las credenciales para su autenticacion.
-// ============================================
-
 import { useState } from "react";
 import api from "../services/api";
 
 function Login({ cambiarVista, setUsuario }) {
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [form, setForm] = useState({ email: "", password: "" });
   const [cargando, setCargando] = useState(false);
 
   const iniciarSesion = async (e) => {
     e.preventDefault();
 
-    // Validación local (campos vacíos)
     if (!form.email.trim() || !form.password.trim()) {
       alert("Ingresa tu correo y contraseña");
       return;
@@ -27,45 +16,33 @@ function Login({ cambiarVista, setUsuario }) {
     setCargando(true);
 
     try {
-
-      // Validación contra la API
       const res = await api.post("/usuarios/login", {
         email: form.email.trim().toLowerCase(),
         password: form.password,
       });
 
       const usuario = res.data.usuario;
+      const token   = res.data.token;
 
       if (!usuario) {
         alert("No se recibió información del usuario");
         return;
       }
 
-      // Guardar sesión
-      localStorage.setItem(
-        "usuario",
-        JSON.stringify(usuario)
-      );
+      // Guardar token para peticiones autenticadas
+      if (token) {
+        localStorage.setItem("jwt_token", token);
+      }
 
-      // Actualizar usuario en React
+      // Guardar sesión
+      localStorage.setItem("usuario", JSON.stringify(usuario));
       setUsuario(usuario);
 
     } catch (error) {
-      console.error(
-        "Error al iniciar sesión:",
-        error
-      );
-
       if (error.response) {
-        const mensaje =
-          error.response.data?.error ||
-          "Correo o contraseña incorrectos";
-
-        alert(mensaje);
+        alert(error.response.data?.error || "Correo o contraseña incorrectos");
       } else {
-        alert(
-          "No se pudo conectar con la API"
-        );
+        alert("No se pudo conectar con la API");
       }
     } finally {
       setCargando(false);
@@ -75,12 +52,19 @@ function Login({ cambiarVista, setUsuario }) {
   return (
     <div className="auth-page">
 
+
+      {/* Izquierda — animación camión */}
+=======
       {/* IZQUIERDA — animación camión */}
+
       <div className="auth-welcome-car">
         <h2>☕ CafeSoft</h2>
         <p>Tu sistema de gestión para cafeterías</p>
 
+
+=======
         {/* Escena del camión */}
+
         <div className="car-scene">
           <div className="car-body">
             <div className="car-window" />
@@ -95,63 +79,41 @@ function Login({ cambiarVista, setUsuario }) {
         </div>
       </div>
 
+
+      {/* Derecha — formulario */}
+=======
       {/* DERECHA — formulario */}
+
       <div className="login-container">
 
-        <div className="auth-logo">
-          ☕
-        </div>
-
+        <div className="auth-logo">☕</div>
         <h1>CafeSoft</h1>
+        <p className="auth-subtitle">Sistema de Gestión para Cafetería</p>
 
-        <p className="auth-subtitle">
-          Sistema de Gestión para Cafetería
-        </p>
+        <form onSubmit={iniciarSesion} className="auth-form">
 
-        <form
-          onSubmit={iniciarSesion}
-          className="auth-form"
-        >
-
-          {/* CORREO */}
-          <label>
-            Correo electrónico
-          </label>
-
+          <label>Correo electrónico</label>
           <input
             type="email"
             placeholder="ejemplo@gmail.com"
             value={form.email}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                email: e.target.value,
-              })
-            }
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
             required
             disabled={cargando}
           />
 
-
-          {/* CONTRASEÑA */}
-          <label>
-            Contraseña
-          </label>
-
+          <label>Contraseña</label>
           <input
             type="password"
             placeholder="Ingresa tu contraseña"
             value={form.password}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                password: e.target.value,
-              })
-            }
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
             required
             disabled={cargando}
           />
 
+          <button type="submit" className="btn-glow" disabled={cargando}>
+=======
 
           {/* BOTÓN */}
           <button
@@ -159,32 +121,20 @@ function Login({ cambiarVista, setUsuario }) {
             className="btn-glow"
             disabled={cargando}
           >
+
             <span>{cargando ? "Entrando..." : "Iniciar Sesión"}</span>
           </button>
 
         </form>
 
-
-        {/* REGISTRO */}
         <p className="auth-footer">
-
           ¿No tienes cuenta?{" "}
-
-          <span
-            onClick={() =>
-              cambiarVista("registro")
-            }
-            style={{
-              cursor: "pointer",
-            }}
-          >
+          <span onClick={() => cambiarVista("registro")} style={{ cursor: "pointer" }}>
             Crear una cuenta
           </span>
-
         </p>
 
       </div>
-
     </div>
   );
 }

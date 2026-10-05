@@ -8,9 +8,12 @@ function Ventas({ usuario }) {
 
   useEffect(() => {
     cargarVentas();
-  }, []);
+  }, [usuario]);
 
   const cargarVentas = async () => {
+      console.log("usuario completo:", usuario);
+  console.log("sucursalId:", usuario?.sucursalId);
+  console.log("tipo:", typeof usuario?.sucursalId);
     try {
       const sucursalId = usuario?.sucursalId;
 
@@ -23,8 +26,7 @@ function Ventas({ usuario }) {
       const res = await api.get("/ventas");
       const todas = Array.isArray(res.data) ? res.data : [];
 
-      // Filtrar solo las ventas de la sucursal del usuario logueado
-      const filtradas = todas.filter((v) => v.sucursalId === sucursalId);
+      const filtradas = todas.filter((v) => Number(v.sucursalId) === Number(sucursalId));
 
       setVentas(filtradas);
     } catch (err) {

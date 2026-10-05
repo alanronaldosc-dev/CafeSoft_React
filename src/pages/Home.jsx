@@ -1,4 +1,9 @@
 import { useState } from "react";
+
+import InicioPage from "./InicioPage";
+
+=======
+
 import Register from "./Register";
 import Productos from "./Productos";
 import Ventas from "./Ventas";
@@ -14,22 +19,40 @@ import Categorias from "./Categorias";
 import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
 import PerfilUsuario from "./PerfilUsuario";
+
+=======
 import Dashboard from "./Dashboard";
 import InventarioProductos from "./InventarioProductos";
 import RecibirProducto from "./RecibirProducto";
 import Cargas from "./Cargas";
 import InicioPage from "./InicioPage";
 
+
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
 import CrearProveedor from "./CrearProveedor";
 
-// HU-009 - MERMA DE GARRAFONES
-import MermaGarrafon from "./MermaGarrafon";
+// HU-011 - CLIENTES
+import Clientes from "./Clientes";
+import CrearCliente from "./CrearCliente";
+import EditarCliente from "./EditarCliente";
+
+// RUTAS
+import Rutas from "./Rutas";
+import CrearRuta from "./CrearRuta";
+import EditarRuta from "./EditarRuta";
+
+// HU-005 - CARGAS DE GARRAFONES
+import Cargas from "./Cargas";
+
+// HU-016 - LIQUIDACIÓN DE REPARTIDORES
+import Liquidaciones from "./Liquidaciones";
 
 function Home({ usuario, cerrarSesion, tema, toggleTema }) {
   const [seccion, setSeccion] = useState("inicio");
   const [categoriaParaProductos, setCategoriaParaProductos] = useState(null);
+  const [clienteParaEditar, setClienteParaEditar] = useState(null);
+  const [rutaParaEditar, setRutaParaEditar] = useState(null);
 
   // ============================================
   // HU-015
@@ -46,17 +69,18 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
     { id: "carrito", texto: "🛒 Carrito de Compras" },
     { id: "registro", texto: "👤 Registrar Usuario" },
     { id: "insumos", texto: "🧂 Ver Insumos" },
-    { id: "lotes", texto: "📦 Cargas de insumos" },
+    { id: "lotes", texto: "📦 Lotes de Insumos" },
     { id: "categorias", texto: "🏷️ Categorías" },
-    { id: "dashboard", texto: "📊 Estado de Inventario" },
-    { id: "inventarioProductos", texto: "🏭 Cargas de productos" },
-    { id: "cargas", texto: "🚰 Cargas de Garrafones" },
-
-
     // HU-013
     { id: "proveedores", texto: "🚚 Proveedores" },
-    // HU-009
-    { id: "mermas", texto: "⚠️ Merma de Garrafón" },
+    // HU-011
+    { id: "clientes", texto: "🧑 Clientes" },
+    // RUTAS
+    { id: "rutas", texto: "🗺️ Rutas" },
+    // HU-005
+    { id: "cargas", texto: "🚰 Cargas de Garrafones" },
+    // HU-016
+    { id: "liquidaciones", texto: "💵 Liquidación de Repartidores" },
   ];
 
   // ============================================
@@ -73,12 +97,17 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
 
     // Usuario normal: permisos predeterminados.
     if (usuario.userTipo === 1) {
-      return ["productos", "pedidos", "ventas", "carrito", "mermas"].includes(permiso);
+      return ["productos", "pedidos", "ventas", "carrito", "cargas", "liquidaciones", "rutas", "crearRuta", "editarRuta"].includes(permiso);
     }
 
     // Cliente: acceso básico.
     if (usuario.userTipo === 2) {
       return ["productos", "pedidos", "carrito"].includes(permiso);
+    }
+
+    // Repartidor: puede gestionar clientes (sus rutas).
+    if (usuario.userTipo === 4) {
+      return ["clientes", "crearCliente", "editarCliente", "rutas", "crearRuta", "editarRuta"].includes(permiso);
     }
 
     return false;
@@ -128,11 +157,11 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
     }
 
     switch (seccion) {
-      case "cargas":
-        return <Cargas usuario={usuario} />;
       case "inicio":
         return (
           <InicioPage
+
+=======
             usuario={usuario}
             tienePermiso={tienePermiso}
             onNavegar={cambiarSeccion}
@@ -143,13 +172,11 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
         return (
           <InventarioProductos
             onRecibirProducto={() => cambiarSeccion("recibirProducto")}
-            usuario={usuario}
-          />
-        );
 
-      case "recibirProducto":
-        return (
-          <RecibirProducto onVolver={() => cambiarSeccion("inventarioProductos")} usuario={usuario} />
+            usuario={usuario}
+            tienePermiso={tienePermiso}
+            onNavegar={cambiarSeccion}
+          />
         );
 
 
@@ -159,17 +186,14 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
       case "ventas":
         return <Ventas usuario={usuario} />;
 
-
       case "pedidos":
         return <Pedidos />;
 
       case "productos":
         return <Productos usuario={usuario} />;
 
-
       case "usuarios":
         return <Usuarios usuario={usuario} />;
-
 
       case "reportes":
         return (
@@ -196,7 +220,6 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
       case "insumos":
         return <Insumos onCrear={() => cambiarSeccion("crearInsumo")} usuario={usuario} />;
 
-
       case "crearInsumo":
         return <CrearInsumo onVolver={() => cambiarSeccion("insumos")} usuario={usuario} />;
 
@@ -218,6 +241,53 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
         return (
           <CrearProveedor onVolver={() => cambiarSeccion("proveedores")} />
         );
+
+      // ============================================
+      // HU-011 - CLIENTES
+      // ============================================
+      case "clientes":
+        return (
+          <Clientes
+            onCrear={() => cambiarSeccion("crearCliente")}
+            onEditar={(cliente) => {
+              setClienteParaEditar(cliente);
+              cambiarSeccion("editarCliente");
+            }}
+          />
+        );
+
+      case "crearCliente":
+        return (
+          <CrearCliente onVolver={() => cambiarSeccion("clientes")} />
+        );
+
+      case "editarCliente":
+        return (
+          <EditarCliente
+            cliente={clienteParaEditar}
+            onVolver={() => cambiarSeccion("clientes")}
+          />
+        );
+
+      // ============================================
+      // RUTAS
+      // ============================================
+      case "rutas":
+        return (
+          <Rutas
+            onCrear={() => cambiarSeccion("crearRuta")}
+            onEditar={(ruta) => {
+              setRutaParaEditar(ruta);
+              cambiarSeccion("editarRuta");
+            }}
+          />
+        );
+
+      case "crearRuta":
+        return <CrearRuta onVolver={() => cambiarSeccion("rutas")} />;
+
+      case "editarRuta":
+        return <EditarRuta ruta={rutaParaEditar} onVolver={() => cambiarSeccion("rutas")} />;
 
       case "categorias":
         return (
@@ -252,15 +322,17 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
           />
         );
 
-      case "dashboard":
-        return <Dashboard usuario={usuario} />;
-
+      // ==========================================
+      // HU-005 - CARGAS
+      // ==========================================
+      case "cargas":
+        return <Cargas usuario={usuario} />;
 
       // ==========================================
-      // HU-009 - MERMA DE GARRAFONES
+      // HU-016 - LIQUIDACIONES
       // ==========================================
-      case "mermas":
-        return <MermaGarrafon />;
+      case "liquidaciones":
+        return <Liquidaciones />;
 
       default:
         return null;
