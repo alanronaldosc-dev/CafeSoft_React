@@ -8,7 +8,7 @@ function InventarioAnalisis({ onCrear, usuario }) {
 
   useEffect(() => {
     cargarDatos();
-  }, []);
+  }, [usuario]);
 
   const cargarDatos = () => {
     Promise.all([api.get("/insumos"), api.get("/lotes")])

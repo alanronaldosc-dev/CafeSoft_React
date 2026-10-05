@@ -10,7 +10,7 @@ function Usuarios({ usuario }) {
 
   useEffect(() => {
     obtenerUsuarios();
-  }, []);
+  }, [usuario]);
 
   const obtenerUsuarios = async () => {
     try {
@@ -22,8 +22,7 @@ function Usuarios({ usuario }) {
         return;
       }
 
-      // Todos ven solo su sucursal, sin excepción
-      const res = await api.get(`/usuarios/sucursal/${sucursalId}`);
+      const res = await api.get(`/usuarios/sucursal/${Number(sucursalId)}`);
 
       const data = Array.isArray(res.data)
         ? res.data

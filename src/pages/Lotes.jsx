@@ -7,17 +7,16 @@ function Lotes({ onCrear, usuario }) {
 
   useEffect(() => {
     obtenerLotes();
-  }, []);
+  }, [usuario]);
 
   const obtenerLotes = async () => {
     try {
       const res = await api.get("/lotes");
       const todos = Array.isArray(res.data) ? res.data : [];
 
-      // Filtrar por sucursal del usuario logueado
       const sucursalId = usuario?.sucursalId;
       const filtrados = sucursalId
-        ? todos.filter((l) => l.sucursalId === sucursalId)
+        ? todos.filter((l) => Number(l.sucursalId) === Number(sucursalId))
         : todos;
 
       setLotes(filtrados);

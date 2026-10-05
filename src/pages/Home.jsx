@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
-import api from "../services/api";
+import { useState } from "react";
+import InicioPage from "./InicioPage";
+
 import Register from "./Register";
 import Productos from "./Productos";
 import Ventas from "./Ventas";
@@ -14,7 +15,6 @@ import Carrito from "./Carrito";
 import Categorias from "./Categorias";
 import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
-import ProductoShowcase from "./ProductoShowcase";
 import PerfilUsuario from "./PerfilUsuario";
 
 // HU-013 - PROVEEDORES
@@ -127,90 +127,28 @@ function Home({ usuario, cerrarSesion }) {
     switch (seccion) {
       case "inicio":
         return (
-          <>
-            <section className="header">
-              <div>
-                <h1>Bienvenido a CafeSoft</h1>
-                <p>
-                  Hola, {usuario.nombre}. Administra tu cafetería desde un solo
-                  lugar.
-                </p>
-              </div>
-
-              {tienePermiso("ventas") && (
-                <button
-                  className="history-btn"
-                  onClick={() => cambiarSeccion("ventas")}
-                >
-                  Ver historial
-                </button>
-              )}
-            </section>
-              <ProductoShowcase />
-
-            <section className="cards">
-              <div className="card">
-                <span className="card-icon">💵</span>
-                <p>Total vendido hoy</p>
-                <h2>$470.00</h2>
-              </div>
-
-              <div className="card">
-                <span className="card-icon">🧾</span>
-                <p>Tickets generados</p>
-                <h2>1</h2>
-              </div>
-            </section>
-
-            <section className="dashboard-grid">
-              <div className="panel">
-                <h2>👑 Top productos de hoy</h2>
-                <div className="donut"></div>
-                <div className="legend">
-                  <p>☕ Café Americano</p>
-                  <p>🍫 Chocolate Caliente</p>
-                  <p>🍵 Té Chai Latte</p>
-                  <p>🥕 Pastel de Zanahoria</p>
-                </div>
-              </div>
-
-              <div className="panel">
-                <h2>🕒 Detalle de ventas</h2>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Hora</th>
-                      <th>Mesa</th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>11:29 PM</td>
-                      <td>Mesa 9</td>
-                      <td>$470.00</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          </>
+          <InicioPage
+            usuario={usuario}
+            tienePermiso={tienePermiso}
+            onNavegar={cambiarSeccion}
+          />
         );
 
+
       case "crearProducto":
-        return <CrearProducto />;
+        return <CrearProducto usuario={usuario} />;
 
       case "ventas":
-        return <Ventas />;
+        return <Ventas usuario={usuario} />;
 
       case "pedidos":
         return <Pedidos />;
 
       case "productos":
-        return <Productos />;
+        return <Productos usuario={usuario} />;
 
       case "usuarios":
-        return <Usuarios />;
+        return <Usuarios usuario={usuario} />;
 
       case "reportes":
         return (
@@ -229,21 +167,22 @@ function Home({ usuario, cerrarSesion }) {
             <Register
               cambiarVista={() => setSeccion("inicio")}
               esAdministrador={usuario.userTipo === 0}
+              usuario={usuario}
             />
           </div>
         );
 
       case "insumos":
-        return <Insumos onCrear={() => cambiarSeccion("crearInsumo")} />;
+        return <Insumos onCrear={() => cambiarSeccion("crearInsumo")} usuario={usuario} />;
 
       case "crearInsumo":
-        return <CrearInsumo onVolver={() => cambiarSeccion("insumos")} />;
+        return <CrearInsumo onVolver={() => cambiarSeccion("insumos")} usuario={usuario} />;
 
       case "lotes":
-        return <Lotes onCrear={() => cambiarSeccion("crearLote")} />;
+        return <Lotes onCrear={() => cambiarSeccion("crearLote")} usuario={usuario} />;
 
       case "crearLote":
-        return <CrearLote onVolver={() => cambiarSeccion("lotes")} />;
+        return <CrearLote onVolver={() => cambiarSeccion("lotes")} usuario={usuario} />;
 
       // ============================================
       // HU-013 - PROVEEDORES

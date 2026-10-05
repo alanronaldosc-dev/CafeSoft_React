@@ -7,7 +7,7 @@ function Productos({ onCrear, usuario }) {
 
   useEffect(() => {
     obtenerProductos();
-  }, []);
+  }, [usuario]);
 
   const obtenerProductos = async () => {
     try {
