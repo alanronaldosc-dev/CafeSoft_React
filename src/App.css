@@ -175,11 +175,7 @@ input.input-buscador-modulos:focus {
   right: 4px;
   top: 4px;
   z-index: 0;
-
   background: #f7b455;
-=======
-  background: #a855f7;
-
   border-radius: 50%;
   filter: blur(16px);
   transition:
@@ -198,11 +194,7 @@ input.input-buscador-modulos:focus {
   right: 32px;
   top: 12px;
   z-index: 0;
-e-clientes
   background: #a8f9a9;
-=======
-  background: #f9a8d4;
-
   border-radius: 50%;
   filter: blur(20px);
   transition:
@@ -724,11 +716,7 @@ label {
   align-items: center;
   padding: 48px 40px;
   gap: 80px;
-
   background: linear-gradient(135deg, #070e17 0%, #070e17 60%, #94ed97c7 100%);
-=======
-  background: linear-gradient(135deg, #070e17 0%, #070e17 60%, #ed94c8c7 100%);
-
 }
 
 .login-container,

@@ -7,57 +7,44 @@ import Home from "./pages/Home";
 import "./App.css";
 
 function App() {
-
   const [vista, setVista] = useState("login");
 
   const [usuario, setUsuario] = useState(
     JSON.parse(localStorage.getItem("usuario")) || null
   );
 
-
-  // ── Tema oscuro/claro — persiste en localStorage ─────────
-=======
-  // ── Tema: persiste en localStorage ──────────────────────
-
   const [tema, setTema] = useState(
     localStorage.getItem("tema") || "oscuro"
   );
 
-
-=======
-  // Aplica / quita clase en #root cuando cambia el tema
-
+  // Aplicar tema y guardarlo
   useEffect(() => {
     const root = document.getElementById("root");
+
     if (!root) return;
+
     if (tema === "claro") {
       root.classList.add("tema-claro");
     } else {
       root.classList.remove("tema-claro");
     }
+
     localStorage.setItem("tema", tema);
   }, [tema]);
 
-
-  const toggleTema = () =>
+  const toggleTema = () => {
     setTema((prev) => (prev === "oscuro" ? "claro" : "oscuro"));
+  };
 
   const cerrarSesion = () => {
     localStorage.removeItem("usuario");
     localStorage.removeItem("jwt_token");
-=======
-
-  const toggleTema = () =>
-    setTema((prev) => (prev === "oscuro" ? "claro" : "oscuro"));
-
-  const cerrarSesion = () => {
-    localStorage.removeItem("usuario");
 
     setUsuario(null);
     setVista("login");
   };
 
-  // ── Usuario autenticado ──────────────────────────────────
+  // Usuario autenticado
   if (usuario) {
     return (
       <>
@@ -78,7 +65,7 @@ function App() {
     );
   }
 
-  // ── Login / Registro público ─────────────────────────────
+  // Login / Registro público
   return (
     <>
       <div className="orbes">
@@ -89,9 +76,15 @@ function App() {
       </div>
 
       {vista === "login" ? (
-        <Login cambiarVista={setVista} setUsuario={setUsuario} />
+        <Login
+          cambiarVista={setVista}
+          setUsuario={setUsuario}
+        />
       ) : (
-        <Register cambiarVista={setVista} esAdministrador={false} />
+        <Register
+          cambiarVista={setVista}
+          esAdministrador={false}
+        />
       )}
     </>
   );

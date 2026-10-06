@@ -1,9 +1,6 @@
 import { useState } from "react";
 
 import InicioPage from "./InicioPage";
-
-=======
-
 import Register from "./Register";
 import Productos from "./Productos";
 import Ventas from "./Ventas";
@@ -20,13 +17,9 @@ import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
 import PerfilUsuario from "./PerfilUsuario";
 
-=======
 import Dashboard from "./Dashboard";
 import InventarioProductos from "./InventarioProductos";
 import RecibirProducto from "./RecibirProducto";
-import Cargas from "./Cargas";
-import InicioPage from "./InicioPage";
-
 
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
@@ -161,7 +154,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
         return (
           <InicioPage
 
-=======
+
             usuario={usuario}
             tienePermiso={tienePermiso}
             onNavegar={cambiarSeccion}
