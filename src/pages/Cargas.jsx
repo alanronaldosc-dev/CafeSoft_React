@@ -8,7 +8,9 @@ function Cargas({ usuario }) {
 
   const [inventario, setInventario] = useState([]);
   const [cargas, setCargas] = useState([]);
+  const [repartidores, setRepartidores] = useState([]);
 
+  const [repartidorId, setRepartidorId] = useState("");
   const [inventarioId, setInventarioId] = useState("");
   const [cantidad, setCantidad] = useState("");
 
@@ -35,22 +37,19 @@ function Cargas({ usuario }) {
 
       const sucursalId = usuario?.sucursalId;
 
-      const [inventarioResponse, cargasResponse] = await Promise.all([
+      const [
+        inventarioResponse,
+        cargasResponse,
+        repartidoresResponse,
+      ] = await Promise.all([
         sucursalId
           ? api.get(`/inventario/sucursal/${sucursalId}`)
           : api.get("/inventario"),
+
         api.get("/cargas"),
+
+        api.get("/usuarios/tipo/4"),
       ]);
-
-      console.log(
-        "Respuesta inventario:",
-        inventarioResponse.data
-      );
-
-      console.log(
-        "Respuesta cargas:",
-        cargasResponse.data
-      );
 
       // ========================================
       // INVENTARIO
@@ -88,6 +87,30 @@ function Cargas({ usuario }) {
 
       setCargas(listaCargas);
 
+      // ========================================
+      // REPARTIDORES
+      // ========================================
+
+      const datosRep = repartidoresResponse.data;
+
+      let listaRepartidores = [];
+
+      if (Array.isArray(datosRep)) {
+        listaRepartidores = datosRep;
+      } else if (Array.isArray(datosRep?.usuarios)) {
+        listaRepartidores = datosRep.usuarios;
+      } else if (Array.isArray(datosRep?.data)) {
+        listaRepartidores = datosRep.data;
+      }
+
+      // Solo repartidores activos
+      listaRepartidores = listaRepartidores.filter(
+        (repartidor) =>
+          Number(repartidor.userTipo) === 4 &&
+          repartidor.activo !== false
+      );
+
+      setRepartidores(listaRepartidores);
     } catch (err) {
       console.error(
         "Error al cargar datos de cargas:",
@@ -100,11 +123,11 @@ function Cargas({ usuario }) {
       );
 
       setError(
-        err.response?.data?.message ||
-        err.response?.data?.mensaje ||
-        "No se pudieron cargar los datos."
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          err.response?.data?.mensaje ||
+          "No se pudieron cargar los datos."
       );
-
     } finally {
       setCargando(false);
     }
@@ -122,7 +145,21 @@ function Cargas({ usuario }) {
     );
 
   const cantidadDisponible =
-    Number(inventarioSeleccionado?.cantidad || 0);
+    Number(
+      inventarioSeleccionado?.cantidad ||
+        0
+    );
+
+  // ============================================
+  // REPARTIDOR SELECCIONADO
+  // ============================================
+
+  const repartidorSeleccionado =
+    repartidores.find(
+      (repartidor) =>
+        String(repartidor.id) ===
+        String(repartidorId)
+    );
 
   // ============================================
   // REGISTRAR CARGA
@@ -135,15 +172,32 @@ function Cargas({ usuario }) {
     setError("");
 
     // ========================================
-    // VALIDACIONES
+    // VALIDAR REPARTIDOR
+    // ========================================
+
+    if (!repartidorId) {
+      setError(
+        "Selecciona el repartidor que llevará la carga."
+      );
+
+      return;
+    }
+
+    // ========================================
+    // VALIDAR INVENTARIO
     // ========================================
 
     if (!inventarioId) {
       setError(
         "Selecciona el tipo de garrafón o inventario."
       );
+
       return;
     }
+
+    // ========================================
+    // VALIDAR CANTIDAD
+    // ========================================
 
     if (
       !cantidad ||
@@ -152,6 +206,7 @@ function Cargas({ usuario }) {
       setError(
         "La cantidad debe ser mayor a cero."
       );
+
       return;
     }
 
@@ -162,6 +217,7 @@ function Cargas({ usuario }) {
       setError(
         `Stock insuficiente. Solo hay ${cantidadDisponible} disponibles.`
       );
+
       return;
     }
 
@@ -170,8 +226,14 @@ function Cargas({ usuario }) {
     // ========================================
 
     const datos = {
-      inventarioId: Number(inventarioId),
-      cantidad: Number(cantidad),
+      repartidorId:
+        Number(repartidorId),
+
+      inventarioId:
+        Number(inventarioId),
+
+      cantidad:
+        Number(cantidad),
     };
 
     console.log(
@@ -198,13 +260,17 @@ function Cargas({ usuario }) {
       // ======================================
 
       setMensaje(
-        `✅ Se registraron ${cantidad} unidades. La carga queda SIN ASIGNAR hasta que se active una ruta.`
+        `✅ Se asignaron ${cantidad} garrafones a ${
+          repartidorSeleccionado?.nombre ||
+          "el repartidor"
+        } correctamente.`
       );
 
       // ======================================
       // LIMPIAR FORMULARIO
       // ======================================
 
+      setRepartidorId("");
       setInventarioId("");
       setCantidad("");
 
@@ -213,7 +279,6 @@ function Cargas({ usuario }) {
       // ======================================
 
       await cargarDatos();
-
     } catch (err) {
       console.error(
         "Error al registrar carga:",
@@ -226,12 +291,11 @@ function Cargas({ usuario }) {
       );
 
       setError(
-        err.response?.data?.message ||
-        err.response?.data?.mensaje ||
         err.response?.data?.error ||
-        "No se pudo registrar la carga."
+          err.response?.data?.message ||
+          err.response?.data?.mensaje ||
+          "No se pudo registrar la carga."
       );
-
     } finally {
       setCargando(false);
     }
@@ -280,6 +344,13 @@ function Cargas({ usuario }) {
       "CARGA EN TRÁNSITO"
     ) {
       return "Carga en tránsito";
+    }
+
+    if (
+      estado ===
+      "SIN ASIGNAR"
+    ) {
+      return "Sin asignar";
     }
 
     return estado || "Sin estado";
@@ -331,7 +402,7 @@ function Cargas({ usuario }) {
 
         <p>
           Registra la cantidad inicial
-          de garrafones entregados a
+          de garrafones que recibirá
           cada repartidor al inicio
           de su turno.
         </p>
@@ -378,7 +449,7 @@ function Cargas({ usuario }) {
       )}
 
       {/* ========================================
-          FORMULARIO HU-005
+          FORMULARIO DE CARGA
       ======================================== */}
 
       <div
@@ -388,7 +459,6 @@ function Cargas({ usuario }) {
           padding: "25px",
         }}
       >
-
         <h2>
           📋 Registrar carga inicial
         </h2>
@@ -399,15 +469,162 @@ function Cargas({ usuario }) {
             marginBottom: "25px",
           }}
         >
-          Selecciona el tipo de garrafón y la
-          cantidad que llevará la ruta.
-          La carga quedará sin asignar hasta
-          activar una ruta.
+          Selecciona el repartidor,
+          el tipo de garrafón y la
+          cantidad que llevará al
+          iniciar su ruta.
         </p>
 
         <form
-          onSubmit={registrarCarga}
+          onSubmit={
+            registrarCarga
+          }
         >
+
+          {/* ==================================
+              REPARTIDOR
+          ================================== */}
+
+          <div
+            style={{
+              marginBottom: "20px",
+            }}
+          >
+            <label>
+              <strong>
+                🚚 Repartidor
+              </strong>
+            </label>
+
+            <select
+              value={
+                repartidorId
+              }
+              onChange={(e) =>
+                setRepartidorId(
+                  e.target.value
+                )
+              }
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginTop: "8px",
+              }}
+              disabled={
+                cargando
+              }
+              required
+            >
+              <option value="">
+                Selecciona un
+                repartidor
+              </option>
+
+              {repartidores.map(
+                (repartidor) => (
+                  <option
+                    key={
+                      repartidor.id
+                    }
+                    value={
+                      repartidor.id
+                    }
+                  >
+                    {
+                      repartidor.nombre
+                    }
+                    {" - "}
+                    {
+                      repartidor.email
+                    }
+                  </option>
+                )
+              )}
+            </select>
+
+            {repartidores.length ===
+              0 && (
+              <small
+                style={{
+                  display: "block",
+                  marginTop: "8px",
+                  color: "#b02a37",
+                }}
+              >
+                No hay repartidores
+                activos disponibles.
+              </small>
+            )}
+          </div>
+
+          {/* ==================================
+              INFORMACIÓN DEL REPARTIDOR
+          ================================== */}
+
+          {repartidorSeleccionado && (
+            <div
+              style={{
+                padding: "16px",
+                marginBottom:
+                  "20px",
+                borderRadius:
+                  "8px",
+                background:
+                  "var(--humo)",
+                border:
+                  "1px solid var(--borde)",
+              }}
+            >
+              <strong>
+                🚚 Repartidor
+                seleccionado
+              </strong>
+
+              <p
+                style={{
+                  marginBottom:
+                    "5px",
+                }}
+              >
+                <strong>
+                  Nombre:
+                </strong>{" "}
+                {
+                  repartidorSeleccionado.nombre
+                }
+              </p>
+
+              <p
+                style={{
+                  marginBottom:
+                    "5px",
+                }}
+              >
+                <strong>
+                  Correo:
+                </strong>{" "}
+                {
+                  repartidorSeleccionado.email
+                }
+              </p>
+
+              {repartidorSeleccionado.telefono && (
+                <p
+                  style={{
+                    marginBottom:
+                      0,
+                  }}
+                >
+                  <strong>
+                    Teléfono:
+                  </strong>{" "}
+                  {
+                    repartidorSeleccionado.telefono
+                  }
+                </p>
+              )}
+            </div>
+          )}
 
           {/* ==================================
               INVENTARIO
@@ -418,7 +635,6 @@ function Cargas({ usuario }) {
               marginBottom: "20px",
             }}
           >
-
             <label>
               <strong>
                 🚰 Tipo de garrafón /
@@ -427,7 +643,9 @@ function Cargas({ usuario }) {
             </label>
 
             <select
-              value={inventarioId}
+              value={
+                inventarioId
+              }
               onChange={(e) =>
                 setInventarioId(
                   e.target.value
@@ -438,38 +656,54 @@ function Cargas({ usuario }) {
                 padding: "10px",
                 marginTop: "8px",
               }}
-              disabled={cargando}
+              disabled={
+                cargando
+              }
+              required
             >
-
               <option value="">
-                Selecciona el inventario
+                Selecciona el
+                inventario
               </option>
 
               {inventario.map(
                 (item) => (
                   <option
-                    key={item.id}
-                    value={item.id}
+                    key={
+                      item.id
+                    }
+                    value={
+                      item.id
+                    }
                     disabled={
                       Number(
-                        item.cantidad || 0
+                        item.cantidad ||
+                          0
                       ) <= 0
                     }
                   >
-                    {item.nombre}
+                    {
+                      item.nombre
+                    }
                     {" - "}
-                    {item.tipo}
+                    {
+                      item.tipo
+                    }
                     {" - Disponible: "}
-                    {item.cantidad}
-                    {" "}
-                    {item.unidadMedida || ""}
+                    {
+                      item.cantidad
+                    }{" "}
+                    {
+                      item.unidadMedida ||
+                      ""
+                    }
                   </option>
                 )
               )}
-
             </select>
 
-            {inventario.length === 0 && (
+            {inventario.length ===
+              0 && (
               <small
                 style={{
                   display: "block",
@@ -478,10 +712,10 @@ function Cargas({ usuario }) {
                 }}
               >
                 No hay registros de
-                inventario disponibles.
+                inventario
+                disponibles.
               </small>
             )}
-
           </div>
 
           {/* ==================================
@@ -492,20 +726,25 @@ function Cargas({ usuario }) {
             <div
               style={{
                 padding: "16px",
-                marginBottom: "20px",
-                borderRadius: "8px",
-                background: "var(--humo)",
-                border: "1px solid var(--borde)",
+                marginBottom:
+                  "20px",
+                borderRadius:
+                  "8px",
+                background:
+                  "var(--humo)",
+                border:
+                  "1px solid var(--borde)",
               }}
             >
-
               <strong>
-                📦 Inventario seleccionado
+                📦 Inventario
+                seleccionado
               </strong>
 
               <p
                 style={{
-                  marginBottom: "5px",
+                  marginBottom:
+                    "5px",
                 }}
               >
                 <strong>
@@ -518,7 +757,8 @@ function Cargas({ usuario }) {
 
               <p
                 style={{
-                  marginBottom: "5px",
+                  marginBottom:
+                    "5px",
                 }}
               >
                 <strong>
@@ -531,30 +771,36 @@ function Cargas({ usuario }) {
 
               <p
                 style={{
-                  marginBottom: "5px",
+                  marginBottom:
+                    "5px",
                 }}
               >
                 <strong>
                   Disponible:
                 </strong>{" "}
-                {cantidadDisponible}{" "}
+                {
+                  cantidadDisponible
+                }{" "}
                 {
                   inventarioSeleccionado.unidadMedida
                 }
               </p>
 
-              {cantidadDisponible <= 0 && (
+              {cantidadDisponible <=
+                0 && (
                 <p
                   style={{
-                    color: "#b02a37",
-                    marginBottom: 0,
+                    color:
+                      "#b02a37",
+                    marginBottom:
+                      0,
                   }}
                 >
-                  ⚠️ Este inventario
-                  no tiene existencias.
+                  ⚠️ Este
+                  inventario no
+                  tiene existencias.
                 </p>
               )}
-
             </div>
           )}
 
@@ -567,10 +813,10 @@ function Cargas({ usuario }) {
               marginBottom: "20px",
             }}
           >
-
             <label>
               <strong>
-                🔢 Cantidad a asignar
+                🔢 Cantidad a
+                asignar
               </strong>
             </label>
 
@@ -581,7 +827,9 @@ function Cargas({ usuario }) {
                 cantidadDisponible ||
                 undefined
               }
-              value={cantidad}
+              value={
+                cantidad
+              }
               onChange={(e) =>
                 setCantidad(
                   e.target.value
@@ -597,8 +845,10 @@ function Cargas({ usuario }) {
               }}
               disabled={
                 cargando ||
-                !inventarioId
+                !inventarioId ||
+                !repartidorId
               }
+              required
             />
 
             {inventarioSeleccionado && (
@@ -609,14 +859,14 @@ function Cargas({ usuario }) {
                   color: "#666",
                 }}
               >
-                Máximo disponible:
-                {" "}
+                Máximo disponible:{" "}
                 <strong>
-                  {cantidadDisponible}
+                  {
+                    cantidadDisponible
+                  }
                 </strong>
               </small>
             )}
-
           </div>
 
           {/* ==================================
@@ -628,14 +878,20 @@ function Cargas({ usuario }) {
             className="btn-glow"
             disabled={
               cargando ||
-              inventario.length === 0
+              inventario.length ===
+                0 ||
+              repartidores.length ===
+                0
             }
           >
-            <span>{cargando ? "⏳ Registrando..." : "🚰 Asignar carga"}</span>
+            <span>
+              {cargando
+                ? "⏳ Registrando..."
+                : "🚰 Asignar carga"}
+            </span>
           </button>
 
         </form>
-
       </div>
 
       {/* ========================================
@@ -649,12 +905,13 @@ function Cargas({ usuario }) {
             display: "flex",
             justifyContent:
               "space-between",
-            alignItems: "center",
-            marginBottom: "20px",
+            alignItems:
+              "center",
+            marginBottom:
+              "20px",
             gap: "15px",
           }}
         >
-
           <div>
             <h2>
               📦 Cargas registradas
@@ -669,12 +926,17 @@ function Cargas({ usuario }) {
 
           <button
             type="button"
-            onClick={cargarDatos}
-            disabled={cargando}
+            onClick={
+              cargarDatos
+            }
+            disabled={
+              cargando
+            }
             style={{
               padding:
                 "8px 15px",
-              borderRadius: "6px",
+              borderRadius:
+                "6px",
               border: "none",
               cursor:
                 cargando
@@ -684,7 +946,6 @@ function Cargas({ usuario }) {
           >
             🔄 Actualizar
           </button>
-
         </div>
 
         {/* ======================================
@@ -692,23 +953,18 @@ function Cargas({ usuario }) {
         ====================================== */}
 
         {cargas.length === 0 ? (
-
           <p>
             No hay cargas registradas
             todavía.
           </p>
-
         ) : (
-
           <div
             style={{
               overflowX:
                 "auto",
             }}
           >
-
             <table>
-
               <thead>
                 <tr>
                   <th>
@@ -728,6 +984,10 @@ function Cargas({ usuario }) {
                   </th>
 
                   <th>
+                    Disponible
+                  </th>
+
+                  <th>
                     Fecha y hora
                   </th>
 
@@ -738,48 +998,54 @@ function Cargas({ usuario }) {
               </thead>
 
               <tbody>
-
                 {cargas.map(
                   (carga) => (
-
                     <tr
                       key={
                         carga.id
                       }
                     >
+                      <td>
+                        {
+                          carga.id
+                        }
+                      </td>
 
                       <td>
-                        {carga.id}
+                        <strong>
+                          {carga.repartidorNombre ||
+                            carga.repartidor
+                              ?.nombre ||
+                            "Sin asignar"}
+                        </strong>
+                      </td>
+
+                      <td>
+                        {carga.inventarioNombre ||
+                          carga.tipoGarrafon ||
+                          carga.inventario
+                            ?.nombre ||
+                          "Sin especificar"}
                       </td>
 
                       <td>
                         <strong>
                           {
-                            carga.repartidorNombre ||
-                            carga.repartidor?.nombre ||
-                            "Sin nombre"
+                            carga.cantidad
                           }
-                        </strong>
-                      </td>
-
-                      <td>
-                        {
-                          carga.inventarioNombre ||
-                          carga.tipoGarrafon ||
-                          carga.inventario?.nombre ||
-                          "Sin especificar"
-                        }
+                        </strong>{" "}
+                        {carga.unidadMedida ||
+                          carga.inventario
+                            ?.unidadMedida ||
+                          ""}
                       </td>
 
                       <td>
                         <strong>
-                          {carga.cantidad}
-                        </strong>{" "}
-                        {
-                          carga.unidadMedida ||
-                          carga.inventario?.unidadMedida ||
-                          ""
-                        }
+                          {carga.cantidadDisponible ??
+                            carga.cantidad ??
+                            0}
+                        </strong>
                       </td>
 
                       <td>
@@ -789,7 +1055,6 @@ function Cargas({ usuario }) {
                       </td>
 
                       <td>
-
                         <span
                           className={obtenerClaseEstado(
                             carga.estado
@@ -799,24 +1064,16 @@ function Cargas({ usuario }) {
                             carga.estado
                           )}
                         </span>
-
                       </td>
-
                     </tr>
-
                   )
                 )}
-
               </tbody>
-
             </table>
-
           </div>
-
         )}
 
       </div>
-
     </section>
   );
 }
