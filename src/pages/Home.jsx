@@ -41,6 +41,9 @@ import Cargas from "./Cargas";
 // HU-016 - LIQUIDACIÓN DE REPARTIDORES
 import Liquidaciones from "./Liquidaciones";
 
+// HU-020 - REPORTE CONSOLIDADO DE ENTREGAS
+import ReporteEntregas from "./ReporteEntregas";
+
 function Home({ usuario, cerrarSesion, tema, toggleTema }) {
   const [seccion, setSeccion] = useState("inicio");
   const [categoriaParaProductos, setCategoriaParaProductos] = useState(null);
@@ -189,12 +192,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
         return <Usuarios usuario={usuario} />;
 
       case "reportes":
-        return (
-          <section className="panel">
-            <h1>📊 Reportes</h1>
-            <p>Aquí irán las gráficas y reportes del sistema.</p>
-          </section>
-        );
+  return <ReporteEntregas />;
 
       case "carrito":
         return <Carrito usuario={usuario} />;
