@@ -1,0 +1,1422 @@
+/* ============================================================
+   CAFESOFT — AWS Console Theme
+   Paleta: azul marino oscuro, naranja AWS, grises azulados
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* ── Paleta AWS ── */
+  --cafe-oscuro:    #101319;   /* Azul AWS principal — botones primarios */
+  --cafe-medio:     #005E9E;   /* Azul AWS hover */
+  --cafe-claro:     #4A9FD4;   /* Azul claro — links, acentos */
+  --caramelo:       #FF9900;   /* Naranja AWS — acción secundaria, badges */
+  --crema:          #D4E5F5;   /* Texto claro sobre fondo oscuro */
+  --crema-oscura:   #8D9DB6;   /* Texto secundario */
+  --latte:          #B0C4DE;   /* Texto suave / subtítulos sidebar */
+  --canela:         #EC7211;   /* Naranja AWS oscuro — hover naranja */
+  --vanilla:        #0F1B2D;   /* Fondo más oscuro */
+  --humo:           #1A2332;   /* Fondo widget / hover row */
+
+  /* ── Texto ── */
+  --texto:          #FFFFFF;       /* Texto principal — blanco */
+  --texto-medio:    #D4E5F5;       /* Texto sobre fondo oscuro */
+  --texto-suave:    #8D9DB6;       /* Texto secundario / labels */
+  --texto-placeholder: #5A6B7E;   /* Placeholders */
+
+  /* ── UI ── */
+  --borde:          #2D3B4E;       /* Borde entre elementos */
+  --borde-focus:    #FF9900;       /* Focus naranja AWS */
+  --fondo:          #0e1115;       /* Fondo principal oscuro */
+  --fondo-sidebar:  #101319;       /* Sidebar ligeramente más oscuro */
+  --fondo-card:     #171c24;       /* Cards / widgets */
+  --fondo-input:    #232F3E;       /* Input background */
+
+  /* ── Sombras ── */
+  --sombra-xs:      0 1px 3px rgba(0,0,0,0.30);
+  --sombra-sm:      0 2px 8px rgba(0,0,0,0.35);
+  --sombra-md:      0 4px 20px rgba(0,0,0,0.40);
+  --sombra-lg:      0 8px 40px rgba(0,0,0,0.50);
+
+  /* ── Radios ── */
+  --r-sm:   10px;
+  --r-md:   16px;
+  --r-lg:   22px;
+  --r-xl:   30px;
+
+  /* ── Tipografía ── */
+  --font:   'Inter', 'Segoe UI', Arial, sans-serif;
+}
+
+/* ============================================================
+   TEMA CLARO — sobreescribe las variables del tema oscuro
+   Se activa añadiendo la clase .tema-claro al #root
+   ============================================================ */
+.tema-claro {
+  --fondo:          #cabeac;
+  --fondo-sidebar:  #101319;
+  --fondo-card:     #FFFFFF;
+  --fondo-input:    #F7FAFC;
+  --humo:           #E8EEF4;
+
+  --texto:          #0F1B2D;
+  --texto-medio:    #1A2B3C;
+  --texto-suave:    #4A6080;
+  --texto-placeholder: #8AAAC0;
+
+  --borde:          #C8D8E8;
+  --borde-focus:    #FF9900;
+
+  --sombra-xs:      0 1px 3px rgba(15,27,45,0.08);
+  --sombra-sm:      0 2px 8px rgba(15,27,45,0.10);
+  --sombra-md:      0 4px 20px rgba(15,27,45,0.12);
+  --sombra-lg:      0 8px 40px rgba(15,27,45,0.15);
+}
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── BODY ─────────────────────────────────────────────────── */
+body {
+  font-family: var(--font);
+  background: var(--fondo);
+  color: var(--texto);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── RESET ───────────────────────────────────────────────── */
+.buscador-modulos input,
+input.input-buscador-modulos,
+input[type="text"].input-buscador-modulos {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  flex: 1 !important;
+  font-size: 14px !important;
+  font-family: var(--font) !important;
+  outline: none !important;
+  caret-color: #FF9900 !important;
+
+  /* Color del texto — el truco: usar ambas propiedades */
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+input.input-buscador-modulos::placeholder {
+  color: rgba(255,255,255,0.4) !important;
+  -webkit-text-fill-color: rgba(255,255,255,0.4) !important;
+  opacity: 1 !important;
+}
+
+input.input-buscador-modulos:focus {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Tema claro */
+.tema-claro input.input-buscador-modulos,
+.tema-claro .buscador-modulos input {
+  color: #0F1B2D !important;
+  -webkit-text-fill-color: #0F1B2D !important;
+}
+
+.tema-claro input.input-buscador-modulos::placeholder {
+  color: rgba(15,27,45,0.45) !important;
+  -webkit-text-fill-color: rgba(15,27,45,0.45) !important;
+}
+
+/* ============================================================
+   BTN-GLOW — Botón con efecto blob/glow animado
+   Traducción del componente Tailwind a CSS puro.
+   Uso: añadir clase "btn-glow" al botón
+   ============================================================ */
+.btn-glow {
+  position: relative;
+  height: 52px;
+  min-width: 180px;
+  padding: 0 24px;
+  background: #1a1a2e;
+  color: #f1f1f1;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid #444;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition:
+    border-color 0.5s ease,
+    color 0.5s ease,
+    text-underline-offset 0.3s ease;
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* Blob 1 — violeta (esquina superior derecha) */
+.btn-glow::before {
+  content: '';
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  right: 4px;
+  top: 4px;
+  z-index: 0;
+  background: #f7b455;
+  border-radius: 50%;
+  filter: blur(16px);
+  transition:
+    right 0.5s ease,
+    bottom 0.5s ease,
+    filter 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+/* Blob 2 — rosa (esquina superior derecha, más grande) */
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  right: 32px;
+  top: 12px;
+  z-index: 0;
+  background: #a8f9a9;
+  border-radius: 50%;
+  filter: blur(20px);
+  transition:
+    right 0.5s ease,
+    filter 0.5s ease;
+}
+
+/* Texto encima de los blobs */
+.btn-glow span {
+  position: relative;
+  z-index: 2;
+}
+
+/* HOVER — blobs se desplazan */
+.btn-glow:hover {
+  border-color: #fda4af;
+  color: #fda4af;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+  background: #1a1a2e;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-glow:hover::before {
+  right: 48px;
+  bottom: -32px;
+  filter: blur(20px);
+  box-shadow: 20px 20px 20px 30px #a21caf;
+}
+
+.btn-glow:hover::after {
+  right: -32px;
+  filter: blur(20px);
+}
+
+/* Estado disabled */
+.btn-glow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-glow:disabled:hover::before,
+.btn-glow:disabled:hover::after {
+  right: 4px;
+  bottom: auto;
+  box-shadow: none;
+}
+
+/* ── RESET ───────────────────────────────────────────────── */
+.orbes, .orbe, .orbe-1, .orbe-3 { display: none; }
+
+/* ============================================================
+   LAYOUT — HOME
+   ============================================================ */
+
+.home {
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar {
+  width: 260px;
+  min-height: 100vh;
+  background: var(--fondo-sidebar);
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  flex-shrink: 0;
+  border-right: 1px solid var(--borde);
+}
+
+.logo {
+  color: var(--crema);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  padding: 0 8px;
+}
+
+.logo span {
+  display: block;
+  color: var(--latte);
+  font-size: 11px;
+  margin-top: 3px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.user-card {
+  margin: 24px 0;
+  padding: 14px;
+  border-radius: var(--r-md);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.10);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--caramelo), #EC7211);
+  color: #fff;
+  border-radius: var(--r-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-card h3 {
+  color: var(--crema);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.user-card p {
+  color: var(--latte);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* ── MENÚ ─────────────────────────────────────────────────── */
+.menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menu p {
+  padding: 11px 14px;
+  color: rgba(245,236,215,0.65);
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.18s ease;
+  border: 1px solid transparent;
+  letter-spacing: 0.1px;
+}
+
+.menu p:hover {
+  background: rgba(255, 140, 0, 0.079);
+  color: var(--crema);
+  border-color: rgba(255, 140, 0, 0.804);
+}
+
+.menu p.active-menu {
+  background: var(--cafe-oscuro);
+  color: #fff;
+  font-weight: 600;
+  border-color: transparent;
+  border-color: rgba(0, 255, 115, 0.804);
+}
+
+/* ── CERRAR SESIÓN ───────────────────────────────────────── */
+.logout {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  color: rgba(245,236,215,0.70) !important;
+  border-radius: var(--r-sm) !important;
+  font-size: 13px !important;
+  margin-top: 16px;
+  padding: 11px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.logout:hover {
+  background: rgba(220,50,50,0.25) !important;
+  color: #FF8A80 !important;
+  border-color: rgba(220,50,50,0.35) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── CONTENIDO PRINCIPAL ─────────────────────────────────── */
+.content {
+  flex: 1;
+  padding: 32px;
+  overflow-y: auto;
+  background: var(--fondo);
+  min-width: 0;
+}
+
+/* ============================================================
+   HEADER BANNER
+   ============================================================ */
+.header {
+  background: var(--fondo-card);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-sm);
+  padding: 24px 28px;
+  border-radius: var(--r-lg);
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  color: var(--texto);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.header p {
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+.history-btn {
+  width: auto !important;
+  padding: 10px 22px !important;
+  background: var(--cafe-oscuro) !important;
+  color: var(--crema) !important;
+  font-weight: 600 !important;
+  font-size: 13.5px !important;
+  border-radius: var(--r-sm) !important;
+  border: none !important;
+  white-space: nowrap;
+  box-shadow: var(--sombra-sm) !important;
+  transition: all 0.2s ease !important;
+}
+
+.history-btn:hover {
+  background: var(--cafe-medio) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--sombra-md) !important;
+}
+
+/* ============================================================
+   STAT CARDS
+   ============================================================ */
+.cards {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.card {
+  flex: 1;
+  background: var(--fondo-card);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-sm);
+  padding: 22px 24px;
+  border-radius: var(--r-lg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-md);
+}
+
+.card-icon {
+  font-size: 26px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.card p {
+  color: var(--texto-suave);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.card h2 {
+  color: var(--texto);
+  font-size: 30px;
+  font-weight: 700;
+  margin-top: 6px;
+  letter-spacing: -0.5px;
+}
+
+/* ============================================================
+   DASHBOARD GRID
+   ============================================================ */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 18px;
+}
+
+/* ── PANEL ───────────────────────────────────────────────── */
+.panel {
+  background: var(--fondo-card);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-sm);
+  padding: 26px;
+  border-radius: var(--r-lg);
+}
+
+.panel h1 {
+  color: var(--texto);
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.panel h2 {
+  color: var(--texto);
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.panel p {
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+/* ============================================================
+   TABLAS
+   ============================================================ */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+thead tr {
+  background: var(--humo);
+}
+
+th {
+  text-align: left;
+  color: var(--texto-suave);
+  padding: 11px 14px;
+  border-bottom: 2px solid var(--borde);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--borde);
+  color: var(--texto-medio);
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: var(--humo);
+}
+
+/* ============================================================
+   DONUT CHART
+   ============================================================ */
+.donut {
+  width: 150px;
+  height: 150px;
+  margin: 20px auto;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--caramelo)   0 40%,
+    var(--cafe-oscuro) 40% 65%,
+    var(--cafe-claro) 65% 83%,
+    var(--crema-oscura) 83% 100%
+  );
+  position: relative;
+  box-shadow: var(--sombra-md);
+}
+
+.donut::after {
+  content: "";
+  width: 80px;
+  height: 80px;
+  background: var(--fondo-card);
+  border-radius: 50%;
+  position: absolute;
+  top: 35px;
+  left: 35px;
+}
+
+.legend p {
+  color: var(--texto-suave);
+  margin: 8px 0;
+  font-size: 13.5px;
+}
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+button {
+  width: 100%;
+  padding: 12px 18px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: var(--cafe-oscuro);
+  color: var(--crema);
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+button:hover {
+  background: var(--cafe-medio);
+  transform: translateY(-1px);
+  box-shadow: var(--sombra-md);
+}
+
+button:active {
+  transform: translateY(0);
+  box-shadow: var(--sombra-xs);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Botón secundario */
+button.btn-secondary {
+  background: var(--fondo);
+  color: var(--texto-medio);
+  border: 1px solid var(--borde);
+}
+
+button.btn-secondary:hover {
+  background: var(--crema-oscura);
+}
+
+/* Botón peligro */
+button.btn-danger {
+  background: #FEF0EE;
+  color: #C0392B;
+  border: 1px solid #F5C6C0;
+}
+
+button.btn-danger:hover {
+  background: #FDDFDB;
+}
+
+/* ============================================================
+   INPUTS
+   ============================================================ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  background: var(--fondo-input);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--r-sm);
+  color: var(--texto);
+  padding: 11px 14px;
+  font-family: var(--font);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--texto-placeholder);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--borde-focus);
+  box-shadow: 0 0 0 3px rgba(255,153,0,0.15);
+  background: var(--fondo-input);
+}
+
+select option {
+  background: var(--fondo-input);
+  color: var(--texto);
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto-medio);
+  margin-bottom: 6px;
+  letter-spacing: 0.2px;
+}
+
+/* ============================================================
+   LOGIN / REGISTER
+   ============================================================ */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 40px;
+  gap: 80px;
+  background: linear-gradient(135deg, #070e17 0%, #070e17 60%, #94ed97c7 100%);
+}
+
+.login-container,
+.register-container {
+  width: 420px;
+  flex-shrink: 0;
+  background: var(--fondo-card);
+  padding: 44px;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-lg);
+  text-align: center;
+}
+
+.auth-logo {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 18px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--cafe-medio), var(--caramelo));
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 34px;
+  box-shadow: var(--sombra-md);
+}
+
+.login-container h1,
+.register-container h1 {
+  color: var(--texto);
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.auth-subtitle {
+  color: var(--texto-suave);
+  font-size: 14px;
+  margin-bottom: 28px;
+}
+
+.auth-form {
+  text-align: left;
+}
+
+.auth-form label {
+  color: var(--texto-medio);
+  font-weight: 600;
+  font-size: 12.5px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.auth-form input {
+  background: var(--fondo-input);
+  border: 1.5px solid var(--borde);
+  border-radius: var(--r-sm);
+  color: var(--texto);
+  padding: 12px 14px;
+  font-size: 14px;
+  margin: 6px 0 18px;
+}
+
+.auth-form input:focus {
+  border-color: var(--borde-focus);
+  box-shadow: 0 0 0 3px rgba(200,120,58,0.12);
+}
+
+.auth-footer {
+  color: var(--texto-suave);
+  font-size: 13.5px;
+  margin-top: 22px;
+}
+
+.auth-footer span {
+  color: var(--caramelo);
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* ── WELCOME PANEL (login) ───────────────────────────────── */
+.auth-welcome {
+  flex: 1;
+  max-width: 560px;
+  color: #fff;
+  padding: 20px;
+}
+
+.auth-welcome-icon {
+  font-size: 52px;
+  margin-bottom: 20px;
+}
+
+.auth-welcome h1 {
+  font-size: 38px;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--crema);
+  margin-bottom: 16px;
+}
+
+.auth-welcome p {
+  font-size: 16px;
+  color: rgba(212,229,245,0.80);
+  line-height: 1.75;
+  margin-bottom: 26px;
+}
+
+.auth-welcome ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-welcome ul li {
+  font-size: 14px;
+  color: var(--crema);
+  background: rgba(0, 115, 187, 0.15);
+  border: 1px solid rgba(0, 115, 187, 0.30);
+  border-radius: var(--r-sm);
+  padding: 11px 16px;
+}
+
+/* ============================================================
+   CARRITO — TARJETA PRODUCTO
+   ============================================================ */
+.producto-card-carrito {
+  background: var(--fondo-card);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-md);
+  padding: 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  box-shadow: var(--sombra-xs);
+}
+
+.producto-card-carrito:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-md);
+  border-color: var(--caramelo);
+}
+
+/* ============================================================
+   DASHBOARD FORM
+   ============================================================ */
+.dashboard-form {
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--borde);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--latte);
+}
+
+/* ============================================================
+   GLASS (mantenido por compatibilidad, redirige a card)
+   ============================================================ */
+.glass {
+  background: var(--fondo-card);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sombra-sm);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .home {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    min-height: unset;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+
+  .content {
+    padding: 20px;
+  }
+
+  .cards {
+    flex-direction: column;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .auth-page {
+    flex-direction: column;
+    padding: 28px 20px;
+    gap: 32px;
+  }
+
+  .auth-welcome {
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .auth-welcome h1 {
+    font-size: 26px;
+  }
+
+  .login-container,
+  .register-container {
+    width: 100%;
+    max-width: 420px;
+    padding: 30px 24px;
+  }
+}
+
+/* ============================================================
+   TORCH TOGGLE — antorcha 3D para cambio de tema
+   ============================================================ */
+.torch-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.torch-container input {
+  position: absolute !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+  height: 0 !important;
+  width: 0 !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.torch-container input:focus {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.torch-label {
+  position: absolute;
+  bottom: -28px;
+  width: 140px;
+  text-align: center;
+  color: var(--texto-suave);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.torch { display: flex; justify-content: center; height: 150px; }
+
+.torch-head, .torch-stick {
+  position: absolute;
+  width: 30px;
+  transform-style: preserve-3d;
+  transform: rotateX(-30deg) rotateY(45deg);
+}
+
+.torch-stick { position: relative; height: 120px; }
+
+.torch-face {
+  position: absolute;
+  transform-style: preserve-3d;
+  width: 30px; height: 30px;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: 50% 50%;
+  background-color: #000;
+}
+
+.torch-top   { transform: rotateX(90deg)  translateZ(15px); }
+.torch-left  { transform: rotateY(-90deg) translateZ(15px); }
+.torch-right { transform: rotateY(0deg)   translateZ(15px); }
+
+.torch-top div, .torch-left div, .torch-right div { width: 102%; height: 102%; }
+
+.torch-top div:nth-child(1), .torch-left div:nth-child(3),  .torch-right div:nth-child(3) { background-color: #ffff9760; }
+.torch-top div:nth-child(2), .torch-left div:nth-child(1),  .torch-right div:nth-child(1) { background-color: #ffd80060; }
+.torch-top div:nth-child(3), .torch-left div:nth-child(4),  .torch-right div:nth-child(4) { background-color: #ffffff60; }
+.torch-top div:nth-child(4), .torch-left div:nth-child(2),  .torch-right div:nth-child(2) { background-color: #ff8f0060; }
+
+.torch-side {
+  position: absolute;
+  width: 30px; height: 120px;
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: repeat(8, 12.5%);
+  translate: 0 12px;
+}
+.torch-side-left  { transform: rotateY(-90deg) translateZ(15px) translateY(8px); }
+.torch-side-right { transform: rotateY(0deg)   translateZ(15px) translateY(8px); }
+.torch-side div { width: 103%; height: 103%; }
+
+.torch-side div:nth-child(1)               { background-color: #443622; }
+.torch-side div:nth-child(2)               { background-color: #2e2517; }
+.torch-side div:nth-child(3),
+.torch-side div:nth-child(5)               { background-color: #4b3b23; }
+.torch-side div:nth-child(4),
+.torch-side div:nth-child(10)              { background-color: #251e12; }
+.torch-side div:nth-child(6)               { background-color: #292115; }
+.torch-side div:nth-child(7)               { background-color: #4b3c26; }
+.torch-side div:nth-child(8)               { background-color: #292115; }
+.torch-side div:nth-child(9)               { background-color: #4b3a21; }
+.torch-side div:nth-child(11),
+.torch-side div:nth-child(15)              { background-color: #3d311d; }
+.torch-side div:nth-child(12)              { background-color: #2c2315; }
+.torch-side div:nth-child(13)              { background-color: #493a22; }
+.torch-side div:nth-child(14)              { background-color: #2b2114; }
+.torch-side div:nth-child(16)              { background-color: #271e10; }
+
+/* Encendida */
+.torch-container input:checked ~ .torch .torch-face {
+  filter:
+    drop-shadow(0px 0px 2px rgb(255,255,255))
+    drop-shadow(0px 0px 10px rgba(255,237,156,0.7))
+    drop-shadow(0px 0px 25px rgba(255,227,101,0.4));
+}
+
+.torch-container input:checked ~ .torch .torch-top div:nth-child(1),
+.torch-container input:checked ~ .torch .torch-left div:nth-child(3),
+.torch-container input:checked ~ .torch .torch-right div:nth-child(3) { background-color: #ffff97; }
+.torch-container input:checked ~ .torch .torch-top div:nth-child(2),
+.torch-container input:checked ~ .torch .torch-left div:nth-child(1),
+.torch-container input:checked ~ .torch .torch-right div:nth-child(1) { background-color: #ffd800; }
+.torch-container input:checked ~ .torch .torch-top div:nth-child(3),
+.torch-container input:checked ~ .torch .torch-left div:nth-child(4),
+.torch-container input:checked ~ .torch .torch-right div:nth-child(4) { background-color: #ffffff; }
+.torch-container input:checked ~ .torch .torch-top div:nth-child(4),
+.torch-container input:checked ~ .torch .torch-left div:nth-child(2),
+.torch-container input:checked ~ .torch .torch-right div:nth-child(2) { background-color: #ff8f00; }
+
+.torch-container input:checked ~ .torch .torch-side div:nth-child(1)  { background-color: #7c623e; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(2)  { background-color: #4c3d26; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(3),
+.torch-container input:checked ~ .torch .torch-side div:nth-child(5)  { background-color: #937344; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(4),
+.torch-container input:checked ~ .torch .torch-side div:nth-child(10) { background-color: #3c2f1c; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(6)  { background-color: #423522; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(7)  { background-color: #9f7f50; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(8)  { background-color: #403320; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(9)  { background-color: #977748; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(11),
+.torch-container input:checked ~ .torch .torch-side div:nth-child(15) { background-color: #675231; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(12) { background-color: #3d301d; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(13) { background-color: #987849; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(14) { background-color: #3b2e1b; }
+.torch-container input:checked ~ .torch .torch-side div:nth-child(16) { background-color: #372a17; }
+
+/* ============================================================
+   CAR ANIMATION — animación de camión para pantalla de login
+   ============================================================ */
+.car-scene {
+  position: relative;
+  width: 700px;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  transform: scale(0.8);
+}
+
+.car-body {
+  position: absolute;
+  background-color: rgb(204, 204, 204);
+  width: 200px;
+  height: 120px;
+  left: 50px;
+  border-top: 4px solid rgb(162, 162, 162);
+  top: 135px;
+  animation: car-bounce 0.4s infinite;
+}
+
+@keyframes car-bounce {
+  0%   { top: 135px; }
+  50%  { top: 132px; }
+}
+
+.car-body::before {
+  content: "";
+  position: absolute;
+  width: 290px;
+  height: 20px;
+  background-color: rgb(46, 46, 81);
+  bottom: -10px;
+}
+
+.car-body::after {
+  content: "";
+  position: absolute;
+  background-color: rgb(229, 229, 229);
+  width: 80px;
+  height: 90px;
+  right: -90px;
+  bottom: 10px;
+  clip-path: polygon(0% 0%, 50% 0, 100% 60%, 100% 100%, 0% 100%);
+}
+
+.car-window {
+  position: absolute;
+  background-color: rgb(126, 191, 226);
+  width: 50px;
+  height: 40px;
+  right: -75px;
+  top: 26px;
+  z-index: 1;
+  clip-path: polygon(0% 0%, 40% 0, 100% 100%, 0% 100%);
+  border: 2px solid rgb(135, 135, 135);
+}
+
+.car-window::before {
+  content: "";
+  position: absolute;
+  background-color: rgb(186, 225, 247);
+  width: 5px;
+  height: 40px;
+  left: 5px;
+  transform: skew(-36deg);
+  box-shadow: 9px 0px rgb(186, 225, 247);
+}
+
+.car-window::after {
+  content: "";
+  position: absolute;
+  background-color: rgb(108, 107, 107);
+  width: 10px;
+  height: 10px;
+  bottom: 2px;
+  right: 10px;
+  box-shadow: 2px 6px 0px -2px rgb(229, 229, 229), inset 2px 0px rgb(203, 203, 204);
+}
+
+.car-cargo {
+  position: absolute;
+  width: 185px;
+  height: 20px;
+  background-color: #e9e9e9;
+  left: 8px;
+  top: 5px;
+  box-shadow: 0px 23px #e9e9e9, 0px 46px #e9e9e9, 0px 69px #e9e9e9;
+}
+
+.car-cargo::before {
+  position: absolute;
+  content: "";
+  width: 10px;
+  height: 4px;
+  background-color: red;
+  bottom: -72px;
+  box-shadow:
+    10px 0px white, 20px 0px red, 30px 0px white, 40px 0px red,
+    50px 0px white, 60px 0px red, 70px 0px white, 80px 0px red,
+    90px 0px white, 100px 0px red, 110px 0px white, 120px 0px red,
+    130px 0px white, 140px 0px red, 150px 0px white, 160px 0px red,
+    170px 0px white, 175px 0px red;
+}
+
+.car-cargo::after {
+  position: absolute;
+  content: "";
+  width: 10px;
+  height: 6px;
+  background-color: rgb(135, 135, 135);
+  top: -6px;
+  left: -10px;
+  box-shadow: 195px 0px rgb(135, 135, 135), 0px 125px rgb(46, 46, 81);
+}
+
+.car-door {
+  position: absolute;
+  width: 10px;
+  height: 4px;
+  background-color: black;
+  right: -31px;
+  bottom: 40px;
+  z-index: 2;
+}
+
+.car-door::before {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 20px;
+  background-color: rgb(85, 84, 85);
+  left: -21px;
+  z-index: -1;
+  bottom: -30px;
+  box-shadow: inset 0px 4px rgb(163, 163, 163);
+}
+
+.car-lights {
+  position: absolute;
+  width: 12px;
+  height: 20px;
+  background-color: rgb(255, 237, 191);
+  right: -90px;
+  bottom: 0px;
+  z-index: 1;
+  box-shadow: inset 0px -8px rgba(172, 2, 2, 0.719);
+  animation: car-lighting1 1.5s infinite ease-in-out;
+}
+
+@keyframes car-lighting1 {
+  0%  { background-color: rgb(255, 237, 191); box-shadow: inset 0px -8px rgba(172, 2, 2, 0.719); }
+  50% { box-shadow: inset 0px -8px rgba(217, 83, 1, 0.719); }
+}
+
+.car-lights::before {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 15px;
+  background-color: rgb(207, 2, 2);
+  left: -280px;
+  bottom: 0px;
+  box-shadow: inset 0px 7px rgb(207, 2, 2);
+  animation: car-lighting 1.5s infinite ease-in-out;
+}
+
+@keyframes car-lighting {
+  0%  { box-shadow: inset 0px 9px rgb(207, 2, 2); }
+  50% { box-shadow: inset 0px 9px rgb(255, 0, 0); }
+}
+
+.car-lights::after {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 2px;
+  background-color: rgb(81, 81, 81);
+  top: -8px;
+  box-shadow: 0px -6px rgb(81, 81, 81), 0px -12px rgb(81, 81, 81);
+  right: 0px;
+}
+
+.car-wheels {
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #bcbcbc;
+  border: 10px solid rgb(4, 4, 4);
+  bottom: 108px;
+  left: 90px;
+  box-shadow: 0px 0px 0px 4px;
+  animation: car-rotation 0.3s linear infinite;
+}
+
+@keyframes car-rotation {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.car-wheels::before {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background-color: rgb(67, 67, 67);
+  top: 10px;
+  left: 3px;
+  border-radius: 50%;
+  box-shadow:
+    14.5px 0px rgb(67, 67, 67),
+    7px -7px rgb(67, 67, 67),
+    7px 7px rgb(67, 67, 67),
+    7px 0px 0px 4px rgb(67, 67, 67);
+}
+
+.car-wheels-2 { left: 270px; }
+
+.car-street {
+  height: 2px;
+  width: 70px;
+  background-color: black;
+  position: absolute;
+  bottom: 105px;
+  left: 0;
+  box-shadow: 90px 0, 180px 0, 270px 0, 360px 0;
+  animation: car-motion 2s linear infinite;
+}
+
+@keyframes car-motion {
+  0%   { left: 0; }
+  100% { left: -450px; }
+}
+
+.car-street::before {
+  content: "";
+  height: 2px;
+  width: 70px;
+  background-color: black;
+  position: absolute;
+  bottom: 0;
+  left: 450px;
+  box-shadow: 90px 0, 180px 0, 270px 0, 360px 0;
+}
+
+.car-post {
+  position: absolute;
+  width: 5px;
+  height: 180px;
+  background-color: black;
+  right: -15px;
+  top: 115px;
+  animation: car-moving 2.9s infinite linear;
+  z-index: -2;
+}
+
+@keyframes car-moving {
+  0%   { transform: translateX(0px); }
+  100% { transform: translateX(-650px); }
+}
+
+.car-post::before {
+  width: 20px;
+  height: 20px;
+  position: absolute;
+  content: "";
+  background-color: black;
+  top: -15px;
+  left: -7px;
+  clip-path: polygon(0% 0%, 100% 0%, 80% 100%, 20% 100%);
+}
+
+.car-post::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-bottom: 20px solid transparent;
+  border-left: 20px solid black;
+  transform: rotate(45deg);
+  top: -23px;
+  left: -7px;
+}
+
+/* Panel de bienvenida con la animación */
+.auth-welcome-car {
+  flex: 1;
+  max-width: 660px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 20px;
+}
+
+.auth-welcome-car h2 {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--crema);
+  text-align: center;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.auth-welcome-car p {
+  font-size: 15px;
+  color: rgba(212, 229, 245, 0.7);
+  text-align: center;
+  margin: 0;
+  line-height: 1.6;
+}
