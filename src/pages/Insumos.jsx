@@ -2,59 +2,82 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 
 function InventarioAnalisis({ onCrear, usuario }) {
-  const [insumos, setInsumos] = useState([]);
-  const [lotes, setLotes] = useState([]);
   const [productosInventario, setProductosInventario] = useState([]);
+  const [inventarioVacios, setInventarioVacios] = useState([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    cargarDatos();
-  }, [usuario]);
+    let activo = true;
 
-  const cargarDatos = () => {
-    Promise.all([
-      api.get("/insumos"),
-      api.get("/lotes"),
-      api.get("/inventario/productos"),
-    ])
-      .then(([resInsumos, resLotes, resProductos]) => {
-        const todosInsumos   = Array.isArray(resInsumos.data)   ? resInsumos.data   : [];
-        const todosLotes     = Array.isArray(resLotes.data)     ? resLotes.data     : [];
-        const todosProductos = Array.isArray(resProductos.data) ? resProductos.data : [];
+    const cargarDatos = async () => {
+      try {
+        setCargando(true);
 
-        const insumosFiltrados =
-          usuario?.userTipo === 0
-            ? todosInsumos
-            : todosInsumos.filter((i) => i.sucursalId === usuario?.sucursalId);
+        const [resProductos, resInventario] = await Promise.all([
+          api.get("/inventario/productos"),
+          api.get("/inventario"),
+        ]);
 
-        const lotesFiltrados =
-          usuario?.userTipo === 0
-            ? todosLotes
-            : todosLotes.filter((l) => l.sucursalId === usuario?.sucursalId);
+        if (!activo) return;
+
+        const todosProductos = Array.isArray(resProductos.data)
+          ? resProductos.data
+          : [];
+
+        const todoInventario = Array.isArray(resInventario.data)
+          ? resInventario.data
+          : [];
 
         const productosFiltrados =
           usuario?.userTipo === 0
             ? todosProductos
-            : todosProductos.filter((p) => p.sucursalId === usuario?.sucursalId);
+            : todosProductos.filter(
+                (p) =>
+                  p.sucursalId == null ||
+                  Number(p.sucursalId) === Number(usuario?.sucursalId)
+              );
 
-        setInsumos(insumosFiltrados);
-        setLotes(lotesFiltrados);
+        const normalizar = (valor) =>
+          String(valor || "")
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "");
+
+        const vacios = todoInventario.filter((item) => {
+          const nombre = normalizar(item.nombre);
+          const tipo = normalizar(item.tipo);
+
+          const esVacio =
+            nombre.includes("vac") ||
+            tipo.includes("vac") ||
+            nombre.includes("envase") ||
+            tipo.includes("envase");
+
+          const esSucursalCorrecta =
+            usuario?.userTipo === 0 ||
+            item.sucursalId == null ||
+            Number(item.sucursalId) === Number(usuario?.sucursalId);
+
+          return esVacio && esSucursalCorrecta;
+        });
+
         setProductosInventario(productosFiltrados);
-      })
-      .catch((err) => console.error("Error al cargar análisis:", err))
-      .finally(() => setCargando(false));
-  };
+        setInventarioVacios(vacios);
+      } catch (err) {
+        console.error("Error al cargar inventario:", err);
+      } finally {
+        if (activo) {
+          setCargando(false);
+        }
+      }
+    };
 
-  const eliminarInsumo = async (id, nombre) => {
-    if (!confirm(`¿Eliminar el insumo "${nombre}"? Esta acción no se puede deshacer.`)) return;
-    try {
-      await api.delete(`/insumos/${id}`);
-      setInsumos((prev) => prev.filter((i) => i.id !== id));
-    } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data || "No se pudo eliminar el insumo";
-      alert("Error: " + msg);
-    }
-  };
+    cargarDatos();
+
+    return () => {
+      activo = false;
+    };
+  }, [usuario]);
 
   const encabezado = (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -81,32 +104,6 @@ function InventarioAnalisis({ onCrear, usuario }) {
     );
   }
 
-  const stockPorInsumo = insumos.map((insumo) => {
-    const lotesDelInsumo = lotes.filter(
-      (l) => l.insumoId === insumo.id || l.insumoNombre === insumo.nombre
-    );
-    const stockTotal = lotesDelInsumo.reduce((acc, l) => acc + (Number(l.cantidad) || 0), 0);
-    const proximoVencer = lotesDelInsumo
-      .filter((l) => l.fechaVencimiento)
-      .sort((a, b) => new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento))[0];
-
-    return { ...insumo, stockTotal, proximoVencer, totalLotes: lotesDelInsumo.length };
-  });
-
-  const criticos = stockPorInsumo.filter((i) => i.stockTotal === 0);
-  const bajos    = stockPorInsumo.filter((i) => i.stockTotal > 0 && i.stockTotal <= 5);
-  const normales = stockPorInsumo.filter((i) => i.stockTotal > 5);
-
-  const hoy = new Date();
-  const en7dias = new Date(hoy);
-  en7dias.setDate(hoy.getDate() + 7);
-
-  const porVencer = lotes.filter((l) => {
-    if (!l.fechaVencimiento) return false;
-    const fecha = new Date(l.fechaVencimiento);
-    return fecha >= hoy && fecha <= en7dias;
-  });
-
   const totalGarrafones = productosInventario.reduce(
     (acc, p) => acc + (Number(p.cantidad) || 0),
     0
@@ -120,6 +117,27 @@ function InventarioAnalisis({ onCrear, usuario }) {
   const garrafonesNormales = productosInventario.filter(
     (p) => (Number(p.cantidad) || 0) > (Number(p.cantidadMinima) || 5)
   );
+
+  const totalVacios = inventarioVacios.reduce(
+    (acc, item) => acc + (Number(item.cantidad) || 0),
+    0
+  );
+
+  const vaciosCriticos = inventarioVacios.filter(
+    (item) => (Number(item.cantidad) || 0) === 0
+  );
+
+  const vaciosBajos = inventarioVacios.filter((item) => {
+    const cantidad = Number(item.cantidad) || 0;
+    const minimo = Number(item.cantidadMinima) || 5;
+    return cantidad > 0 && cantidad <= minimo;
+  });
+
+  const vaciosNormales = inventarioVacios.filter((item) => {
+    const cantidad = Number(item.cantidad) || 0;
+    const minimo = Number(item.cantidadMinima) || 5;
+    return cantidad > minimo;
+  });
 
   const tarjetaStyle = (color) => ({
     background: "#1A2332",
@@ -147,136 +165,97 @@ function InventarioAnalisis({ onCrear, usuario }) {
 
       {encabezado}
 
-      {/* ── PANEL GARRAFONES VACÍOS (insumos) ── */}
+      {/* ── PANEL GARRAFONES VACÍOS (inventario real) ── */}
       <div style={{
         background: "var(--fondo-card)",
         border: "1px solid var(--borde)",
         borderRadius: "var(--r-md)",
         padding: "18px 22px",
       }}>
-        <h3 style={{ fontSize: "15px", fontWeight: "700", color: "var(--texto)", margin: "0 0 14px" }}>
-          ♻️ Garrafones Vacíos — Insumos
-        </h3>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+          <h3 style={{ fontSize: "15px", fontWeight: "700", color: "var(--texto)", margin: 0 }}>
+            ♻️ Garrafones Vacíos — Inventario
+          </h3>
+          <span style={{
+            background: "#3AC87A22",
+            color: "#3AC87A",
+            border: "1px solid #3AC87A44",
+            borderRadius: "999px",
+            padding: "4px 14px",
+            fontSize: "13px",
+            fontWeight: "700",
+          }}>
+            Total: {totalVacios} piezas
+          </span>
+        </div>
 
-        {/* Tarjetas resumen */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "14px", marginBottom: "18px" }}>
           <div style={tarjetaStyle("#E05252")}>
             <p style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase",
               letterSpacing: "0.5px", color: "#E05252", marginBottom: "6px" }}>🔴 Sin stock</p>
-            <p style={{ fontSize: "28px", fontWeight: "800", color: "#E05252" }}>{criticos.length}</p>
-            <p style={{ fontSize: "12px", color: "#8D9DB6" }}>insumos agotados</p>
+            <p style={{ fontSize: "28px", fontWeight: "800", color: "#E05252" }}>{vaciosCriticos.length}</p>
+            <p style={{ fontSize: "12px", color: "#8D9DB6" }}>tipos de vacío agotados</p>
           </div>
           <div style={tarjetaStyle("#FF9900")}>
             <p style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase",
               letterSpacing: "0.5px", color: "#FF9900", marginBottom: "6px" }}>🟠 Stock bajo</p>
-            <p style={{ fontSize: "28px", fontWeight: "800", color: "#FF9900" }}>{bajos.length}</p>
-            <p style={{ fontSize: "12px", color: "#8D9DB6" }}>5 unidades o menos</p>
+            <p style={{ fontSize: "28px", fontWeight: "800", color: "#FF9900" }}>{vaciosBajos.length}</p>
+            <p style={{ fontSize: "12px", color: "#8D9DB6" }}>bajo mínimo</p>
           </div>
           <div style={tarjetaStyle("#3AC87A")}>
             <p style={{ fontSize: "11px", fontWeight: "700", textTransform: "uppercase",
               letterSpacing: "0.5px", color: "#3AC87A", marginBottom: "6px" }}>🟢 Stock normal</p>
-            <p style={{ fontSize: "28px", fontWeight: "800", color: "#3AC87A" }}>{normales.length}</p>
-            <p style={{ fontSize: "12px", color: "#8D9DB6" }}>insumos bien abastecidos</p>
+            <p style={{ fontSize: "28px", fontWeight: "800", color: "#3AC87A" }}>{vaciosNormales.length}</p>
+            <p style={{ fontSize: "12px", color: "#8D9DB6" }}>bien abastecidos</p>
           </div>
         </div>
 
-        {/* Alerta por vencer */}
-        {porVencer.length > 0 && (
-          <div style={{
-            background: "#1A2332",
-            border: "1px solid #C8783A44",
-            borderRadius: "var(--r-md)",
-            padding: "14px 18px",
-            marginBottom: "18px",
-          }}>
-            <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#C8783A", marginBottom: "12px" }}>
-              ⚠️ Lotes por vencer en los próximos 7 días
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {porVencer.map((l, i) => (
-                <div key={i} style={{
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                  background: "rgba(255,255,255,0.06)", borderRadius: "var(--r-sm)", padding: "10px 14px",
-                }}>
-                  <span style={{ fontWeight: "600", fontSize: "14px" }}>{l.insumoNombre || "Insumo"}</span>
-                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                    <span style={{ fontSize: "13px", color: "var(--texto-suave)" }}>
-                      {l.cantidad} {l.unidadMedida || "uds"}
-                    </span>
-                    <Badge
-                      color="#C8783A"
-                      bg="#FDEBD0"
-                      texto={`Vence: ${new Date(l.fechaVencimiento).toLocaleDateString("es-MX")}`}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Tabla insumos */}
         <div style={{ borderTop: "1px solid var(--borde)", paddingTop: "14px" }}>
-          <p style={{ fontSize: "13px", fontWeight: "700", color: "var(--texto-suave)",
-            textTransform: "uppercase", letterSpacing: "0.5px", margin: "0 0 10px" }}>
-            📊 Estado de inventario por insumo
-          </p>
-          <table>
-            <thead>
-              <tr>
-                <th>Insumo</th>
-                <th>Unidad</th>
-                <th>Stock total</th>
-                <th>Lotes</th>
-                <th>Próx. vencimiento</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stockPorInsumo.map((insumo) => {
-                const estado = insumo.stockTotal === 0
-                  ? { label: "Agotado",    color: "#E05252", bg: "#FEF0EE" }
-                  : insumo.stockTotal <= 5
-                  ? { label: "Stock bajo", color: "#C8783A", bg: "#FEF3E8" }
-                  : { label: "Normal",     color: "#3AC87A", bg: "#E8FEF0" };
+          {inventarioVacios.length === 0 ? (
+            <p style={{ color: "var(--texto-suave)", fontSize: "14px", textAlign: "center", padding: "20px 0" }}>
+              No hay inventarios de garrafones vacíos registrados.
+            </p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>Envase vacío</th>
+                  <th>Unidad</th>
+                  <th>Stock actual</th>
+                  <th>Mínimo</th>
+                  <th>Sucursal</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inventarioVacios.map((item) => {
+                  const cantidad = Number(item.cantidad) || 0;
+                  const minimo = Number(item.cantidadMinima) || 5;
+                  const estado =
+                    cantidad === 0
+                      ? { label: "Agotado", color: "#E05252", bg: "#FEF0EE" }
+                      : cantidad <= minimo
+                      ? { label: "Stock bajo", color: "#C8783A", bg: "#FEF3E8" }
+                      : { label: "Normal", color: "#3AC87A", bg: "#E8FEF0" };
 
-                return (
-                  <tr key={insumo.id}>
-                    <td><strong>{insumo.nombre}</strong></td>
-                    <td>{insumo.unidadMedida || "—"}</td>
-                    <td style={{ fontWeight: "700", color: estado.color }}>{insumo.stockTotal}</td>
-                    <td>{insumo.totalLotes}</td>
-                    <td style={{ fontSize: "13px", color: "var(--texto-suave)" }}>
-                      {insumo.proximoVencer
-                        ? new Date(insumo.proximoVencer.fechaVencimiento).toLocaleDateString("es-MX")
-                        : "—"}
-                    </td>
-                    <td>
-                      <Badge color={estado.color} bg={estado.bg} texto={estado.label} />
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => eliminarInsumo(insumo.id, insumo.nombre)}
-                        style={{
-                          background: "#2D1A1A",
-                          color: "#E05252",
-                          border: "1px solid #E0525233",
-                          borderRadius: "6px",
-                          padding: "5px 12px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          fontWeight: "600",
-                        }}
-                      >
-                        🗑️ Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  return (
+                    <tr key={item.id}>
+                      <td><strong>{item.nombre}</strong></td>
+                      <td>{item.unidadMedida || "piezas"}</td>
+                      <td style={{ fontWeight: "700", color: estado.color }}>{cantidad}</td>
+                      <td style={{ color: "var(--texto-suave)" }}>{minimo}</td>
+                      <td style={{ fontSize: "13px", color: "var(--texto-suave)" }}>
+                        {item.sucursalNombre || "—"}
+                      </td>
+                      <td>
+                        <Badge color={estado.color} bg={estado.bg} texto={estado.label} />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
 
