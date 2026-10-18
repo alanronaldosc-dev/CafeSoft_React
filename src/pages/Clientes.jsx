@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import api from "../services/api";
+import ConsultaPuntos from "./ConsultaPuntos";
 
 const DIAS = [
   "Lunes",
@@ -22,6 +23,7 @@ function Clientes({ onCrear, onEditar }) {
   const [pagina, setPagina] = useState(1);
 
   const POR_PAGINA = 10;
+  // HU-026: el componente de consulta se presenta junto al catálogo.
 
   useEffect(() => {
     obtenerClientes();
@@ -113,6 +115,7 @@ function Clientes({ onCrear, onEditar }) {
 
   return (
     <section className="panel">
+      <ConsultaPuntos clientes={clientes} />
       {/* Encabezado */}
       <div
         style={{
