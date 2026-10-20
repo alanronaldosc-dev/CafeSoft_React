@@ -364,6 +364,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
             .map((item) => (
               <p
                 key={item.id}
+                data-testid={`menu-${item.id}`}
                 onClick={() => cambiarSeccion(item.id)}
                 className={seccion === item.id ? "active-menu" : ""}
                 style={{ cursor: "pointer" }}

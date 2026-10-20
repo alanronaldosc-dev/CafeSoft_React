@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "node --test tests/e2e/canje-beneficios.test.js",
+    "test:e2e:mock": "node --test tests/e2e/canje-beneficios.test.js"
   },
   "dependencies": {
     "axios": "^1.18.0",
@@ -27,6 +29,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "postcss": "^8.5.15",
+    "selenium-webdriver": "^4.51.0",
     "tailwindcss": "^4.3.1",
     "vite": "^8.0.12"
   }
