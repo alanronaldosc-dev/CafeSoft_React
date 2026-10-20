@@ -9,10 +9,17 @@ function Carrito({ usuario }) {
   const [montoEfectivo, setMontoEfectivo] = useState("");
   const [cargando, setCargando] = useState(false);
   const [ventaCompletada, setVentaCompletada] = useState(null);
+  const [clientes, setClientes] = useState([]);
+  const [clienteId, setClienteId] = useState("");
+  const [puntosSolicitados, setPuntosSolicitados] = useState("");
+  const [canjeAplicado, setCanjeAplicado] = useState(null);
+  const [errorCanje, setErrorCanje] = useState("");
+  const [cotizandoCanje, setCotizandoCanje] = useState(false);
 
   // NUEVO: nombre de la persona para quien es el pedido.
   const [nombreCliente, setNombreCliente] = useState("");
 
+  // HU-023: cargar los clientes para mostrar el saldo y permitir cotizar canjes.
   // Categorías
   const [categorias, setCategorias] = useState([]);
   const [categoriaActiva, setCategoriaActiva] = useState(null);
@@ -28,8 +35,29 @@ function Carrito({ usuario }) {
     api
       .get("/categorias/activas")
       .then((res) => setCategorias(res.data))
-      .catch(() => {});
+      .catch((error) => {
+        console.error("Error al cargar categorías:", error);
+      });
+
+    api
+      .get("/clientes")
+      .then((res) => setClientes(Array.isArray(res.data) ? res.data : []))
+      .catch((error) => {
+        console.error("Error al cargar clientes:", error);
+        setErrorCanje("No se pudieron cargar los clientes para el canje.");
+      });
   }, []);
+
+  const clienteSeleccionado = clientes.find(
+    (cliente) => String(cliente.id) === clienteId
+  );
+  const saldoPuntos =
+    clienteSeleccionado?.saldoPuntos === null ||
+    clienteSeleccionado?.saldoPuntos === undefined
+      ? Number.NaN
+      : Number(clienteSeleccionado.saldoPuntos);
+  const puntosDisponibles =
+    Number.isFinite(saldoPuntos) && saldoPuntos >= 0 ? saldoPuntos : null;
 
   // Filtrar productos
   const productosFiltrados = productos.filter((p) => {
@@ -45,6 +73,7 @@ function Carrito({ usuario }) {
 
   // Agregar producto
   const agregarAlCarrito = (producto) => {
+    setCanjeAplicado(null);
     const existe = carrito.find(
       (i) => i.productoId === producto.id
     );
@@ -72,6 +101,7 @@ function Carrito({ usuario }) {
 
   // Quitar producto
   const quitarDelCarrito = (productoId) => {
+    setCanjeAplicado(null);
     setCarrito(
       carrito.filter((i) => i.productoId !== productoId)
     );
@@ -79,6 +109,7 @@ function Carrito({ usuario }) {
 
   // Cambiar cantidad
   const cambiarCantidad = (productoId, cantidad) => {
+    setCanjeAplicado(null);
     if (cantidad <= 0 || isNaN(cantidad)) {
       quitarDelCarrito(productoId);
       return;
@@ -101,7 +132,70 @@ function Carrito({ usuario }) {
 
   const impuestos = subtotal * 0.16;
 
-  const total = subtotal + impuestos;
+  const totalSinDescuento = subtotal + impuestos;
+  const total = Math.max(
+    0,
+    totalSinDescuento - (canjeAplicado?.descuento || 0)
+  );
+
+  // HU-023: pedir al backend la cotización para mantener centralizada la regla de conversión.
+  const cotizarCanje = async () => {
+    setErrorCanje("");
+    setCanjeAplicado(null);
+
+    const puntos = Number(puntosSolicitados);
+    if (!clienteSeleccionado) {
+      setErrorCanje("Selecciona un cliente para canjear puntos.");
+      return;
+    }
+    if (puntosDisponibles === null) {
+      setErrorCanje("La API aún no proporciona el saldo de puntos del cliente.");
+      return;
+    }
+    if (!Number.isInteger(puntos) || puntos <= 0 || puntos > puntosDisponibles) {
+      setErrorCanje("Ingresa una cantidad de puntos válida y disponible.");
+      return;
+    }
+    if (carrito.length === 0) {
+      setErrorCanje("Agrega productos antes de solicitar el canje.");
+      return;
+    }
+
+    setCotizandoCanje(true);
+    try {
+      const res = await api.post(
+        `/clientes/${clienteSeleccionado.id}/beneficios/cotizaciones`,
+        {
+          puntosSolicitados: puntos,
+          totalCompra: totalSinDescuento,
+        }
+      );
+      const puntosCanjeados = Number(res.data?.puntosCanjeados);
+      const descuento = Number(res.data?.descuento);
+
+      if (
+        !Number.isInteger(puntosCanjeados) ||
+        puntosCanjeados <= 0 ||
+        puntosCanjeados > puntosDisponibles ||
+        !Number.isFinite(descuento) ||
+        descuento <= 0 ||
+        descuento > totalSinDescuento
+      ) {
+        throw new Error("La API devolvió una cotización de canje inválida.");
+      }
+
+      setCanjeAplicado({ puntosCanjeados, descuento });
+    } catch (error) {
+      console.error("Error al cotizar el canje:", error);
+      setErrorCanje(
+        error.response?.data?.message ||
+          error.message ||
+          "No se pudo cotizar el canje de puntos."
+      );
+    } finally {
+      setCotizandoCanje(false);
+    }
+  };
 
   const cambio =
     metodoPago === "efectivo" && montoEfectivo
@@ -145,7 +239,10 @@ function Carrito({ usuario }) {
           ? parseFloat(montoEfectivo)
           : null,
 
-      descuento: 0,
+      // HU-023: los puntos solo se consumen cuando el backend confirma la venta.
+      clienteId: clienteSeleccionado?.id || null,
+      puntosCanjeados: canjeAplicado?.puntosCanjeados || 0,
+      descuento: canjeAplicado?.descuento || 0,
 
       detalles: carrito.map((i) => ({
         productoId: i.productoId,
@@ -160,6 +257,20 @@ function Carrito({ usuario }) {
       const res = await api.post("/ventas", payload);
 
       setVentaCompletada(res.data);
+      if (canjeAplicado && Number.isFinite(Number(res.data?.saldoPuntosRestante))) {
+        setClientes((clientesActuales) =>
+          clientesActuales.map((cliente) =>
+            cliente.id === clienteSeleccionado.id
+              ? {
+                  ...cliente,
+                  saldoPuntos: Number(res.data.saldoPuntosRestante),
+                }
+              : cliente
+          )
+        );
+      }
+      setCanjeAplicado(null);
+      setPuntosSolicitados("");
 
       // Limpiar carrito
       setCarrito([]);
@@ -209,6 +320,13 @@ function Carrito({ usuario }) {
           <p>
             <strong>Pedido para:</strong>{" "}
             {ventaCompletada.nombreCliente}
+          </p>
+        )}
+
+        {ventaCompletada.saldoPuntosRestante !== undefined && (
+          <p data-testid="saldo-puntos-restante">
+            <strong>Saldo restante de puntos:</strong>{" "}
+            {ventaCompletada.saldoPuntosRestante}
           </p>
         )}
 
@@ -350,6 +468,7 @@ function Carrito({ usuario }) {
                   agregarAlCarrito(p)
                 }
                 className="producto-card-carrito"
+                data-testid="producto-card"
               >
                 {p.imagen ? (
                   <img
@@ -442,12 +561,7 @@ function Carrito({ usuario }) {
                         min="1"
                         value={i.cantidad}
                         onChange={(e) =>
-                          cambiarCantidad(
-                            i.productoId,
-                            parseInt(
-                              e.target.value
-                            )
-                          )
+                          cambiarCantidad(i.productoId, parseInt(e.target.value))
                         }
                         style={{
                           width: "50px",
@@ -494,9 +608,106 @@ function Carrito({ usuario }) {
 
           <p>
             <strong>
-              Total: ${total.toFixed(2)}
+              Total: $
+              <span data-testid="total-venta">{total.toFixed(2)}</span>
             </strong>
           </p>
+
+          <section aria-labelledby="canje-puntos-titulo">
+            <h3 id="canje-puntos-titulo">Canje de puntos</h3>
+            <label htmlFor="cliente-fidelizacion">Cliente</label>
+            <select
+              id="cliente-fidelizacion"
+              data-testid="cliente-fidelizacion"
+              value={clienteId}
+              onChange={(event) => {
+                setClienteId(event.target.value);
+                setCanjeAplicado(null);
+                setPuntosSolicitados("");
+                setErrorCanje("");
+              }}
+              style={{ width: "100%", marginBottom: "0.5rem" }}
+            >
+              <option value="">Selecciona un cliente</option>
+              {clientes
+                .filter((cliente) => cliente.activo !== false)
+                .map((cliente) => (
+                  <option
+                    key={cliente.id}
+                    value={cliente.id}
+                    data-saldo-puntos={cliente.saldoPuntos}
+                  >
+                    {cliente.nombre} —{" "}
+                    {cliente.saldoPuntos !== null &&
+                    cliente.saldoPuntos !== undefined &&
+                    Number.isFinite(Number(cliente.saldoPuntos))
+                      ? `${cliente.saldoPuntos} puntos`
+                      : "saldo no disponible"}
+                  </option>
+                ))}
+            </select>
+
+            {clienteSeleccionado && (
+              <>
+                <p data-testid="saldo-puntos">
+                  Saldo disponible:{" "}
+                  {puntosDisponibles === null
+                    ? "No disponible"
+                    : `${puntosDisponibles} puntos`}
+                </p>
+                {puntosDisponibles === null && (
+                  <p role="alert">
+                    La API debe incluir saldoPuntos para habilitar el canje.
+                  </p>
+                )}
+                <label htmlFor="puntos-a-canjear">Puntos a canjear</label>
+                <input
+                  id="puntos-a-canjear"
+                  data-testid="puntos-a-canjear"
+                  type="number"
+                  min="1"
+                  max={puntosDisponibles ?? undefined}
+                  step="1"
+                  value={puntosSolicitados}
+                  onChange={(event) => {
+                    setPuntosSolicitados(event.target.value);
+                    setCanjeAplicado(null);
+                    setErrorCanje("");
+                  }}
+                  style={{ width: "100%", marginBottom: "0.5rem" }}
+                />
+                <button
+                  type="button"
+                  data-testid="aplicar-canje"
+                  onClick={cotizarCanje}
+                  disabled={
+                    cotizandoCanje ||
+                    puntosDisponibles === null ||
+                    !puntosDisponibles ||
+                    carrito.length === 0
+                  }
+                  style={{ width: "100%" }}
+                >
+                  {cotizandoCanje
+                    ? "Cotizando canje..."
+                    : "Aplicar Descuento / Canjear Beneficio"}
+                </button>
+              </>
+            )}
+
+            {canjeAplicado && (
+              <p role="status" data-testid="canje-aplicado">
+                Descuento aplicado: ${canjeAplicado.descuento.toFixed(2)} por{" "}
+                {canjeAplicado.puntosCanjeados} puntos. El saldo se actualizará
+                al completar el cobro.
+              </p>
+            )}
+            {errorCanje && (
+              <p role="alert" data-testid="error-canje">
+                {errorCanje}
+              </p>
+            )}
+          </section>
 
           {/* NUEVO CAMPO */}
           <label>
@@ -522,6 +733,7 @@ function Carrito({ usuario }) {
           <label>Método de pago</label>
 
           <select
+            data-testid="metodo-pago"
             value={metodoPago}
             onChange={(e) =>
               setMetodoPago(e.target.value)
@@ -582,6 +794,7 @@ function Carrito({ usuario }) {
           {/* COBRAR */}
           <button
             onClick={procesarVenta}
+            data-testid="cobrar-venta"
             disabled={
               cargando ||
               carrito.length === 0
