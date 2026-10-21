@@ -55,6 +55,9 @@ function Productos({ onCrear, usuario }) {
               <th>ID</th>
               <th>Nombre</th>
               <th>Precio</th>
+              <th>Stock</th>
+              <th>Estado</th>
+              <th>Categoría</th>
               <th>Descripción</th>
               <th>Insumos</th>
               <th>Imagen</th>
@@ -67,6 +70,9 @@ function Productos({ onCrear, usuario }) {
                 <td>{producto.id}</td>
                 <td>{producto.nombre}</td>
                 <td>${producto.precio}</td>
+                <td>{producto.stock ?? "Sin datos"}</td>
+                <td>{producto.stock == null ? "Sin datos" : Number(producto.stock) <= 0 ? "Agotado" : Number(producto.stock) <= 5 ? "Stock bajo" : "Disponible"}</td>
+                <td>{producto.categoriaNombre || producto.categoria?.nombre || "Sin categoría"}</td>
                 <td>{producto.descripcion}</td>
                 <td>
                   {producto.insumos && producto.insumos.length > 0 ? (
