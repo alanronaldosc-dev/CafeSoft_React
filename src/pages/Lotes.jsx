@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-function Lotes({ onCrear }) {
+function Lotes({ onCrear, usuario }) {
   const [lotes, setLotes] = useState([]);
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
     obtenerLotes();
-  }, []);
+  }, [usuario]);
 
   const obtenerLotes = async () => {
     try {
       const res = await api.get("/lotes");
-      setLotes(Array.isArray(res.data) ? res.data : []);
+      const todos = Array.isArray(res.data) ? res.data : [];
+
+      const sucursalId = usuario?.sucursalId;
+      const filtrados = sucursalId
+        ? todos.filter((l) => Number(l.sucursalId) === Number(sucursalId))
+        : todos;
+
+      setLotes(filtrados);
     } catch (error) {
       alert("No se pudieron cargar los lotes");
     } finally {
@@ -32,13 +39,7 @@ function Lotes({ onCrear }) {
 
   return (
     <section className="panel">
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1>📦 Lotes de Insumos</h1>
         <button onClick={onCrear}>+ Registrar Lote</button>
       </div>
@@ -46,7 +47,7 @@ function Lotes({ onCrear }) {
       {cargando ? (
         <p>Cargando lotes...</p>
       ) : lotes.length === 0 ? (
-        <p>No hay lotes registrados.</p>
+        <p>No hay lotes registrados para esta sucursal.</p>
       ) : (
         <table>
           <thead>
@@ -57,26 +58,34 @@ function Lotes({ onCrear }) {
               <th>Cantidad</th>
               <th>Fecha Entrada</th>
               <th>Fecha Caducidad</th>
+              <th>Sucursal</th>
               <th>Observaciones</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {lotes.map((lote) => (
-              <tr key={lote.id}>
+              <tr key={lote.id} style={{
+                background: lote.tipoLote === "produccion" ? "#1A2B1A" : undefined
+              }}>
                 <td>{lote.id}</td>
-                <td>{lote.insumoNombre}</td>
-                <td>{lote.proveedorNombre || "—"}</td>
                 <td>
-                  {lote.cantidad} {lote.insumoUnidad}
+                  {lote.tipoLote === "produccion"
+                    ? <span>🏭 <strong>{lote.productoNombre}</strong></span>
+                    : lote.insumoNombre}
                 </td>
+                <td>{lote.proveedorNombre || (lote.tipoLote === "produccion" ? "Producción propia" : "—")}</td>
+                <td>{lote.cantidad} {lote.tipoLote === "produccion" ? "pzs" : lote.insumoUnidad}</td>
                 <td>{lote.fechaEntrada}</td>
                 <td>{lote.fechaCaducidad}</td>
+                <td>{lote.sucursalNombre || "—"}</td>
                 <td>{lote.observaciones || "—"}</td>
                 <td>
-                  <button onClick={() => eliminarLote(lote.id)}>
-                    🗑️ Eliminar
-                  </button>
+                  {lote.tipoLote === "produccion"
+                    ? <span style={{ background: "#0D1E2B", color: "#4A9FD4", borderRadius: "999px",
+                        padding: "3px 10px", fontSize: "12px", fontWeight: "600",
+                        border: "1px solid #4A9FD433" }}>Producción</span>
+                    : <button onClick={() => eliminarLote(lote.id)}>🗑️ Eliminar</button>}
                 </td>
               </tr>
             ))}

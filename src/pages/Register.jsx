@@ -1,107 +1,99 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../services/api";
 
 /**
  * HU-011 – Gestión de perfiles de usuarios
- * "Como administrador, quiero registrar, consultar y actualizar los perfiles
- * de los usuarios administrador, empleado y cliente."
- *
- * Este componente cumple con el criterio de aceptación:
- *  ✅ Formulario único para dar de alta y editar datos básicos del empleado.
- *
- * Cuando es invocado con `esAdministrador=true` permite al administrador
- * elegir el tipo de rol (Administrador, Usuario o Personalizado) antes de
- * registrar el perfil.  En modo público registra clientes (userTipo = 2).
  */
 
 // HU-011 / HU-015: catálogo de permisos disponibles para roles personalizados
 const PERMISOS = [
-  {
-    id: "crearProducto",
-    texto: "☕ Crear Producto",
-  },
-  {
-    id: "ventas",
-    texto: "🧾 Ver Ventas",
-  },
-  {
-    id: "pedidos",
-    texto: "🍽️ Pedidos",
-  },
-  {
-    id: "productos",
-    texto: "📦 Ver Productos",
-  },
-  {
-    id: "usuarios",
-    texto: "👥 Ver Usuarios",
-  },
-  {
-    id: "reportes",
-    texto: "📊 Reportes",
-  },
-  {
-    id: "carrito",
-    texto: "🛒 Carrito de Compras",
-  },
-  {
-    id: "registro",
-    texto: "👤 Registrar Usuario",
-  },
-  {
-    id: "insumos",
-    texto: "🧂 Ver Insumos",
-  },
-  {
-    id: "lotes",
-    texto: "📦 Lotes de Insumos",
-  },
-  {
-    id: "categorias",
-    texto: "🏷️ Categorías",
-  },
-  {
-    id: "proveedores",
-    texto: "🚚 Proveedores",
-  },
+  { id: "crearProducto", texto: "☕ Crear Producto" },
+  { id: "ventas", texto: "🧾 Ver Ventas" },
+  { id: "pedidos", texto: "🍽️ Pedidos" },
+  { id: "productos", texto: "📦 Ver Productos" },
+  { id: "usuarios", texto: "👥 Ver Usuarios" },
+  { id: "reportes", texto: "📊 Reportes" },
+  { id: "carrito", texto: "🛒 Carrito de Compras" },
+  { id: "registro", texto: "👤 Registrar Usuario" },
+  { id: "insumos", texto: "🧂 Ver Insumos" },
+  { id: "lotes", texto: "📦 Lotes de Insumos" },
+  { id: "categorias", texto: "🏷️ Categorías" },
+  { id: "proveedores", texto: "🚚 Proveedores" },
 ];
 
 /**
  * HU-011 – Formulario de registro / alta de usuario
  *
- * @param {function} cambiarVista    - Callback para navegar entre vistas (login / register)
- * @param {boolean}  esAdministrador - true  → el admin registra empleados/administradores
- *                                     false → registro público de clientes
+ * @param {function} cambiarVista
+ * @param {boolean} esAdministrador
+ * @param {object} usuario
  */
 function Register({
   cambiarVista,
   esAdministrador = false,
+  usuario = null,
 }) {
-  /**
-   * HU-011: estado del formulario con los datos básicos del perfil.
-   * Campos requeridos por el criterio de aceptación:
-   *   nombre, email, contraseña, dirección, teléfono, tipo de rol.
-   */
   const [form, setForm] = useState({
     nombre: "",
     email: "",
     password: "",
     direccion: "",
     telefono: "",
-
-    /*
-     * HU-011: tipo de usuario según quién realiza el registro.
-     * Registro público:         Cliente = 2
-     * Registro desde admin:     Usuario = 1
-     */
     userTipo: esAdministrador ? 1 : 2,
-
     permisos: [],
+    sucursalId: "",
   });
 
+  const [sucursales, setSucursales] = useState([]);
   const [cargando, setCargando] = useState(false);
+  const [cargandoSucursales, setCargandoSucursales] = useState(true);
 
-  // HU-011: actualiza un campo individual del formulario de perfil
+  // ============================================
+  // CARGAR SUCURSALES
+  // ============================================
+
+  useEffect(() => {
+    const cargarSucursales = async () => {
+      setCargandoSucursales(true);
+
+      try {
+        const response = await api.get(
+          "/sucursales/activas"
+        );
+
+        const lista = Array.isArray(response.data)
+          ? response.data
+          : response.data?.data || [];
+
+        setSucursales(lista);
+
+        // Si solo existe una sucursal,
+        // se selecciona automáticamente.
+        if (lista.length === 1) {
+          setForm((actual) => ({
+            ...actual,
+            sucursalId: String(lista[0].id),
+          }));
+        }
+      } catch (error) {
+        console.error(
+          "Error al cargar sucursales:",
+          error
+        );
+
+        setSucursales([]);
+      } finally {
+        setCargandoSucursales(false);
+      }
+    };
+
+    cargarSucursales();
+  }, []);
+
+  // ============================================
+  // CAMBIAR CAMPOS
+  // ============================================
+
   const cambiarCampo = (campo, valor) => {
     setForm((actual) => ({
       ...actual,
@@ -109,11 +101,10 @@ function Register({
     }));
   };
 
-  /**
-   * HU-011: cambia el tipo de rol del perfil que se está registrando.
-   * Al cambiar el rol se limpian los permisos personalizados para evitar
-   * inconsistencias entre rol y permisos.
-   */
+  // ============================================
+  // CAMBIAR ROL
+  // ============================================
+
   const cambiarRol = (valor) => {
     const nuevoTipo = Number(valor);
 
@@ -124,9 +115,14 @@ function Register({
     }));
   };
 
+  // ============================================
+  // PERMISOS
+  // ============================================
+
   const cambiarPermiso = (permiso) => {
     setForm((actual) => {
-      const permisosActuales = actual.permisos || [];
+      const permisosActuales =
+        actual.permisos || [];
 
       const yaExiste =
         permisosActuales.includes(permiso);
@@ -161,18 +157,37 @@ function Register({
     }));
   };
 
-  /**
-   * HU-011 – Dar de alta un nuevo perfil de usuario
-   * Envía los datos del formulario a POST /usuarios.
-   * Construye el payload con los datos básicos exigidos por el criterio
-   * de aceptación (nombre, email, contraseña, dirección, teléfono, rol).
-   */
+  // ============================================
+  // REGISTRAR USUARIO
+  // ============================================
+
   const registrar = async (e) => {
     e.preventDefault();
 
-    /*
-     * Validación HU-015
-     */
+    // Validación básica
+    if (!form.nombre.trim()) {
+      alert("Debes ingresar el nombre.");
+      return;
+    }
+
+    if (!form.email.trim()) {
+      alert("Debes ingresar el correo.");
+      return;
+    }
+
+    if (!form.password) {
+      alert("Debes ingresar la contraseña.");
+      return;
+    }
+
+    if (form.password.length < 8) {
+      alert(
+        "La contraseña debe tener al menos 8 caracteres."
+      );
+      return;
+    }
+
+    // Validación de permisos personalizados
     if (
       esAdministrador &&
       form.userTipo === 3 &&
@@ -185,26 +200,49 @@ function Register({
       return;
     }
 
+    // La sucursal ahora es obligatoria
+    if (!form.sucursalId) {
+      alert(
+        "Debes seleccionar la sucursal a la que pertenecerá el usuario."
+      );
+
+      return;
+    }
+
     setCargando(true);
 
     try {
-      // HU-011: payload con los datos básicos del perfil a registrar
       const datosUsuario = {
-        nombre: form.nombre.trim(),
-        email: form.email.trim().toLowerCase(),
-        password: form.password,
-        direccion: form.direccion.trim(),
-        telefono: form.telefono.trim(),
-        userTipo: form.userTipo,
+        nombre:
+          form.nombre.trim(),
 
-        /*
-         * Los permisos solamente se envían
-         * cuando corresponde a un rol personalizado.
-         */
+        email:
+          form.email
+            .trim()
+            .toLowerCase(),
+
+        password:
+          form.password,
+
+        direccion:
+          form.direccion.trim(),
+
+        telefono:
+          form.telefono.trim(),
+
+        userTipo:
+          Number(form.userTipo),
+
         permisos:
           form.userTipo === 3
             ? form.permisos
             : [],
+
+        sucursal: {
+          id: Number(
+            form.sucursalId
+          ),
+        },
       };
 
       await api.post(
@@ -222,16 +260,22 @@ function Register({
         password: "",
         direccion: "",
         telefono: "",
-        userTipo: esAdministrador
-          ? 1
-          : 2,
+        userTipo:
+          esAdministrador
+            ? 1
+            : 2,
         permisos: [],
+        sucursalId:
+          sucursales.length === 1
+            ? String(
+                sucursales[0].id
+              )
+            : "",
       });
 
       cambiarVista("login");
 
     } catch (error) {
-
       console.error(
         "Error al registrar usuario:",
         error
@@ -239,18 +283,22 @@ function Register({
 
       const mensaje =
         error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.response?.data?.mensaje ||
         "No fue posible registrar el usuario.";
 
       alert(mensaje);
 
     } finally {
-
       setCargando(false);
     }
   };
 
+  // ============================================
+  // INTERFAZ
+  // ============================================
+
   return (
-    // HU-011: contenedor del formulario único de alta de usuario
     <div className="auth-page">
       <div className="register-container">
 
@@ -258,24 +306,22 @@ function Register({
           ☕
         </div>
 
-        <h1>CafeSoft</h1>
+        <h1>
+          CafeSoft
+        </h1>
 
-        {/* HU-011: subtítulo diferenciado según el contexto de registro */}
         <p className="auth-subtitle">
           {esAdministrador
             ? "Registrar nuevo usuario"
             : "Crea una cuenta para comenzar"}
         </p>
 
-        {/*
-         * HU-011 – Formulario único de alta de perfil
-         * Criterio de aceptación: "Formulario único para dar de alta
-         * y editar datos básicos del empleado."
-         */}
         <form
           onSubmit={registrar}
           className="auth-form"
         >
+
+          {/* NOMBRE */}
 
           <label>
             Nombre completo
@@ -295,6 +341,8 @@ function Register({
             disabled={cargando}
           />
 
+          {/* CORREO */}
+
           <label>
             Correo electrónico
           </label>
@@ -313,6 +361,8 @@ function Register({
             disabled={cargando}
           />
 
+          {/* CONTRASEÑA */}
+
           <label>
             Contraseña
           </label>
@@ -328,8 +378,11 @@ function Register({
               )
             }
             required
+            minLength={8}
             disabled={cargando}
           />
+
+          {/* DIRECCIÓN */}
 
           <label>
             Dirección
@@ -345,8 +398,11 @@ function Register({
                 e.target.value
               )
             }
+            required
             disabled={cargando}
           />
+
+          {/* TELÉFONO */}
 
           <label>
             Teléfono
@@ -362,15 +418,14 @@ function Register({
                 e.target.value
               )
             }
+            required
             disabled={cargando}
           />
 
-          {/*
-           * ======================================
-           * HU-015
-           * SELECTOR DE ROL
-           * ======================================
-           */}
+          {/* ======================================
+              SELECTOR DE ROL
+              SOLO ADMINISTRADOR
+          ====================================== */}
 
           {esAdministrador && (
             <>
@@ -403,16 +458,67 @@ function Register({
                   Repartidor
                 </option>
               </select>
-
             </>
           )}
 
-          {/*
-           * ======================================
-           * HU-015
-           * PERMISOS PERSONALIZADOS
-           * ======================================
-           */}
+          {/* ======================================
+              SELECTOR DE SUCURSAL
+          ====================================== */}
+
+          <label>
+            Sucursal
+          </label>
+
+          <select
+            value={form.sucursalId}
+            onChange={(e) =>
+              cambiarCampo(
+                "sucursalId",
+                e.target.value
+              )
+            }
+            required
+            disabled={
+              cargando ||
+              cargandoSucursales
+            }
+          >
+            <option value="">
+              {cargandoSucursales
+                ? "Cargando sucursales..."
+                : "Selecciona una sucursal"}
+            </option>
+
+            {sucursales.map(
+              (sucursal) => (
+                <option
+                  key={sucursal.id}
+                  value={sucursal.id}
+                >
+                  {sucursal.nombre}
+                </option>
+              )
+            )}
+          </select>
+
+          {!cargandoSucursales &&
+            sucursales.length === 0 && (
+              <p
+                style={{
+                  color: "#c62828",
+                  fontSize: "13px",
+                  marginTop: "5px",
+                }}
+              >
+                No hay sucursales
+                disponibles.
+              </p>
+            )}
+
+          {/* ======================================
+              PERMISOS PERSONALIZADOS
+              SOLO ADMIN
+          ====================================== */}
 
           {esAdministrador &&
             form.userTipo === 3 && (
@@ -420,12 +526,13 @@ function Register({
                 style={{
                   marginTop: "20px",
                   padding: "20px",
-                  border: "1px solid #ddd",
+                  border:
+                    "1px solid var(--borde)",
                   borderRadius: "10px",
-                  background: "#fafafa",
+                  background:
+                    "var(--humo)",
                 }}
               >
-
                 <h3>
                   Permisos personalizados
                 </h3>
@@ -433,7 +540,8 @@ function Register({
                 <p
                   style={{
                     fontSize: "14px",
-                    marginBottom: "15px",
+                    marginBottom:
+                      "15px",
                   }}
                 >
                   Selecciona los apartados
@@ -445,14 +553,16 @@ function Register({
                   style={{
                     display: "flex",
                     gap: "10px",
-                    marginBottom: "15px",
+                    marginBottom:
+                      "15px",
                     flexWrap: "wrap",
                   }}
                 >
-
                   <button
                     type="button"
-                    onClick={seleccionarTodos}
+                    onClick={
+                      seleccionarTodos
+                    }
                     disabled={cargando}
                   >
                     Seleccionar todos
@@ -460,34 +570,39 @@ function Register({
 
                   <button
                     type="button"
-                    onClick={limpiarPermisos}
+                    onClick={
+                      limpiarPermisos
+                    }
                     disabled={cargando}
                   >
                     Limpiar selección
                   </button>
-
                 </div>
 
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "column",
+                    flexDirection:
+                      "column",
                     gap: "10px",
                   }}
                 >
-
                   {PERMISOS.map(
                     (permiso) => (
                       <label
-                        key={permiso.id}
+                        key={
+                          permiso.id
+                        }
                         style={{
-                          display: "flex",
-                          alignItems: "center",
+                          display:
+                            "flex",
+                          alignItems:
+                            "center",
                           gap: "10px",
-                          cursor: "pointer",
+                          cursor:
+                            "pointer",
                         }}
                       >
-
                         <input
                           type="checkbox"
                           checked={form.permisos.includes(
@@ -504,40 +619,55 @@ function Register({
                         />
 
                         <span>
-                          {permiso.texto}
+                          {
+                            permiso.texto
+                          }
                         </span>
-
                       </label>
                     )
                   )}
-
                 </div>
 
                 <p
                   style={{
-                    marginTop: "15px",
-                    fontSize: "13px",
+                    marginTop:
+                      "15px",
+                    fontSize:
+                      "13px",
                   }}
                 >
                   Permisos seleccionados:{" "}
                   <strong>
-                    {form.permisos.length}
+                    {
+                      form.permisos
+                        .length
+                    }
                   </strong>
                 </p>
-
               </div>
             )}
 
+          {/* BOTÓN */}
+
           <button
             type="submit"
-            disabled={cargando}
+            className="btn-glow"
+            disabled={
+              cargando ||
+              cargandoSucursales ||
+              sucursales.length === 0
+            }
           >
-            {cargando
-              ? "Registrando..."
-              : "Crear Cuenta"}
+            <span>
+              {cargando
+                ? "Registrando..."
+                : "Crear Cuenta"}
+            </span>
           </button>
 
         </form>
+
+        {/* LOGIN */}
 
         <p className="auth-footer">
           ¿Ya tienes una cuenta?{" "}
@@ -552,7 +682,6 @@ function Register({
           >
             Iniciar
           </span>
-
         </p>
 
       </div>

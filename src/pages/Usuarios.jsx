@@ -2,20 +2,37 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import PerfilUsuario from "./PerfilUsuario";
 
-function Usuarios() {
+function Usuarios({ usuario }) {
   const [usuarios, setUsuarios] = useState([]);
   const [usuarioPerfil, setUsuarioPerfil] = useState(null);
+  const [search, setSearch] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     obtenerUsuarios();
-  }, []);
+  }, [usuario]);
 
   const obtenerUsuarios = async () => {
     try {
-      const res = await api.get("/usuarios");
-      setUsuarios(res.data);
-    } catch (error) {
-      console.log(error);
+      const sucursalId = usuario?.sucursalId;
+
+      if (!sucursalId) {
+        setError("Tu cuenta no tiene una sucursal asignada. Contacta al administrador.");
+        setUsuarios([]);
+        return;
+      }
+
+      const res = await api.get(`/usuarios/sucursal/${Number(sucursalId)}`);
+
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data.usuarios ?? [];
+
+      setUsuarios(data);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("No se pudieron cargar los usuarios.");
     }
   };
 
@@ -23,12 +40,17 @@ function Usuarios() {
     try {
       await api.put(`/usuarios/${id}/estado`, { activo: nuevoEstado });
       obtenerUsuarios();
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  // Si hay un usuario seleccionado, muestra su perfil
+  const usuariosFiltrados = usuarios.filter(
+    (u) =>
+      u.nombre.toLowerCase().includes(search.toLowerCase()) ||
+      u.telefono?.includes(search)
+  );
+
   if (usuarioPerfil) {
     return (
       <PerfilUsuario
@@ -42,6 +64,18 @@ function Usuarios() {
     <section className="panel">
       <h1>👥 Usuarios</h1>
 
+      {error && (
+        <p style={{ color: "#E05252", marginBottom: "1rem" }}>⚠️ {error}</p>
+      )}
+
+      <input
+        type="text"
+        placeholder="Buscar usuario por nombre o teléfono"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ marginBottom: "1rem", padding: "0.5rem", width: "100%" }}
+      />
+
       <table>
         <thead>
           <tr>
@@ -50,25 +84,26 @@ function Usuarios() {
             <th>Email</th>
             <th>Teléfono</th>
             <th>Rol</th>
+            <th>Sucursal</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
-
         <tbody>
-          {usuarios.map((usuario) => (
-            <tr key={usuario.id}>
-              <td>{usuario.id}</td>
-              <td>{usuario.nombre}</td>
-              <td>{usuario.email}</td>
-              <td>{usuario.telefono}</td>
+          {usuariosFiltrados.map((u) => (
+            <tr key={u.id}>
+              <td>{u.id}</td>
+              <td>{u.nombre}</td>
+              <td>{u.email}</td>
+              <td>{u.telefono}</td>
               <td>
-                {usuario.userTipo === 0 && "👑 Administrador"}
-                {usuario.userTipo === 1 && "👔 Usuario"}
-                {usuario.userTipo === 2 && "👤 Cliente"}
-                {usuario.userTipo === 3 && "⚙️ Personalizado"}
-                {usuario.userTipo === 4 && "🛵 Repartidor"}
+                {u.userTipo === 0 && "👑 Administrador"}
+                {u.userTipo === 1 && "👔 Usuario"}
+                {u.userTipo === 2 && "👤 Cliente"}
+                {u.userTipo === 3 && "⚙️ Personalizado"}
+                {u.userTipo === 4 && "🛵 Repartidor"}
               </td>
+              <td>{u.sucursalNombre || "—"}</td>
               <td>
                 <span
                   style={{
@@ -77,25 +112,24 @@ function Usuarios() {
                     borderRadius: "999px",
                     fontSize: "12px",
                     fontWeight: "600",
-                    background: usuario.activo ? "#E8FEF0" : "#FEE8E8",
-                    color: usuario.activo ? "#3AC87A" : "#E05252",
-                    border: `1px solid ${usuario.activo ? "#3AC87A33" : "#E0525233"}`,
+                    background: u.activo ? "#0D2B1A" : "#2B0D0D",
+                    color: u.activo ? "#3AC87A" : "#E05252",
+                    border: `1px solid ${u.activo ? "#3AC87A33" : "#E0525233"}`,
                   }}
                 >
-                  {usuario.activo ? "Activo" : "Inactivo"}
+                  {u.activo ? "Activo" : "Inactivo"}
                 </span>
               </td>
               <td>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  {/* Ver perfil */}
                   <button
-                    onClick={() => setUsuarioPerfil(usuario)}
+                    onClick={() => setUsuarioPerfil(u)}
                     style={{
                       width: "auto",
                       padding: "6px 14px",
                       fontSize: "12px",
                       fontWeight: "600",
-                      background: "var(--fondo)",
+                      background: "var(--humo)",
                       color: "var(--texto-medio)",
                       border: "1px solid var(--borde)",
                       borderRadius: "var(--r-sm)",
@@ -105,24 +139,22 @@ function Usuarios() {
                   >
                     👤 Ver perfil
                   </button>
-
-                  {/* Suspender / Reactivar */}
                   <button
-                    onClick={() => cambiarEstado(usuario.id, !usuario.activo)}
+                    onClick={() => cambiarEstado(u.id, !u.activo)}
                     style={{
                       width: "auto",
                       padding: "6px 14px",
                       fontSize: "12px",
                       fontWeight: "600",
-                      background: usuario.activo ? "#FEE8E8" : "#E8FEF0",
-                      color: usuario.activo ? "#E05252" : "#3AC87A",
-                      border: `1px solid ${usuario.activo ? "#E0525233" : "#3AC87A33"}`,
+                      background: u.activo ? "#2B0D0D" : "#0D2B1A",
+                      color: u.activo ? "#E05252" : "#3AC87A",
+                      border: `1px solid ${u.activo ? "#E0525233" : "#3AC87A33"}`,
                       borderRadius: "var(--r-sm)",
                       cursor: "pointer",
                       margin: 0,
                     }}
                   >
-                    {usuario.activo ? "Suspender" : "Reactivar"}
+                    {u.activo ? "Suspender" : "Reactivar"}
                   </button>
                 </div>
               </td>

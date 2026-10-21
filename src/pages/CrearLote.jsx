@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
 
-function CrearLote({ onVolver }) {
+function CrearLote({ onVolver, usuario }) {
   const [insumos, setInsumos] = useState([]);
   const [proveedores, setProveedores] = useState([]);
   const [form, setForm] = useState({
@@ -50,6 +50,7 @@ function CrearLote({ onVolver }) {
         cantidad: parseFloat(form.cantidad),
         fechaCaducidad: form.fechaCaducidad,
         observaciones: form.observaciones || null,
+        sucursalId: usuario?.sucursalId ? parseInt(usuario.sucursalId, 10) : null,
       };
       await api.post("/lotes", payload);
       alert("Lote registrado correctamente");
@@ -152,8 +153,8 @@ function CrearLote({ onVolver }) {
           rows={3}
         />
 
-        <button type="submit" disabled={cargando}>
-          {cargando ? "Guardando..." : "Registrar Lote"}
+        <button type="submit" className="btn-glow" disabled={cargando}>
+          <span>{cargando ? "Guardando..." : "Registrar Lote"}</span>
         </button>
       </form>
     </section>
