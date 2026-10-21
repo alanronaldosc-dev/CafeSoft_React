@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import MonitorVehiculos from "./MonitorVehiculos";
+import ReporteEntregas from "./ReporteEntregas";
 import InicioPage from "./InicioPage";
 import Register from "./Register";
 import Productos from "./Productos";
@@ -41,9 +43,6 @@ import Cargas from "./Cargas";
 // HU-016 - LIQUIDACIÓN DE REPARTIDORES
 import Liquidaciones from "./Liquidaciones";
 
-// HU-020 - REPORTE CONSOLIDADO DE ENTREGAS
-import ReporteEntregas from "./ReporteEntregas";
-
 function Home({ usuario, cerrarSesion, tema, toggleTema }) {
   const [seccion, setSeccion] = useState("inicio");
   const [categoriaParaProductos, setCategoriaParaProductos] = useState(null);
@@ -60,11 +59,12 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
     { id: "ventas", texto: "🧾 Ver Ventas" },
     { id: "pedidos", texto: "🍽️ Pedidos" },
     { id: "productos", texto: "📦 Ver Productos" },
+    { id: "monitorVehiculos", texto: "📍 Monitor de Vehículos" },
     { id: "usuarios", texto: "👥 Ver Usuarios" },
     { id: "reportes", texto: "📊 Reportes" },
     { id: "carrito", texto: "🛒 Carrito de Compras" },
     { id: "registro", texto: "👤 Registrar Usuario" },
-    { id: "insumos", texto: "🧂 Ver Insumos" },
+    { id: "insumos", texto: "📦 Inventario" },
     { id: "lotes", texto: "📦 Lotes de Insumos" },
     { id: "categorias", texto: "🏷️ Categorías" },
     // HU-013
@@ -192,7 +192,11 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
         return <Usuarios usuario={usuario} />;
 
       case "reportes":
-  return <ReporteEntregas />;
+        return <ReporteEntregas />;
+
+      case "monitorVehiculos":
+        return <MonitorVehiculos />;
+
 
       case "carrito":
         return <Carrito usuario={usuario} />;

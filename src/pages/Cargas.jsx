@@ -11,8 +11,16 @@ function Cargas({ usuario }) {
   const [repartidores, setRepartidores] = useState([]);
 
   const [repartidorId, setRepartidorId] = useState("");
-  const [inventarioId, setInventarioId] = useState("");
-  const [cantidad, setCantidad] = useState("");
+
+  /**
+   * HU-015
+   * Filas de garrafones a asignar.
+   * Cada fila es un tipo de garrafón con su cantidad.
+   * Ejemplo: [{ inventarioId: "1", cantidad: "20" }, { inventarioId: "2", cantidad: "5" }]
+   */
+  const [filas, setFilas] = useState([
+    { inventarioId: "", cantidad: "" },
+  ]);
 
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState("");
@@ -22,9 +30,7 @@ function Cargas({ usuario }) {
   // CARGAR DATOS AL ENTRAR
   // ============================================
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
+  // (se ejecuta después de declarar cargarDatos)
 
   // ============================================
   // CARGAR REPARTIDORES, INVENTARIO Y CARGAS
@@ -39,6 +45,7 @@ function Cargas({ usuario }) {
 
       const [
         inventarioResponse,
+        inventarioProductosResponse,
         cargasResponse,
         repartidoresResponse,
       ] = await Promise.all([
@@ -46,26 +53,40 @@ function Cargas({ usuario }) {
           ? api.get(`/inventario/sucursal/${sucursalId}`)
           : api.get("/inventario"),
 
+        api.get("/inventario/productos"),
+
         api.get("/cargas"),
 
         api.get("/usuarios/tipo/4"),
       ]);
 
       // ========================================
-      // INVENTARIO
+      // INVENTARIO (insumos + productos llenos)
       // ========================================
 
       const datosInv = inventarioResponse.data;
+      const datosProds = inventarioProductosResponse.data;
 
-      let listaInventario = [];
-
+      let listaInsumos = [];
       if (Array.isArray(datosInv)) {
-        listaInventario = datosInv;
+        listaInsumos = datosInv;
       } else if (Array.isArray(datosInv?.data)) {
-        listaInventario = datosInv.data;
+        listaInsumos = datosInv.data;
       } else if (Array.isArray(datosInv?.inventario)) {
-        listaInventario = datosInv.inventario;
+        listaInsumos = datosInv.inventario;
       }
+
+      let listaProductos = [];
+      if (Array.isArray(datosProds)) {
+        listaProductos = datosProds;
+      } else if (Array.isArray(datosProds?.data)) {
+        listaProductos = datosProds.data;
+      }
+
+      const listaInventario = [
+        ...listaInsumos.map((i) => ({ ...i, _origen: "insumo" })),
+        ...listaProductos.map((p) => ({ ...p, _origen: "producto" })),
+      ];
 
       setInventario(listaInventario);
 
@@ -134,35 +155,63 @@ function Cargas({ usuario }) {
   };
 
   // ============================================
-  // INVENTARIO SELECCIONADO
+  // CARGAR DATOS AL ENTRAR
   // ============================================
 
-  const inventarioSeleccionado =
-    inventario.find(
-      (item) =>
-        String(item.id) ===
-        String(inventarioId)
+  useEffect(() => {
+    cargarDatos();
+  }, []);
+
+  // ============================================
+  // FILAS DE GARRAFONES
+  // ============================================
+
+  const agregarFila = () => {
+    setFilas((actual) => [
+      ...actual,
+      { inventarioId: "", cantidad: "" },
+    ]);
+  };
+
+  const quitarFila = (index) => {
+    setFilas((actual) =>
+      actual.filter((_, posicion) => posicion !== index)
+    );
+  };
+
+  const actualizarFila = (index, campo, valor) => {
+    setFilas((actual) =>
+      actual.map((fila, posicion) =>
+        posicion === index
+          ? { ...fila, [campo]: valor }
+          : fila
+      )
+    );
+  };
+
+  // ============================================
+  // STOCK DISPONIBLE DE UN INVENTARIO
+  // ============================================
+
+  const stockDeInventario = (inventarioId) => {
+    const item = inventario.find(
+      (inv) => String(inv.id) === String(inventarioId)
     );
 
-  const cantidadDisponible =
-    Number(
-      inventarioSeleccionado?.cantidad ||
-        0
-    );
+    return Number(item?.cantidad || 0);
+  };
 
   // ============================================
-  // REPARTIDOR SELECCIONADO
+  // TOTAL DE GARRAFONES DEL FORMULARIO
   // ============================================
 
-  const repartidorSeleccionado =
-    repartidores.find(
-      (repartidor) =>
-        String(repartidor.id) ===
-        String(repartidorId)
-    );
+  const totalGarrafonesFormulario = filas.reduce(
+    (total, fila) => total + (Number(fila.cantidad) || 0),
+    0
+  );
 
   // ============================================
-  // REGISTRAR CARGA
+  // REGISTRAR CARGAS (VARIOS GARRAFONES)
   // ============================================
 
   const registrarCarga = async (e) => {
@@ -184,41 +233,49 @@ function Cargas({ usuario }) {
     }
 
     // ========================================
-    // VALIDAR INVENTARIO
+    // VALIDAR FILAS
     // ========================================
 
-    if (!inventarioId) {
+    if (filas.length === 0) {
       setError(
-        "Selecciona el tipo de garrafón o inventario."
+        "Agrega al menos un garrafón para asignar."
       );
 
       return;
     }
 
-    // ========================================
-    // VALIDAR CANTIDAD
-    // ========================================
+    for (const fila of filas) {
+      if (!fila.inventarioId) {
+        setError(
+          "Selecciona el tipo de garrafón en todas las filas."
+        );
 
-    if (
-      !cantidad ||
-      Number(cantidad) <= 0
-    ) {
-      setError(
-        "La cantidad debe ser mayor a cero."
-      );
+        return;
+      }
 
-      return;
-    }
+      if (
+        !fila.cantidad ||
+        Number(fila.cantidad) <= 0
+      ) {
+        setError(
+          "La cantidad debe ser mayor a cero en todas las filas."
+        );
 
-    if (
-      Number(cantidad) >
-      cantidadDisponible
-    ) {
-      setError(
-        `Stock insuficiente. Solo hay ${cantidadDisponible} disponibles.`
-      );
+        return;
+      }
 
-      return;
+      if (
+        Number(fila.cantidad) >
+        stockDeInventario(fila.inventarioId)
+      ) {
+        setError(
+          `Stock insuficiente. Solo hay ${stockDeInventario(
+            fila.inventarioId
+          )} disponibles de ese garrafón.`
+        );
+
+        return;
+      }
     }
 
     // ========================================
@@ -226,32 +283,29 @@ function Cargas({ usuario }) {
     // ========================================
 
     const datos = {
-      repartidorId:
-        Number(repartidorId),
+      repartidorId: Number(repartidorId),
 
-      inventarioId:
-        Number(inventarioId),
-
-      cantidad:
-        Number(cantidad),
+      items: filas.map((fila) => ({
+        inventarioId: Number(fila.inventarioId),
+        cantidad: Number(fila.cantidad),
+      })),
     };
 
     console.log(
-      "Datos enviados a /cargas:",
+      "Datos enviados a /cargas/multiple:",
       datos
     );
 
     try {
       setCargando(true);
 
-      const response =
-        await api.post(
-          "/cargas",
-          datos
-        );
+      const response = await api.post(
+        "/cargas/multiple",
+        datos
+      );
 
       console.log(
-        "Carga registrada:",
+        "Cargas registradas:",
         response.data
       );
 
@@ -259,8 +313,28 @@ function Cargas({ usuario }) {
       // MENSAJE DE ÉXITO
       // ======================================
 
+      const repartidorSeleccionado =
+        repartidores.find(
+          (repartidor) =>
+            String(repartidor.id) ===
+            String(repartidorId)
+        );
+
+      const tiposAsignados = [
+        ...new Set(
+          filas.map(
+            (fila) =>
+              inventario.find(
+                (inv) =>
+                  String(inv.id) ===
+                  String(fila.inventarioId)
+              )?.nombre || "garrafón"
+          )
+        ),
+      ].join(", ");
+
       setMensaje(
-        `✅ Se asignaron ${cantidad} garrafones a ${
+        `✅ Se asignaron ${totalGarrafonesFormulario} garrafones (${tiposAsignados}) a ${
           repartidorSeleccionado?.nombre ||
           "el repartidor"
         } correctamente.`
@@ -271,8 +345,7 @@ function Cargas({ usuario }) {
       // ======================================
 
       setRepartidorId("");
-      setInventarioId("");
-      setCantidad("");
+      setFilas([{ inventarioId: "", cantidad: "" }]);
 
       // ======================================
       // ACTUALIZAR INFORMACIÓN
@@ -281,7 +354,7 @@ function Cargas({ usuario }) {
       await cargarDatos();
     } catch (err) {
       console.error(
-        "Error al registrar carga:",
+        "Error al registrar cargas:",
         err
       );
 
@@ -313,13 +386,10 @@ function Cargas({ usuario }) {
     try {
       return new Date(
         fecha
-      ).toLocaleString(
-        "es-MX",
-        {
-          dateStyle: "short",
-          timeStyle: "short",
-        }
-      );
+      ).toLocaleString("es-MX", {
+        dateStyle: "short",
+        timeStyle: "short",
+      });
     } catch {
       return fecha;
     }
@@ -401,10 +471,10 @@ function Cargas({ usuario }) {
         </h1>
 
         <p>
-          Registra la cantidad inicial
-          de garrafones que recibirá
-          cada repartidor al inicio
-          de su turno.
+          Registra los garrafones que recibirá
+          cada repartidor al inicio de su turno.
+          Puedes asignar varios tipos de garrafón
+          en una misma carga.
         </p>
       </div>
 
@@ -469,10 +539,9 @@ function Cargas({ usuario }) {
             marginBottom: "25px",
           }}
         >
-          Selecciona el repartidor,
-          el tipo de garrafón y la
-          cantidad que llevará al
-          iniciar su ruta.
+          Selecciona el repartidor y agrega los
+          tipos de garrafón con la cantidad que
+          llevará al iniciar su ruta.
         </p>
 
         <form
@@ -558,316 +627,235 @@ function Cargas({ usuario }) {
           </div>
 
           {/* ==================================
-              INFORMACIÓN DEL REPARTIDOR
+              GARRAFONES (FILAS)
           ================================== */}
 
-          {repartidorSeleccionado && (
-            <div
-              style={{
-                padding: "16px",
-                marginBottom:
-                  "20px",
-                borderRadius:
-                  "8px",
-                background:
-                  "var(--humo)",
-                border:
-                  "1px solid var(--borde)",
-              }}
-            >
-              <strong>
-                🚚 Repartidor
-                seleccionado
-              </strong>
+          <label>
+            <strong>
+              🚰 Garrafones a asignar
+            </strong>
+          </label>
 
-              <p
-                style={{
-                  marginBottom:
-                    "5px",
-                }}
-              >
-                <strong>
-                  Nombre:
-                </strong>{" "}
-                {
-                  repartidorSeleccionado.nombre
-                }
-              </p>
-
-              <p
-                style={{
-                  marginBottom:
-                    "5px",
-                }}
-              >
-                <strong>
-                  Correo:
-                </strong>{" "}
-                {
-                  repartidorSeleccionado.email
-                }
-              </p>
-
-              {repartidorSeleccionado.telefono && (
-                <p
-                  style={{
-                    marginBottom:
-                      0,
-                  }}
-                >
-                  <strong>
-                    Teléfono:
-                  </strong>{" "}
-                  {
-                    repartidorSeleccionado.telefono
-                  }
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* ==================================
-              INVENTARIO
-          ================================== */}
-
-          <div
+          <small
             style={{
-              marginBottom: "20px",
+              display: "block",
+              color: "#666",
+              marginBottom: "10px",
             }}
           >
-            <label>
-              <strong>
-                🚰 Tipo de garrafón /
-                inventario
-              </strong>
-            </label>
+            Agrega una fila por cada tipo de
+            garrafón (ej. 20 Bonafont y 5 Ciel).
+          </small>
 
-            <select
-              value={
-                inventarioId
-              }
-              onChange={(e) =>
-                setInventarioId(
-                  e.target.value
-                )
-              }
+          {filas.map((fila, index) => (
+            <div
+              key={index}
               style={{
-                width: "100%",
-                padding: "10px",
-                marginTop: "8px",
+                display: "flex",
+                gap: "10px",
+                alignItems: "flex-end",
+                marginBottom: "12px",
+                padding: "12px",
+                background: "var(--humo)",
+                border: "1px solid var(--borde)",
+                borderRadius: "8px",
               }}
-              disabled={
-                cargando
-              }
-              required
             >
-              <option value="">
-                Selecciona el
-                inventario
-              </option>
+              {/* TIPO DE GARRAFÓN */}
 
-              {inventario.map(
-                (item) => (
-                  <option
-                    key={
-                      item.id
-                    }
-                    value={
-                      item.id
-                    }
-                    disabled={
-                      Number(
-                        item.cantidad ||
-                          0
-                      ) <= 0
-                    }
-                  >
-                    {
-                      item.nombre
-                    }
-                    {" - "}
-                    {
-                      item.tipo
-                    }
-                    {" - Disponible: "}
-                    {
-                      item.cantidad
-                    }{" "}
-                    {
-                      item.unidadMedida ||
-                      ""
-                    }
+              <div
+                style={{
+                  flex: 2,
+                }}
+              >
+                <label>
+                  <small>
+                    Garrafón {index + 1}
+                  </small>
+                </label>
+
+                <select
+                  value={
+                    fila.inventarioId
+                  }
+                  onChange={(e) =>
+                    actualizarFila(
+                      index,
+                      "inventarioId",
+                      e.target.value
+                    )
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "10px",
+                    marginTop: "5px",
+                  }}
+                  disabled={
+                    cargando
+                  }
+                  required
+                >
+                  <option value="">
+                    Selecciona el
+                    garrafón
                   </option>
-                )
-              )}
-            </select>
 
-            {inventario.length ===
-              0 && (
-              <small
+                  {inventario.map(
+                    (item) => (
+                      <option
+                        key={`${item._origen ?? "inv"}-${item.id}`}
+                        value={
+                          item.id
+                        }
+                        disabled={
+                          Number(
+                            item.cantidad ||
+                              0
+                          ) <= 0
+                        }
+                      >
+                        {
+                          item.nombre
+                        }
+                        {" - "}
+                        {
+                          item.tipo
+                        }
+                        {" - Disponible: "}
+                        {
+                          item.cantidad
+                        }
+                        {" "}
+                        {
+                          item.unidadMedida ||
+                          ""
+                        }
+                      </option>
+                    )
+                  )}
+                </select>
+              </div>
+
+              {/* CANTIDAD */}
+
+              <div
                 style={{
-                  display: "block",
-                  marginTop: "8px",
-                  color: "#b02a37",
+                  flex: 1,
                 }}
               >
-                No hay registros de
-                inventario
-                disponibles.
-              </small>
-            )}
-          </div>
+                <label>
+                  <small>
+                    Cantidad
+                  </small>
+                </label>
 
-          {/* ==================================
-              INFORMACIÓN DEL INVENTARIO
-          ================================== */}
-
-          {inventarioSeleccionado && (
-            <div
-              style={{
-                padding: "16px",
-                marginBottom:
-                  "20px",
-                borderRadius:
-                  "8px",
-                background:
-                  "var(--humo)",
-                border:
-                  "1px solid var(--borde)",
-              }}
-            >
-              <strong>
-                📦 Inventario
-                seleccionado
-              </strong>
-
-              <p
-                style={{
-                  marginBottom:
-                    "5px",
-                }}
-              >
-                <strong>
-                  Producto:
-                </strong>{" "}
-                {
-                  inventarioSeleccionado.nombre
-                }
-              </p>
-
-              <p
-                style={{
-                  marginBottom:
-                    "5px",
-                }}
-              >
-                <strong>
-                  Tipo:
-                </strong>{" "}
-                {
-                  inventarioSeleccionado.tipo
-                }
-              </p>
-
-              <p
-                style={{
-                  marginBottom:
-                    "5px",
-                }}
-              >
-                <strong>
-                  Disponible:
-                </strong>{" "}
-                {
-                  cantidadDisponible
-                }{" "}
-                {
-                  inventarioSeleccionado.unidadMedida
-                }
-              </p>
-
-              {cantidadDisponible <=
-                0 && (
-                <p
+                <input
+                  type="number"
+                  min="1"
+                  max={
+                    fila.inventarioId
+                      ? stockDeInventario(
+                          fila.inventarioId
+                        ) ||
+                        undefined
+                      : undefined
+                  }
+                  value={
+                    fila.cantidad
+                  }
+                  onChange={(e) =>
+                    actualizarFila(
+                      index,
+                      "cantidad",
+                      e.target.value
+                    )
+                  }
+                  placeholder="Ejemplo: 20"
                   style={{
-                    color:
-                      "#b02a37",
-                    marginBottom:
-                      0,
+                    width: "100%",
+                    padding: "10px",
+                    marginTop: "5px",
+                    boxSizing:
+                      "border-box",
                   }}
-                >
-                  ⚠️ Este
-                  inventario no
-                  tiene existencias.
-                </p>
-              )}
+                  disabled={
+                    cargando ||
+                    !fila.inventarioId
+                  }
+                  required
+                />
+              </div>
+
+              {/* QUITAR FILA */}
+
+              <button
+                type="button"
+                onClick={() =>
+                  quitarFila(index)
+                }
+                disabled={
+                  cargando ||
+                  filas.length === 1
+                }
+                style={{
+                  padding:
+                    "10px 12px",
+                  borderRadius: "6px",
+                  border:
+                    "1px solid #cbd5e1",
+                  background:
+                    filas.length === 1
+                      ? "#f1f5f9"
+                      : "#ffffff",
+                  cursor:
+                    filas.length === 1
+                      ? "not-allowed"
+                      : "pointer",
+                  opacity:
+                    filas.length === 1
+                      ? 0.5
+                      : 1,
+                }}
+                title="Quitar garrafón"
+              >
+                ❌
+              </button>
             </div>
-          )}
+          ))}
 
-          {/* ==================================
-              CANTIDAD
-          ================================== */}
+          {/* AGREGAR FILA */}
 
-          <div
+          <button
+            type="button"
+            onClick={agregarFila}
+            disabled={cargando}
             style={{
-              marginBottom: "20px",
+              padding: "10px 15px",
+              borderRadius: "6px",
+              border: "1px dashed #7a4e39",
+              background: "transparent",
+              color: "#7a4e39",
+              cursor: "pointer",
+              fontWeight: "700",
             }}
           >
-            <label>
-              <strong>
-                🔢 Cantidad a
-                asignar
-              </strong>
-            </label>
+            ＋ Agregar otro garrafón
+          </button>
 
-            <input
-              type="number"
-              min="1"
-              max={
-                cantidadDisponible ||
-                undefined
-              }
-              value={
-                cantidad
-              }
-              onChange={(e) =>
-                setCantidad(
-                  e.target.value
-                )
-              }
-              placeholder="Ejemplo: 20"
-              style={{
-                width: "100%",
-                padding: "10px",
-                marginTop: "8px",
-                boxSizing:
-                  "border-box",
-              }}
-              disabled={
-                cargando ||
-                !inventarioId ||
-                !repartidorId
-              }
-              required
-            />
+          {/* TOTAL */}
 
-            {inventarioSeleccionado && (
-              <small
-                style={{
-                  display: "block",
-                  marginTop: "7px",
-                  color: "#666",
-                }}
-              >
-                Máximo disponible:{" "}
-                <strong>
-                  {
-                    cantidadDisponible
-                  }
-                </strong>
-              </small>
-            )}
-          </div>
+          <p
+            style={{
+              marginTop: "12px",
+              color: "#666",
+              fontSize: "14px",
+            }}
+          >
+            Total de garrafones a asignar:{" "}
+            <strong>
+              {totalGarrafonesFormulario}
+            </strong>
+          </p>
 
           {/* ==================================
               BOTÓN
@@ -883,6 +871,9 @@ function Cargas({ usuario }) {
               repartidores.length ===
                 0
             }
+            style={{
+              marginTop: "15px",
+            }}
           >
             <span>
               {cargando
@@ -905,8 +896,7 @@ function Cargas({ usuario }) {
             display: "flex",
             justifyContent:
               "space-between",
-            alignItems:
-              "center",
+            alignItems: "center",
             marginBottom:
               "20px",
             gap: "15px",
@@ -935,8 +925,7 @@ function Cargas({ usuario }) {
             style={{
               padding:
                 "8px 15px",
-              borderRadius:
-                "6px",
+              borderRadius: "6px",
               border: "none",
               cursor:
                 cargando
