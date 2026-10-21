@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import MonitorVehiculos from "./MonitorVehiculos";
+import ReporteEntregas from "./ReporteEntregas";
 import InicioPage from "./InicioPage";
 import Register from "./Register";
 import Productos from "./Productos";
@@ -191,13 +192,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
         return <Usuarios usuario={usuario} />;
 
       case "reportes":
-        return (
-          <section className="panel">
-            <h1>📊 Reportes</h1>
-            <p>Aquí irán las gráficas y reportes del sistema.</p>
-          </section>
-      
-        );
+        return <ReporteEntregas />;
 
       case "monitorVehiculos":
         return <MonitorVehiculos />;

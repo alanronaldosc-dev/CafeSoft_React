@@ -21,6 +21,10 @@ function Clientes({ onCrear, onEditar }) {
   const [diaFiltro, setDiaFiltro] = useState("");
   const [pagina, setPagina] = useState(1);
 
+  const [clienteHistorial, setClienteHistorial] = useState(null);
+  const [historial, setHistorial] = useState(null);
+  const [cargandoHistorial, setCargandoHistorial] = useState(false);
+
   const POR_PAGINA = 10;
 
   useEffect(() => {
@@ -75,6 +79,40 @@ function Clientes({ onCrear, onEditar }) {
       console.error("Error al eliminar:", error);
       alert("No se pudo eliminar el cliente");
     }
+  };
+
+  const verHistorial = async (cliente) => {
+    try {
+      setCargandoHistorial(true);
+      setClienteHistorial(cliente);
+      setHistorial(null);
+
+      const res = await api.get(
+        `/clientes/${cliente.id}/historial`
+      );
+
+      setHistorial(res.data);
+    } catch (error) {
+      console.error(
+        "Error al cargar historial:",
+        error
+      );
+
+      alert(
+        "No se pudo cargar el historial del cliente"
+      );
+
+      setClienteHistorial(null);
+      setHistorial(null);
+    } finally {
+      setCargandoHistorial(false);
+    }
+  };
+
+  const cerrarHistorial = () => {
+    setClienteHistorial(null);
+    setHistorial(null);
+    setCargandoHistorial(false);
   };
 
   // Filtrado: búsqueda, letra y día de reparto
@@ -361,6 +399,7 @@ function Clientes({ onCrear, onEditar }) {
                   marginTop: "14px",
                 }}
               >
+                <button onClick={() => verHistorial(cliente)}>📋 Historial</button>
                 <button onClick={() => onEditar(cliente)}>Editar</button>
                 <button onClick={() => cambiarEstado(cliente)}>
                   {cliente.activo ? "Dar de baja" : "Dar de alta"}
@@ -371,6 +410,585 @@ function Clientes({ onCrear, onEditar }) {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {clienteHistorial && (
+        <div
+          style={{
+            marginTop: "30px",
+            padding: "22px",
+            borderRadius:
+              "14px",
+            background:
+              "#0f172a",
+            border:
+              "1px solid #334155",
+            boxShadow:
+              "0 4px 14px rgba(0,0,0,.35)",
+          }}
+        >
+          {/* Encabezado historial */}
+
+          <div
+            style={{
+              display: "flex",
+              justifyContent:
+                "space-between",
+              alignItems:
+                "center",
+              marginBottom:
+                "20px",
+              gap: "15px",
+              flexWrap:
+                "wrap",
+            }}
+          >
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                }}
+              >
+                📋 Historial de{" "}
+                {
+                  clienteHistorial.nombre
+                }
+              </h2>
+
+              <p
+                style={{
+                  color:
+                    "#94a3b8",
+                  marginTop:
+                    "5px",
+                }}
+              >
+                Frecuencia y
+                comportamiento de
+                pedidos del cliente.
+              </p>
+            </div>
+
+            <button
+              onClick={
+                cerrarHistorial
+              }
+            >
+              ✕ Cerrar
+            </button>
+          </div>
+
+          {cargandoHistorial ? (
+            <p>
+              Cargando historial...
+            </p>
+          ) : historial ? (
+            <>
+              {/* ===============================
+                  INDICADORES HU-019
+              =============================== */}
+
+              <div
+                style={{
+                  display:
+                    "grid",
+
+                  gridTemplateColumns:
+                    "repeat(auto-fit, minmax(180px, 1fr))",
+
+                  gap: "14px",
+
+                  marginBottom:
+                    "25px",
+                }}
+              >
+                {/* Total pedidos */}
+
+                <div
+                  style={{
+                    padding:
+                      "16px",
+
+                    borderRadius:
+                      "12px",
+
+                    background:
+                      "#1e293b",
+
+                    border:
+                      "1px solid #334155",
+                  }}
+                >
+                  <div
+                    style={{
+                      color:
+                        "#94a3b8",
+
+                      fontSize:
+                        "13px",
+                    }}
+                  >
+                    Total de pedidos
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize:
+                        "28px",
+
+                      fontWeight:
+                        "bold",
+
+                      marginTop:
+                        "8px",
+
+                      color:
+                        "#f8fafc",
+                    }}
+                  >
+                    {
+                      historial.totalPedidos
+                    }
+                  </div>
+                </div>
+
+                {/* Promedio garrafones */}
+
+                <div
+                  style={{
+                    padding:
+                      "16px",
+
+                    borderRadius:
+                      "12px",
+
+                    background:
+                      "#1e293b",
+
+                    border:
+                      "1px solid #334155",
+                  }}
+                >
+                  <div
+                    style={{
+                      color:
+                        "#94a3b8",
+
+                      fontSize:
+                        "13px",
+                    }}
+                  >
+                    Promedio de
+                    garrafones
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize:
+                        "28px",
+
+                      fontWeight:
+                        "bold",
+
+                      marginTop:
+                        "8px",
+
+                      color:
+                        "#f8fafc",
+                    }}
+                  >
+                    {historial.promedioGarrafones ??
+                      0}
+                  </div>
+                </div>
+
+                {/* Frecuencia */}
+
+                <div
+                  style={{
+                    padding:
+                      "16px",
+
+                    borderRadius:
+                      "12px",
+
+                    background:
+                      "#1e293b",
+
+                    border:
+                      "1px solid #334155",
+                  }}
+                >
+                  <div
+                    style={{
+                      color:
+                        "#94a3b8",
+
+                      fontSize:
+                        "13px",
+                    }}
+                  >
+                    Frecuencia
+                    promedio
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize:
+                        "20px",
+
+                      fontWeight:
+                        "bold",
+
+                      marginTop:
+                        "8px",
+
+                      color:
+                        "#f8fafc",
+                    }}
+                  >
+                    {historial.frecuenciaPromedioDias >
+                    0
+                      ? `Cada ${historial.frecuenciaPromedioDias} días`
+                      : "Sin datos suficientes"}
+                  </div>
+                </div>
+
+                {/* Días desde último pedido */}
+
+                <div
+                  style={{
+                    padding:
+                      "16px",
+
+                    borderRadius:
+                      "12px",
+
+                    background:
+                      "#1e293b",
+
+                    border:
+                      "1px solid #334155",
+                  }}
+                >
+                  <div
+                    style={{
+                      color:
+                        "#94a3b8",
+
+                      fontSize:
+                        "13px",
+                    }}
+                  >
+                    Días desde último
+                    pedido
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize:
+                        "28px",
+
+                      fontWeight:
+                        "bold",
+
+                      marginTop:
+                        "8px",
+
+                      color:
+                        "#f8fafc",
+                    }}
+                  >
+                    {historial.diasDesdeUltimoPedido !=
+                    null
+                      ? historial.diasDesdeUltimoPedido
+                      : "Sin pedidos"}
+                  </div>
+                </div>
+              </div>
+
+              {/* ===============================
+                  HISTORIAL DE PEDIDOS
+              =============================== */}
+
+              <h3>
+                Pedidos anteriores
+              </h3>
+
+              {historial.pedidos
+                ?.length > 0 ? (
+                <div
+                  style={{
+                    overflowX:
+                      "auto",
+                  }}
+                >
+                  <table
+                    style={{
+                      width:
+                        "100%",
+
+                      borderCollapse:
+                        "collapse",
+
+                      marginTop:
+                        "12px",
+                    }}
+                  >
+                    <thead>
+                      <tr>
+                        <th
+                          style={{
+                            padding:
+                              "12px",
+
+                            textAlign:
+                              "left",
+
+                            borderBottom:
+                              "1px solid #334155",
+
+                            color:
+                              "#cbd5e1",
+                          }}
+                        >
+                          Fecha
+                        </th>
+
+                        <th
+                          style={{
+                            padding:
+                              "12px",
+
+                            textAlign:
+                              "left",
+
+                            borderBottom:
+                              "1px solid #334155",
+
+                            color:
+                              "#cbd5e1",
+                          }}
+                        >
+                          Garrafones
+                        </th>
+
+                        <th
+                          style={{
+                            padding:
+                              "12px",
+
+                            textAlign:
+                              "left",
+
+                            borderBottom:
+                              "1px solid #334155",
+
+                            color:
+                              "#cbd5e1",
+                          }}
+                        >
+                          Monto
+                        </th>
+
+                        <th
+                          style={{
+                            padding:
+                              "12px",
+
+                            textAlign:
+                              "left",
+
+                            borderBottom:
+                              "1px solid #334155",
+
+                            color:
+                              "#cbd5e1",
+                          }}
+                        >
+                          Método
+                        </th>
+
+                        <th
+                          style={{
+                            padding:
+                              "12px",
+
+                            textAlign:
+                              "left",
+
+                            borderBottom:
+                              "1px solid #334155",
+
+                            color:
+                              "#cbd5e1",
+                          }}
+                        >
+                          Estado
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {historial.pedidos.map(
+                        (
+                          pedido
+                        ) => (
+                          <tr
+                            key={
+                              pedido.entregaId
+                            }
+                          >
+                            <td
+                              style={{
+                                padding:
+                                  "12px",
+
+                                borderBottom:
+                                  "1px solid #1e293b",
+
+                                color:
+                                  "#94a3b8",
+                              }}
+                            >
+                              {pedido.fecha
+                                ? new Date(
+                                    pedido.fecha
+                                  ).toLocaleString(
+                                    "es-MX"
+                                  )
+                                : "-"}
+                            </td>
+
+                            <td
+                              style={{
+                                padding:
+                                  "12px",
+
+                                borderBottom:
+                                  "1px solid #1e293b",
+
+                                color:
+                                  "#94a3b8",
+                              }}
+                            >
+                              {pedido.garrafones ??
+                                0}
+                            </td>
+
+                            <td
+                              style={{
+                                padding:
+                                  "12px",
+
+                                borderBottom:
+                                  "1px solid #1e293b",
+
+                                color:
+                                  "#94a3b8",
+                              }}
+                            >
+                              $
+                              {Number(
+                                pedido.montoCobrado ??
+                                  0
+                              ).toFixed(
+                                2
+                              )}
+                            </td>
+
+                            <td
+                              style={{
+                                padding:
+                                  "12px",
+
+                                borderBottom:
+                                  "1px solid #1e293b",
+
+                                color:
+                                  "#94a3b8",
+                              }}
+                            >
+                              {pedido.metodoCobro ||
+                                "-"}
+                            </td>
+
+                            <td
+                              style={{
+                                padding:
+                                  "12px",
+
+                                borderBottom:
+                                  "1px solid #1e293b",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  padding:
+                                    "4px 10px",
+
+                                  borderRadius:
+                                    "999px",
+
+                                  fontSize:
+                                    "12px",
+
+                                  background:
+                                    pedido.resultado ===
+                                    "ENTREGADO"
+                                      ? "#14532d"
+                                      : "#334155",
+
+                                  color:
+                                    pedido.resultado ===
+                                    "ENTREGADO"
+                                      ? "#bbf7d0"
+                                      : "#e2e8f0",
+                                }}
+                              >
+                                {pedido.resultado ||
+                                  "-"}
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    padding:
+                      "18px",
+
+                    borderRadius:
+                      "10px",
+
+                    background:
+                      "#1e293b",
+
+                    color:
+                      "#94a3b8",
+
+                    marginTop:
+                      "10px",
+                  }}
+                >
+                  Este cliente
+                  todavía no tiene
+                  pedidos entregados.
+                </div>
+              )}
+            </>
+          ) : (
+            <p>
+              No se encontró
+              información del
+              historial.
+            </p>
+          )}
         </div>
       )}
 
