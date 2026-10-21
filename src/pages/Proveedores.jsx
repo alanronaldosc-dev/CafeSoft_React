@@ -162,11 +162,10 @@ function Proveedores({ onCrear }) {
               <div
                 key={proveedor.id}
                 style={{
-                  border:
-                    "1px solid #e5e7eb",
+                  border: "1px solid var(--borde)",
                   borderRadius: "12px",
                   padding: "18px",
-                  background: "#ffffff",
+                  background: "var(--fondo-card)",
                 }}
               >
 

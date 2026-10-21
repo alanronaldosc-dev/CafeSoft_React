@@ -49,7 +49,11 @@ function StockGarrafones() {
   }, []);
 
   if (cargando) {
-    return (
+    if (error) {
+    return <section className="panel"><p role="alert">{error}</p><button onClick={cargarStock}>Reintentar</button></section>;
+  }
+
+  return (
       <section className="panel">
         <p>Cargando stock de garrafones...</p>
       </section>

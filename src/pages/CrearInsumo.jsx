@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
 
-function CrearInsumo({ onVolver }) {
+function CrearInsumo({ onVolver, usuario }) {
   const [form, setForm] = useState({
     nombre: "",
     tipo: "",
@@ -37,6 +37,7 @@ function CrearInsumo({ onVolver }) {
         unidadMedida: form.unidadMedida,
         precio: parseFloat(form.precio),
         proveedorId: form.proveedorId ? parseInt(form.proveedorId, 10) : null,
+        sucursalId: usuario?.sucursalId ? parseInt(usuario.sucursalId, 10) : null,
       };
       await api.post("/insumos", payload);
       alert("Insumo registrado correctamente");
@@ -130,8 +131,8 @@ function CrearInsumo({ onVolver }) {
           required
         />
 
-        <button type="submit" disabled={cargando}>
-          {cargando ? "Guardando..." : "Registrar Insumo"}
+        <button type="submit" className="btn-glow" disabled={cargando}>
+          <span>{cargando ? "Guardando..." : "Registrar Insumo"}</span>
         </button>
       </form>
     </section>
