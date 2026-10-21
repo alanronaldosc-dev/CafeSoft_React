@@ -273,6 +273,7 @@ function Clientes({ onCrear, onEditar }) {
       {/* Buscador */}
       <input
         type="text"
+        data-testid="buscar-clientes"
         placeholder="🔍 Buscar por nombre o domicilio..."
         value={busqueda}
         onChange={(e) => {
@@ -384,6 +385,8 @@ function Clientes({ onCrear, onEditar }) {
           {fichaPagina.map((cliente) => (
             <div
               key={cliente.id}
+              data-testid="ficha-cliente"
+              data-cliente-id={cliente.id}
               style={{
                 border:
                   cliente.activo === false
@@ -558,6 +561,18 @@ function Clientes({ onCrear, onEditar }) {
                 </strong>{" "}
                 ${cliente.precioPorGarrafon}
               </p>
+              {/* HU-023: mostrar el saldo vigente devuelto por la API. */}
+              {cliente.saldoPuntos !== null &&
+                cliente.saldoPuntos !== undefined &&
+                Number.isFinite(Number(cliente.saldoPuntos)) && (
+                <p
+                  style={{ color: "#94a3b8", margin: "4px 0" }}
+                  data-testid="saldo-puntos-ficha"
+                >
+                  <strong style={{ color: "#cbd5e1" }}>Puntos disponibles:</strong>{" "}
+                  {cliente.saldoPuntos}
+                </p>
+              )}
 
               <p
                 style={{
