@@ -36,7 +36,7 @@ function EditarRuta({ ruta, onVolver }) {
         // usamos el clienteRepository a través de los clientes que tienen rutaId = ruta.id
         const todos = Array.isArray(cRes.data) ? cRes.data : [];
         const propiosIds = todos
-          .filter((c) => c.ruta?.id === ruta.id)
+          .filter((c) => (c.ruta?.id ?? c.rutaId ?? c.ruta_id) === ruta.id)
           .sort((a, b) => (a.ordenEnRuta ?? 0) - (b.ordenEnRuta ?? 0))
           .map((c) => c.id);
         setClientesSeleccionados(propiosIds);

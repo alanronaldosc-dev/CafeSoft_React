@@ -151,6 +151,27 @@ function Liquidaciones() {
   // REGISTRAR LIQUIDACIÓN
   // ============================================
 
+  const descargarPdf = async () => {
+    if (!repartidorId) return;
+    try {
+      const res = await api.get(
+        `/liquidaciones/repartidor/${repartidorId}/pdf`,
+        { params: { fecha }, responseType: "blob" }
+      );
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `liquidacion_${repartidorId}_${fecha}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+      setError("No se pudo generar el PDF.");
+    }
+  };
+
   const registrarLiquidacion = async (e) => {
     e.preventDefault();
 
@@ -757,6 +778,9 @@ function Liquidaciones() {
               resultado.diferenciaEfectivo
             )}
           </p>
+          <button onClick={descargarPdf} style={{ marginTop: 10 }}>
+            📄 Descargar PDF de liquidación
+          </button>
         </div>
       )}
     </section>

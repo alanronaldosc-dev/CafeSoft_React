@@ -88,6 +88,10 @@ function CrearRuta({ onVolver }) {
       alert("El nombre de la ruta es obligatorio");
       return;
     }
+    if (!repartidorId) {
+      alert("Debes seleccionar un repartidor");
+      return;
+    }
     if (diasSeleccionados.length === 0) {
       alert("Selecciona al menos un día");
       return;
