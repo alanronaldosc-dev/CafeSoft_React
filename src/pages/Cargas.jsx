@@ -1,6 +1,52 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
+// ============================================
+// HELPERS DE FECHAS (HU-013)
+// ============================================
+
+/** Fecha de hoy en formato YYYY-MM-DD (hora local). */
+const fechaDeHoy = () => {
+  const d = new Date();
+
+  return `${d.getFullYear()}-${String(
+    d.getMonth() + 1
+  ).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+/** Obtiene el día (YYYY-MM-DD) de una fecha/hora. */
+const fechaDeCarga = (fechaHora) => {
+  if (!fechaHora) {
+    return "";
+  }
+
+  const d = new Date(fechaHora);
+
+  if (isNaN(d.getTime())) {
+    return String(fechaHora).substring(0, 10) || "";
+  }
+
+  return `${d.getFullYear()}-${String(
+    d.getMonth() + 1
+  ).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+/** Fecha larga en español, ej. "miércoles, 7 de octubre de 2026". */
+const fechaFormateadaLarga = (fecha) => {
+  const d = new Date(`${fecha}T12:00:00`);
+
+  if (isNaN(d.getTime())) {
+    return fecha;
+  }
+
+  return d.toLocaleDateString("es-MX", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+};
+
 function Cargas({ usuario }) {
   // ============================================
   // ESTADOS
@@ -25,6 +71,16 @@ function Cargas({ usuario }) {
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
+
+  /**
+   * HU-013
+   * Día seleccionado para paginar las
+   * cargas (YYYY-MM-DD).
+   *
+   * Cada "página" muestra las cargas
+   * de un solo día.
+   */
+  const [fechaFiltro, setFechaFiltro] = useState(fechaDeHoy());
 
   // ============================================
   // CARGAR DATOS AL ENTRAR
@@ -209,6 +265,57 @@ function Cargas({ usuario }) {
     (total, fila) => total + (Number(fila.cantidad) || 0),
     0
   );
+
+  // ============================================
+  // PAGINADO POR DÍAS (HU-013)
+  // ============================================
+
+  /** Días distintos que tienen cargas, del más reciente al más antiguo. */
+  const diasConCargas = Array.from(
+    new Set(
+      cargas
+        .map((carga) => fechaDeCarga(carga.fechaHora))
+        .filter(Boolean)
+    )
+  )
+    .sort()
+    .reverse();
+
+  /** Cargas registradas el día seleccionado. */
+  const cargasDelDia = cargas.filter(
+    (carga) => fechaDeCarga(carga.fechaHora) === fechaFiltro
+  );
+
+  const totalGarrafonesDelDia = cargasDelDia.reduce(
+    (total, carga) => total + (Number(carga.cantidad) || 0),
+    0
+  );
+
+  /** Va al día con cargas inmediatamente anterior (más antiguo). */
+  const diaAnterior = () => {
+    const diasPrevios = diasConCargas.filter(
+      (dia) => dia < fechaFiltro
+    );
+
+    if (diasPrevios.length > 0) {
+      setFechaFiltro(diasPrevios[0]);
+    }
+  };
+
+  /** Va al día con cargas inmediatamente siguiente (más reciente). */
+  const diaSiguiente = () => {
+    const diasPosteriores = diasConCargas.filter(
+      (dia) => dia > fechaFiltro
+    );
+
+    if (diasPosteriores.length > 0) {
+      setFechaFiltro(
+        diasPosteriores[diasPosteriores.length - 1]
+      );
+    }
+  };
+
+  const irAHoy = () => setFechaFiltro(fechaDeHoy());
 
   // ============================================
   // REGISTRAR CARGAS (VARIOS GARRAFONES)
@@ -886,6 +993,123 @@ function Cargas({ usuario }) {
       </div>
 
       {/* ========================================
+          PAGINADO POR DÍA (CALENDARIO)
+      ======================================== */}
+
+      <div
+        className="panel"
+        style={{
+          marginBottom: "20px",
+          padding: "18px",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "10px",
+            alignItems: "center",
+            justifyContent:
+              "space-between",
+          }}
+        >
+          <div>
+            <h2 style={{ margin: 0 }}>
+              📅 Cargas del día
+            </h2>
+
+            <small style={{ color: "#666" }}>
+              {fechaFormateadaLarga(fechaFiltro)}
+            </small>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
+            <button
+              type="button"
+              onClick={diaAnterior}
+              disabled={
+                cargando ||
+                !diasConCargas.some(
+                  (dia) => dia < fechaFiltro
+                )
+              }
+              style={{
+                padding: "8px 12px",
+                cursor: "...",
+              }}
+            >
+              ◀ Día anterior
+            </button>
+
+            <input
+              type="date"
+              value={fechaFiltro}
+              onChange={(e) =>
+                e.target.value &&
+                setFechaFiltro(e.target.value)
+              }
+              style={{ padding: "8px" }}
+            />
+
+            <button
+              type="button"
+              onClick={diaSiguiente}
+              disabled={
+                cargando ||
+                !diasConCargas.some(
+                  (dia) => dia > fechaFiltro
+                )
+              }
+              style={{
+                padding: "8px 12px",
+                cursor: "...",
+              }}
+            >
+              Día siguiente ▶
+            </button>
+
+            <button
+              type="button"
+              onClick={irAHoy}
+              style={{
+                padding: "8px 12px",
+                cursor: "pointer",
+              }}
+            >
+              Hoy
+            </button>
+          </div>
+        </div>
+
+        <p
+          style={{
+            marginTop: "12px",
+            color: "#666",
+            fontSize: "14px",
+          }}
+        >
+          Mostrando <strong>{cargasDelDia.length}</strong>{" "}
+          carga(s) y{" "}
+          <strong>{totalGarrafonesDelDia}</strong>{" "}
+          garrafones
+          {diasConCargas.length > 0
+            ? diasConCargas.includes(fechaFiltro)
+              ? ` — página ${
+                  diasConCargas.indexOf(fechaFiltro) + 1
+                } de ${diasConCargas.length} con cargas`
+              : " — sin cargas este día"
+            : ""}
+        </p>
+      </div>
+
+      {/* ========================================
           CARGAS REGISTRADAS
       ======================================== */}
 
@@ -941,10 +1165,11 @@ function Cargas({ usuario }) {
             SIN CARGAS
         ====================================== */}
 
-        {cargas.length === 0 ? (
+        {cargasDelDia.length === 0 ? (
           <p>
-            No hay cargas registradas
-            todavía.
+            {cargas.length === 0
+              ? "No hay cargas registradas todavía."
+              : "No hay cargas registradas este día."}
           </p>
         ) : (
           <div
@@ -987,7 +1212,7 @@ function Cargas({ usuario }) {
               </thead>
 
               <tbody>
-                {cargas.map(
+                {cargasDelDia.map(
                   (carga) => (
                     <tr
                       key={
