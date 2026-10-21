@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import MonitorVehiculos from "./MonitorVehiculos";
+import StockGarrafones from "./StockGarrafones";
 import InicioPage from "./InicioPage";
 import Register from "./Register";
 import Productos from "./Productos";
@@ -154,6 +155,8 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
     switch (seccion) {
       case "inicio":
         return (
+          <>
+          <StockGarrafones />
           <InicioPage
 
 
@@ -161,6 +164,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
             tienePermiso={tienePermiso}
             onNavegar={cambiarSeccion}
           />
+          </>
         );
 
       case "inventarioProductos":
