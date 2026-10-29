@@ -28,6 +28,7 @@ import CrearProveedor from "./CrearProveedor";
 
 // HU-011 - CLIENTES
 import Clientes from "./Clientes";
+import SegmentacionClientes from "./SegmentacionClientes";
 import CrearCliente from "./CrearCliente";
 import EditarCliente from "./EditarCliente";
 
@@ -70,6 +71,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
     { id: "proveedores", texto: "🚚 Proveedores" },
     // HU-011
     { id: "clientes", texto: "🧑 Clientes" },
+    ...(usuario.userTipo === 0 ? [{ id: "segmentacion", texto: "📊 Segmentación de clientes" }] : []),
     // RUTAS
     { id: "rutas", texto: "🗺️ Rutas" },
     // HU-005
@@ -245,6 +247,9 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
       // ============================================
       // HU-011 - CLIENTES
       // ============================================
+      case "segmentacion":
+        return <SegmentacionClientes />;
+
       case "clientes":
         return (
           <Clientes
