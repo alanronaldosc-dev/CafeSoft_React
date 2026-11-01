@@ -115,6 +115,7 @@ function SaldoPuntosCliente({ clienteId }) {
 
 function Clientes({ onCrear, onEditar }) {
   const [clientes, setClientes] = useState([]);
+  const [segmentos, setSegmentos] = useState({});
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState("");
   const [letraFiltro, setLetraFiltro] = useState("");
@@ -132,6 +133,11 @@ function Clientes({ onCrear, onEditar }) {
       setCargando(true);
       const res = await api.get("/clientes");
       setClientes(Array.isArray(res.data) ? res.data : []);
+      // La API restringe la consulta de segmentos a ADMIN.
+      try {
+        const respuesta = await api.get("/clientes/segmentos");
+        setSegmentos(Object.fromEntries((respuesta.data || []).map(x => [x.clienteId, x])));
+      } catch { setSegmentos({}); }
     } catch (error) {
       console.error("Error al cargar clientes:", error);
       alert("No se pudieron cargar los clientes");
@@ -587,6 +593,13 @@ function Clientes({ onCrear, onEditar }) {
                   "Sin especificar"}
               </p>
 
+              {/* HU-036: indicador de segmentación en ficha administrativa */}
+              {segmentos[cliente.id] && (
+                <div style={{padding:"10px",borderRadius:8,background:"#164e63",color:"#cffafe",marginTop:10}}>
+                  <strong>Segmento: {segmentos[cliente.id].segmento.replaceAll("_", " ")}</strong>
+                  <div style={{fontSize:12}}>{segmentos[cliente.id].regla}</div>
+                </div>
+              )}
               {/* HU-026: saldo de puntos del cliente */}
               <SaldoPuntosCliente clienteId={cliente.id} />
 
