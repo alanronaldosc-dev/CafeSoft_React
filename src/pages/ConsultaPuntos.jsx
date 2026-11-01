@@ -10,8 +10,6 @@ export default function ConsultaPuntos({ clientes = [] }) {
  <button type="button" onClick={consultar} disabled={!id}>Consultar saldo</button>
  {error&&<p role="alert">{error}</p>}{datos&&<div><p><strong>{datos.nombre}: {datos.saldo} puntos</strong></p><small>1 punto por garrafón comprado. Saldo de solo lectura.</small><ul>{datos.movimientos?.map(m=><li key={m.ventaId}>Venta #{m.ventaId}: +{m.puntos} puntos</li>)}</ul></div>}
  </div>;
-feature/rutas-asignadas
+
 }
-=======
-}
-main
+
