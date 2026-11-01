@@ -1,5 +1,4 @@
-
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import api from "../services/api";
 import "./SegmentacionClientes.css";
 
@@ -69,6 +68,7 @@ export default function SegmentacionClientes() {
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(true);
   const [actualizado, setActualizado] = useState(null);
+  const perfilRef = useRef(null);
 
   const cargar = useCallback(async () => {
     setCargando(true);
@@ -297,9 +297,15 @@ export default function SegmentacionClientes() {
                       <button
                         type="button"
                         className="sc-boton-perfil"
-                        onClick={() =>
-                          setSeleccionadoId(cliente.clienteId)
-                        }
+                        onClick={() => {
+                          setSeleccionadoId(cliente.clienteId);
+                          setTimeout(() => {
+                            perfilRef.current?.scrollIntoView({
+                              behavior: "smooth",
+                              block: "start",
+                            });
+                          }, 50);
+                        }}
                       >
                         Ver perfil →
                       </button>
@@ -346,7 +352,7 @@ export default function SegmentacionClientes() {
         </div>
       </section>
 
-      <section className="sc-seccion sc-seccion-perfil">
+      <section className="sc-seccion sc-seccion-perfil" ref={perfilRef}>
         <div className="sc-titulo-seccion">
           <div>
             <span className="sc-hu sc-hu-secundaria">HU-036</span>
