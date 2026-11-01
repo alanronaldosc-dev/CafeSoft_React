@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import MonitorVehiculos from "./MonitorVehiculos";
 import InicioPage from "./InicioPage";
 import Register from "./Register";
 import Productos from "./Productos";
@@ -62,6 +63,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
     { id: "clientesFrecuentes", texto: "⭐ Clientes Frecuentes" },
     { id: "pedidos", texto: "🍽️ Pedidos" },
     { id: "productos", texto: "📦 Ver Productos" },
+    { id: "monitorVehiculos", texto: "📍 Monitor de Vehículos" },
     { id: "usuarios", texto: "👥 Ver Usuarios" },
     { id: "reportes", texto: "📊 Reportes" },
     { id: "carrito", texto: "🛒 Carrito de Compras" },
@@ -210,7 +212,12 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
             <h1>📊 Reportes</h1>
             <p>Aquí irán las gráficas y reportes del sistema.</p>
           </section>
+      
         );
+
+      case "monitorVehiculos":
+        return <MonitorVehiculos />;
+
 
       case "carrito":
         return <Carrito usuario={usuario} />;

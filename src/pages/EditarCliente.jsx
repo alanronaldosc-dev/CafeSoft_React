@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import { esUrlGoogleMapsValida } from "../utils/validaciones";
+
+// Extrae el mensaje del backend (400 / 403 / 404 / 429)
+const mensajeError = (error) =>
+  error?.response?.data?.mensaje ||
+  error?.response?.data?.message ||
+  null;
 
 const DIAS = [
   "Lunes",
@@ -26,6 +33,7 @@ function EditarCliente({ cliente, onVolver }) {
   );
   const [productos, setProductos] = useState([]);
   const [guardando, setGuardando] = useState(false);
+  const [errorMapas, setErrorMapas] = useState("");
 
   useEffect(() => {
     obtenerProductos();
@@ -70,6 +78,18 @@ function EditarCliente({ cliente, onVolver }) {
       return;
     }
 
+    // Validación del enlace de Google Maps antes de guardar
+    if (
+      form.linkGoogleMaps.trim() !== "" &&
+      !esUrlGoogleMapsValida(form.linkGoogleMaps)
+    ) {
+      setErrorMapas(
+        "El enlace debe ser una URL de Google Maps (https://maps.google.com/..., https://www.google.com/maps/..., https://maps.app.goo.gl/... o https://goo.gl/maps/...)"
+      );
+      return;
+    }
+    setErrorMapas("");
+
     const payload = {
       nombre: form.nombre,
       domicilio: form.domicilio,
@@ -90,7 +110,8 @@ function EditarCliente({ cliente, onVolver }) {
       if (onVolver) onVolver();
     } catch (error) {
       console.error("Error al actualizar cliente:", error);
-      alert("No se pudo actualizar el cliente");
+      console.error("Respuesta del servidor:", error?.response?.data);
+      alert(mensajeError(error) || "No se pudo actualizar el cliente");
     } finally {
       setGuardando(false);
     }
@@ -122,6 +143,11 @@ function EditarCliente({ cliente, onVolver }) {
         <div>
           <label>Link de Google Maps</label>
           <input type="text" name="linkGoogleMaps" value={form.linkGoogleMaps} onChange={cambiarCampo} />
+          {errorMapas && (
+            <p style={{ color: "#f87171", margin: "4px 0 0", fontSize: "13px" }}>
+              {errorMapas}
+            </p>
+          )}
         </div>
 
         <div>

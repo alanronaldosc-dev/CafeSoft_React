@@ -436,6 +436,7 @@ function Ventas({ usuario }) {
           <thead>
             <tr>
               <th>Folio</th>
+              <th>Puntos HU-025</th>
               <th>Fecha</th>
               <th>Subtotal</th>
               <th>IVA</th>
@@ -450,6 +451,7 @@ function Ventas({ usuario }) {
             {ventas.map((v) => (
               <tr key={v.id}>
                 <td>{v.folio}</td>
+                <td>{v.clienteFidelidadId ? `+${v.puntosGenerados ?? 0} (cliente #${v.clienteFidelidadId})` : "Sin cliente asociado"}</td>
                 <td>{new Date(v.fecha).toLocaleString()}</td>
                 <td>${v.subtotal?.toFixed(2)}</td>
                 <td>${v.impuestos?.toFixed(2)}</td>

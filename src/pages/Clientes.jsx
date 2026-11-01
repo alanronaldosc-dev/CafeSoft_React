@@ -1,5 +1,7 @@
+
 import { useEffect, useState, useMemo } from "react";
 import api from "../services/api";
+import ConsultaPuntos from "./ConsultaPuntos";
 
 const DIAS = [
   "Lunes",
@@ -12,6 +14,104 @@ const DIAS = [
 ];
 
 const LETRAS = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ".split("");
+
+// HU-026: consulta el saldo real de puntos de cada cliente visible.
+function SaldoPuntosCliente({ clienteId }) {
+  const [saldo, setSaldo] = useState(null);
+  const [cargandoSaldo, setCargandoSaldo] = useState(true);
+  const [errorSaldo, setErrorSaldo] = useState(false);
+
+  useEffect(() => {
+    let activo = true;
+    setCargandoSaldo(true);
+    setErrorSaldo(false);
+    setSaldo(null);
+
+    if (clienteId == null) {
+      setCargandoSaldo(false);
+      setErrorSaldo(true);
+      return () => {
+        activo = false;
+      };
+    }
+
+    api
+      .get(`/clientes/${clienteId}/puntos`)
+      .then(({ data }) => {
+        if (!activo) return;
+
+        const valor = Number(data?.saldo);
+
+        if (data?.saldo == null || !Number.isFinite(valor)) {
+          setErrorSaldo(true);
+        } else {
+          setSaldo(valor);
+        }
+      })
+      .catch((error) => {
+        if (!activo) return;
+        console.error(
+          `Error al consultar puntos del cliente ${clienteId}:`,
+          error
+        );
+        setErrorSaldo(true);
+      })
+      .finally(() => {
+        if (activo) setCargandoSaldo(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [clienteId]);
+
+  return (
+    <div
+      style={{
+        marginTop: "14px",
+        padding: "14px 16px",
+        borderRadius: "12px",
+        background: "#123247",
+        border: "1px solid #0e7490",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "10px",
+      }}
+    >
+      <div>
+        <div
+          style={{
+            color: "#67e8f9",
+            fontWeight: "bold",
+            fontSize: "13px",
+          }}
+        >
+          ⭐ Saldo de puntos
+        </div>
+
+        <small style={{ color: "#94a3b8" }}>
+           Programa de recompensas
+        </small>
+      </div>
+
+      <div
+        style={{
+          fontSize: "22px",
+          fontWeight: "bold",
+          color: "#facc15",
+          textAlign: "right",
+        }}
+      >
+        {cargandoSaldo
+          ? "Consultando..."
+          : errorSaldo
+          ? "No disponible"
+          : `${saldo} pts`}
+      </div>
+    </div>
+  );
+}
 
 function Clientes({ onCrear, onEditar }) {
   const [clientes, setClientes] = useState([]);
@@ -42,22 +142,28 @@ function Clientes({ onCrear, onEditar }) {
 
   const cambiarEstado = async (cliente) => {
     const esDarDeBaja = cliente.activo;
+
     const confirmar = window.confirm(
       esDarDeBaja
         ? "¿Deseas dar de baja a este cliente?"
         : "¿Deseas dar de alta a este cliente?"
     );
+
     if (!confirmar) return;
+
     try {
       const url = esDarDeBaja
         ? `/clientes/${cliente.id}/baja`
         : `/clientes/${cliente.id}/alta`;
+
       await api.put(url);
+
       alert(
         esDarDeBaja
           ? "Cliente dado de baja correctamente"
           : "Cliente dado de alta correctamente"
       );
+
       obtenerClientes();
     } catch (error) {
       console.error("Error al cambiar estado:", error);
@@ -66,7 +172,14 @@ function Clientes({ onCrear, onEditar }) {
   };
 
   const eliminarCliente = async (id) => {
-    if (!window.confirm("¿Deseas eliminar definitivamente este cliente?")) return;
+    if (
+      !window.confirm(
+        "¿Deseas eliminar definitivamente este cliente?"
+      )
+    ) {
+      return;
+    }
+
     try {
       await api.delete(`/clientes/${id}`);
       alert("Cliente eliminado correctamente");
@@ -77,19 +190,35 @@ function Clientes({ onCrear, onEditar }) {
     }
   };
 
-  // Filtrado: búsqueda, letra y día de reparto
+  // Filtros por nombre, domicilio, letra y día.
   const clientesFiltrados = useMemo(() => {
     return clientes.filter((c) => {
       const coincideBusqueda =
-        c.nombre?.toLowerCase().includes(busqueda.toLowerCase()) ||
-        c.domicilio?.toLowerCase().includes(busqueda.toLowerCase());
+        c.nombre
+          ?.toLowerCase()
+          .includes(busqueda.toLowerCase()) ||
+        c.domicilio
+          ?.toLowerCase()
+          .includes(busqueda.toLowerCase());
+
       const coincideLetra =
         !letraFiltro ||
-        c.nombre?.trim().toUpperCase().startsWith(letraFiltro);
+        c.nombre
+          ?.trim()
+          .toUpperCase()
+          .startsWith(letraFiltro);
+
       const coincideDia =
         !diaFiltro ||
-        c.diasReparto?.toLowerCase().includes(diaFiltro.toLowerCase());
-      return coincideBusqueda && coincideLetra && coincideDia;
+        c.diasReparto
+          ?.toLowerCase()
+          .includes(diaFiltro.toLowerCase());
+
+      return (
+        coincideBusqueda &&
+        coincideLetra &&
+        coincideDia
+      );
     });
   }, [clientes, busqueda, letraFiltro, diaFiltro]);
 
@@ -113,6 +242,9 @@ function Clientes({ onCrear, onEditar }) {
 
   return (
     <section className="panel">
+      {/* Consulta general de puntos */}
+      <ConsultaPuntos clientes={clientes} />
+
       {/* Encabezado */}
       <div
         style={{
@@ -126,15 +258,19 @@ function Clientes({ onCrear, onEditar }) {
           <h1>🧑 Clientes</h1>
           <p>Catálogo de clientes registrados.</p>
         </div>
+
         <button
           onClick={onCrear}
-          style={{ padding: "10px 18px", cursor: "pointer" }}
+          style={{
+            padding: "10px 18px",
+            cursor: "pointer",
+          }}
         >
           + Nuevo cliente
         </button>
       </div>
 
-      {/* Barra de búsqueda */}
+      {/* Buscador */}
       <input
         type="text"
         data-testid="buscar-clientes"
@@ -165,9 +301,16 @@ function Clientes({ onCrear, onEditar }) {
           marginBottom: "18px",
         }}
       >
-        {/* Filtro alfabético (desplegable) */}
         <div>
-          <span style={{ color: "#94a3b8", marginRight: "8px" }}>Letra:</span>
+          <span
+            style={{
+              color: "#94a3b8",
+              marginRight: "8px",
+            }}
+          >
+            Letra:
+          </span>
+
           <select
             value={letraFiltro}
             onChange={(e) => {
@@ -183,17 +326,25 @@ function Clientes({ onCrear, onEditar }) {
             }}
           >
             <option value="">Todas</option>
-            {LETRAS.map((l) => (
-              <option key={l} value={l}>
-                {l}
+
+            {LETRAS.map((letra) => (
+              <option key={letra} value={letra}>
+                {letra}
               </option>
             ))}
           </select>
         </div>
 
-        {/* Filtro por día */}
         <div>
-          <span style={{ color: "#94a3b8", marginRight: "8px" }}>Día:</span>
+          <span
+            style={{
+              color: "#94a3b8",
+              marginRight: "8px",
+            }}
+          >
+            Día:
+          </span>
+
           <select
             value={diaFiltro}
             onChange={(e) => {
@@ -209,23 +360,25 @@ function Clientes({ onCrear, onEditar }) {
             }}
           >
             <option value="">Todos</option>
-            {DIAS.map((d) => (
-              <option key={d} value={d}>
-                {d}
+
+            {DIAS.map((dia) => (
+              <option key={dia} value={dia}>
+                {dia}
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      {/* Fichas */}
+      {/* Tarjetas de clientes */}
       {fichaPagina.length === 0 ? (
         <p>No hay clientes que coincidan.</p>
       ) : (
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(300px, 1fr))",
             gap: "16px",
           }}
         >
@@ -235,15 +388,18 @@ function Clientes({ onCrear, onEditar }) {
               data-testid="ficha-cliente"
               data-cliente-id={cliente.id}
               style={{
-                border: cliente.activo
-                  ? "1px solid #1e293b"
-                  : "2px solid #ef4444",
+                border:
+                  cliente.activo === false
+                    ? "2px solid #ef4444"
+                    : "1px solid #1e293b",
                 borderRadius: "14px",
                 padding: "18px",
                 background: "#0f172a",
-                boxShadow: "0 4px 14px rgba(0,0,0,.35)",
+                boxShadow:
+                  "0 4px 14px rgba(0,0,0,.35)",
               }}
             >
+              {/* Estado del cliente */}
               {cliente.activo === false && (
                 <span
                   style={{
@@ -260,6 +416,8 @@ function Clientes({ onCrear, onEditar }) {
                   ⛔ Dado de baja
                 </span>
               )}
+
+              {/* Nombre */}
               <div
                 style={{
                   display: "flex",
@@ -282,6 +440,7 @@ function Clientes({ onCrear, onEditar }) {
                 >
                   🧑
                 </div>
+
                 <div>
                   <div
                     style={{
@@ -292,21 +451,31 @@ function Clientes({ onCrear, onEditar }) {
                   >
                     MÓDULO
                   </div>
-                  <h3 style={{ margin: 0, color: "#f1f5f9" }}>
+
+                  <h3
+                    style={{
+                      margin: 0,
+                      color: "#f1f5f9",
+                    }}
+                  >
                     {cliente.nombre}
                   </h3>
                 </div>
+
                 <span
                   style={{
                     marginLeft: "auto",
                     width: "8px",
                     height: "8px",
                     borderRadius: "50%",
-                    background: "#22c55e",
+                    background: cliente.activo === false
+                      ? "#ef4444"
+                      : "#22c55e",
                   }}
                 />
               </div>
 
+              {/* Fotografía */}
               {cliente.fotografiaDomicilio && (
                 <img
                   src={`data:image/jpeg;base64,${cliente.fotografiaDomicilio}`}
@@ -321,12 +490,28 @@ function Clientes({ onCrear, onEditar }) {
                 />
               )}
 
-              <p style={{ color: "#94a3b8", margin: "4px 0" }}>
-                <strong style={{ color: "#cbd5e1" }}>Domicilio:</strong>{" "}
+              {/* Datos */}
+              <p
+                style={{
+                  color: "#94a3b8",
+                  margin: "4px 0",
+                }}
+              >
+                <strong style={{ color: "#cbd5e1" }}>
+                  Domicilio:
+                </strong>{" "}
                 {cliente.domicilio}
               </p>
-              <p style={{ color: "#94a3b8", margin: "4px 0" }}>
-                <strong style={{ color: "#cbd5e1" }}>Google Maps:</strong>{" "}
+
+              <p
+                style={{
+                  color: "#94a3b8",
+                  margin: "4px 0",
+                }}
+              >
+                <strong style={{ color: "#cbd5e1" }}>
+                  Google Maps:
+                </strong>{" "}
                 {cliente.linkGoogleMaps ? (
                   <a
                     href={cliente.linkGoogleMaps}
@@ -340,21 +525,41 @@ function Clientes({ onCrear, onEditar }) {
                   "Sin especificar"
                 )}
               </p>
-              <p style={{ color: "#94a3b8", margin: "4px 0" }}>
-                <strong style={{ color: "#cbd5e1" }}>Días:</strong>{" "}
+
+              <p
+                style={{
+                  color: "#94a3b8",
+                  margin: "4px 0",
+                }}
+              >
+                <strong style={{ color: "#cbd5e1" }}>
+                  Días:
+                </strong>{" "}
                 {cliente.diasReparto || "Sin especificar"}
               </p>
-              <p style={{ color: "#94a3b8", margin: "4px 0" }}>
-                <strong style={{ color: "#cbd5e1" }}>Frecuencia:</strong>{" "}
+
+              <p
+                style={{
+                  color: "#94a3b8",
+                  margin: "4px 0",
+                }}
+              >
+                <strong style={{ color: "#cbd5e1" }}>
+                  Frecuencia:
+                </strong>{" "}
                 {cliente.frecuencia || "Sin especificar"}
               </p>
-              <p style={{ color: "#94a3b8", margin: "4px 0" }}>
-                <strong style={{ color: "#cbd5e1" }}>Precio:</strong> $
-                {cliente.precioPorGarrafon}
-              </p>
-              <p style={{ color: "#94a3b8", margin: "4px 0" }}>
-                <strong style={{ color: "#cbd5e1" }}>Garrafón:</strong>{" "}
-                {cliente.garrafonPreferencia?.nombre || "Sin especificar"}
+
+              <p
+                style={{
+                  color: "#94a3b8",
+                  margin: "4px 0",
+                }}
+              >
+                <strong style={{ color: "#cbd5e1" }}>
+                  Precio:
+                </strong>{" "}
+                ${cliente.precioPorGarrafon}
               </p>
               {/* HU-023: mostrar el saldo vigente devuelto por la API. */}
               {cliente.saldoPuntos !== null &&
@@ -369,6 +574,23 @@ function Clientes({ onCrear, onEditar }) {
                 </p>
               )}
 
+              <p
+                style={{
+                  color: "#94a3b8",
+                  margin: "4px 0",
+                }}
+              >
+                <strong style={{ color: "#cbd5e1" }}>
+                  Garrafón:
+                </strong>{" "}
+                {cliente.garrafonPreferencia?.nombre ||
+                  "Sin especificar"}
+              </p>
+
+              {/* HU-026: saldo de puntos del cliente */}
+              <SaldoPuntosCliente clienteId={cliente.id} />
+
+              {/* Acciones */}
               <div
                 style={{
                   display: "flex",
@@ -376,11 +598,23 @@ function Clientes({ onCrear, onEditar }) {
                   marginTop: "14px",
                 }}
               >
-                <button onClick={() => onEditar(cliente)}>Editar</button>
-                <button onClick={() => cambiarEstado(cliente)}>
-                  {cliente.activo ? "Dar de baja" : "Dar de alta"}
+                <button
+                  onClick={() => onEditar(cliente)}
+                >
+                  Editar
                 </button>
-                <button onClick={() => eliminarCliente(cliente.id)}>
+
+                <button
+                  onClick={() => cambiarEstado(cliente)}
+                >
+                  {cliente.activo
+                    ? "Dar de baja"
+                    : "Dar de alta"}
+                </button>
+
+                <button
+                  onClick={() => eliminarCliente(cliente.id)}
+                >
                   Eliminar
                 </button>
               </div>
@@ -389,7 +623,7 @@ function Clientes({ onCrear, onEditar }) {
         </div>
       )}
 
-      {/* Paginado */}
+      {/* Paginación */}
       <div
         style={{
           display: "flex",
@@ -400,17 +634,25 @@ function Clientes({ onCrear, onEditar }) {
       >
         <button
           disabled={pagina <= 1}
-          onClick={() => setPagina((p) => Math.max(1, p - 1))}
+          onClick={() =>
+            setPagina((p) => Math.max(1, p - 1))
+          }
           style={{ cursor: "pointer" }}
         >
           ← Anterior
         </button>
+
         <span style={{ color: "#94a3b8" }}>
           Página {pagina} de {totalPaginas}
         </span>
+
         <button
           disabled={pagina >= totalPaginas}
-          onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+          onClick={() =>
+            setPagina((p) =>
+              Math.min(totalPaginas, p + 1)
+            )
+          }
           style={{ cursor: "pointer" }}
         >
           Siguiente →
