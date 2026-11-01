@@ -16,6 +16,10 @@ import Carrito from "./Carrito";
 import Categorias from "./Categorias";
 import CrearCategoria from "./CrearCategoria";
 import AgregarProductosCategoria from "./AgregarProductosCategoria";
+import ClientesFrecuentes from "./ClientesFrecuentes";
+import Promociones from "./Promociones";
+
+
 import PerfilUsuario from "./PerfilUsuario";
 
 import Dashboard from "./Dashboard";
@@ -56,6 +60,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
     { id: "inicio", texto: "🏠 Inicio" },
     { id: "crearProducto", texto: "☕ Crear Producto" },
     { id: "ventas", texto: "🧾 Ver Ventas" },
+    { id: "clientesFrecuentes", texto: "⭐ Clientes Frecuentes" },
     { id: "pedidos", texto: "🍽️ Pedidos" },
     { id: "productos", texto: "📦 Ver Productos" },
     { id: "monitorVehiculos", texto: "📍 Monitor de Vehículos" },
@@ -76,6 +81,8 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
     { id: "cargas", texto: "🚰 Cargas de Garrafones" },
     // HU-016
     { id: "liquidaciones", texto: "💵 Liquidación de Repartidores" },
+    { id: "promociones", texto: "🏷️ Promociones" },
+
   ];
 
   // ============================================
@@ -162,6 +169,15 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
             onNavegar={cambiarSeccion}
           />
         );
+
+        case "clientesFrecuentes":
+  return <ClientesFrecuentes />;
+
+        case "promociones":
+  return <Promociones usuario={usuario} />;
+
+
+
 
       case "inventarioProductos":
         return (
@@ -371,6 +387,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
             .map((item) => (
               <p
                 key={item.id}
+                data-testid={`menu-${item.id}`}
                 onClick={() => cambiarSeccion(item.id)}
                 className={seccion === item.id ? "active-menu" : ""}
                 style={{ cursor: "pointer" }}
