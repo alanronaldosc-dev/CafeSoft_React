@@ -15,6 +15,8 @@ function Liquidaciones() {
   const [guardando, setGuardando] = useState(false);
   const [resultado, setResultado] = useState(null);
   const [error, setError] = useState("");
+  const [liquidaciones, setLiquidaciones] = useState([]);
+  const [paginaActual, setPaginaActual] = useState(0);
 
   useEffect(() => {
     cargarRepartidores();
@@ -23,10 +25,24 @@ function Liquidaciones() {
   useEffect(() => {
     if (repartidorId) {
       cargarResumen();
+      cargarLiquidaciones();
     } else {
       setResumen(null);
+      setLiquidaciones([]);
     }
   }, [repartidorId, fecha]);
+
+  const cargarLiquidaciones = async () => {
+    if (!repartidorId) return;
+    try {
+      const res = await api.get(`/liquidaciones/repartidor/${repartidorId}`);
+      setLiquidaciones(Array.isArray(res.data) ? res.data : []);
+      setPaginaActual(0);
+    } catch (e) {
+      console.error(e);
+      setLiquidaciones([]);
+    }
+  };
 
   const cargarRepartidores = async () => {
     try {
@@ -113,6 +129,7 @@ function Liquidaciones() {
       });
 
       setResultado(res.data);
+      await cargarLiquidaciones();
     } catch (e) {
       console.error(e);
       setError(
@@ -126,6 +143,28 @@ function Liquidaciones() {
 
   const moneda = (valor) => `$${Number(valor || 0).toFixed(2)}`;
   const numero = (valor) => Number(valor || 0).toFixed(0);
+
+  const descargarPdfLiquidacion = async (liq) => {
+    if (!liq) return;
+    try {
+      const fechaStr = liq.fechaOperacion;
+      const res = await api.get(
+        `/liquidaciones/repartidor/${liq.repartidorId}/pdf`,
+        { params: { fecha: fechaStr }, responseType: "blob" }
+      );
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `liquidacion_${liq.repartidorId}_${fechaStr}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+      setError("No se pudo generar el PDF.");
+    }
+  };
 
   return (
     <section className="panel">
@@ -316,6 +355,79 @@ function Liquidaciones() {
           <p>
             Diferencia de efectivo: {moneda(resultado.diferenciaEfectivo)}
           </p>
+        </div>
+      )}
+
+      {/* ========================================
+          LISTA DE LIQUIDACIONES (paginación por día)
+      ======================================== */}
+      {liquidaciones.length > 0 && (
+        <div style={{ marginTop: 24 }}>
+          <h3 style={{ color: "#f1f5f9" }}>Historial de liquidaciones</h3>
+          <p style={{ color: "#94a3b8", fontSize: 13 }}>
+            Liquidaciones registradas para el repartidor seleccionado.
+          </p>
+
+          {(() => {
+            const porFecha = {};
+            liquidaciones.forEach((liq) => {
+              const fecha = liq.fechaOperacion;
+              if (!porFecha[fecha]) porFecha[fecha] = [];
+              porFecha[fecha].push(liq);
+            });
+            const fechas = Object.keys(porFecha).sort().reverse();
+            const fechaActual = fechas[paginaActual] || fechas[0];
+            const listaDia = porFecha[fechaActual] || [];
+
+            return (
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => setPaginaActual((p) => Math.min(p + 1, fechas.length - 1))}
+                    disabled={paginaActual >= fechas.length - 1}
+                  >
+                    Dia anterior
+                  </button>
+                  <strong style={{ color: "#f1f5f9" }}>{fechaActual}</strong>
+                  <button
+                    type="button"
+                    onClick={() => setPaginaActual((p) => Math.max(p - 1, 0))}
+                    disabled={paginaActual <= 0}
+                  >
+                    Dia siguiente
+                  </button>
+                </div>
+
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr>
+                      <th>Repartidor</th>
+                      <th>Hora</th>
+                      <th>Total ganancias</th>
+                      <th>Estado</th>
+                      <th>PDF</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {listaDia.map((liq) => (
+                      <tr key={liq.id}>
+                        <td>{liq.repartidorNombre}</td>
+                        <td>{liq.fechaCierre ? new Date(liq.fechaCierre).toLocaleTimeString() : "-"}</td>
+                        <td><strong>${Number(liq.totalEfectivo + liq.totalTransferencias).toFixed(2)}</strong></td>
+                        <td>{liq.estado}</td>
+                        <td>
+                          <button type="button" onClick={() => descargarPdfLiquidacion(liq)}>
+                            PDF
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })()}
         </div>
       )}
     </section>
