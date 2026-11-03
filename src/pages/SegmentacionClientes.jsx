@@ -103,10 +103,10 @@ export default function SegmentacionClientes() {
     }
   }, [obtenerSegmentacion]);
 
-  const actualizar = () => {
+  const actualizar = async () => {
     setCargando(true);
     setError("");
-    cargar();
+    await cargar();
   };
 
   useEffect(() => {

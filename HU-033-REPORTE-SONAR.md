@@ -12,6 +12,9 @@
   `minGarrafones` y `acumulaPuntos` de la promoción seleccionada.
 - Corregido el estado de carga de la segmentación para que las actualizaciones
   desde el botón sean visibles.
+- Esperada la recarga de promociones después de crear, editar, desactivar o
+  eliminar para manejar el ciclo asíncrono de forma explícita.
+- Asociadas las etiquetas del formulario de promociones con sus controles.
 - Añadida configuración `sonar-project.properties` limitada a las dos páginas
   en alcance. No se incluyen las pruebas E2E ajenas a esta historia.
 
@@ -21,21 +24,18 @@
 |---|---|
 | ESLint de los dos archivos objetivo | Aprobado. |
 | `git diff --check` | Aprobado. |
-| SonarQube for IDE sobre las páginas objetivo | Se analizaron de nuevo ambos archivos; la vista Problems no reportó observaciones en ellos. No es un análisis consolidado del servidor ni un resultado de Quality Gate. |
-| Security Hotspots / taint de SonarQube | No disponibles: falta conectar el workspace a SonarQube Server o Cloud. |
-| SonarScanner de servidor | Bloqueado: no hay servidor configurado, scanner ni token de análisis. |
-| Pruebas automatizadas específicas de Promociones/Segmentación | No existen en el repositorio; la prueba E2E existente es de canje de puntos y requiere `TEST_EMAIL`, por lo que no se considera evidencia de esta HU. |
-| Build de producción | No aprobado en el entorno: Rolldown no pudo cargar su binding nativo de Windows por una directiva de Control de aplicaciones. |
+| SonarQube Community Build 26.10.0.133078 | Ejecutado localmente contra el proyecto `cafesoft-react-hu033`, limitado a `Promociones.jsx` y `SegmentacionClientes.jsx`; Quality Gate **PASSED**. |
+| Hallazgos Sonar después de las correcciones | 0 bugs, 0 vulnerabilidades, 0 Security Hotspots y 0 code smells abiertos; 1,024 líneas de código analizadas. |
+| Cobertura reportada por Sonar | 0.0%; no hay reporte de cobertura de pruebas asociado a estos componentes. |
+| Build de producción (`npm run build`) | Aprobado; Vite mostró una advertencia de tamaño de bundle superior a 500 kB. |
+| Pruebas automatizadas específicas de Promociones/Segmentación | No existen en el repositorio. La prueba E2E existente cubre canje de puntos y requiere `TEST_EMAIL`, por lo que no se considera evidencia de esta HU. |
 
 ## Conclusión y pendientes
 
-Esta rama contiene correcciones locales de calidad y configuración de análisis,
-pero **HU-033 no puede declararse terminada** sin análisis Sonar de servidor y
-Quality Gate verificable. También queda pendiente agregar/ejecutar pruebas
-automatizadas que cubran las interacciones de promociones y segmentación.
-No se afirma que el código esté libre de vulnerabilidades a partir de un
-análisis IDE no conectado.
-
-Para completar la evidencia, conectar el proyecto SonarQube con un token
-guardado fuera del repositorio, ejecutar el scanner sobre esta rama, resolver
-los hallazgos aplicables y adjuntar el resultado real del Quality Gate.
+El análisis estático solicitado quedó ejecutado y aprobado en SonarQube
+Community Build local; los hallazgos de las dos páginas se corrigieron y el
+reanálisis quedó sin issues abiertos. El build y ESLint también pasaron.
+**Sigue pendiente la evidencia de pruebas funcionales automatizadas y
+cobertura** para los flujos de promociones y segmentación; el Quality Gate no
+demuestra por sí solo esa cobertura. La instancia es local (`localhost:9000`),
+no SonarQube Cloud, y no está publicada para otros equipos.

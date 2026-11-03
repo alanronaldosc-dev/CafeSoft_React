@@ -150,7 +150,7 @@ function Promociones({ usuario }) {
         setMensaje("✅ Promoción creada correctamente.");
       }
       cancelarForm();
-      cargarPromociones();
+      await cargarPromociones();
     } catch (err) {
       setError(
         err.response?.data?.mensaje ||
@@ -166,7 +166,7 @@ function Promociones({ usuario }) {
     try {
       await api.put(`/promociones/${id}/desactivar`);
       setMensaje("✅ Promoción desactivada.");
-      cargarPromociones();
+      await cargarPromociones();
     } catch (err) {
       setError(
         err.response?.data?.mensaje ||
@@ -182,7 +182,7 @@ function Promociones({ usuario }) {
     try {
       await api.delete(`/promociones/${id}`);
       setMensaje("✅ Promoción eliminada.");
-      cargarPromociones();
+      await cargarPromociones();
     } catch (err) {
       setError(
         err.response?.data?.mensaje ||
@@ -307,10 +307,11 @@ function Promociones({ usuario }) {
           >
             {/* Nombre */}
             <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>
+              <label htmlFor="promo-nombre" style={labelStyle}>
                 Nombre <span style={{ color: "#E05252" }}>*</span>
               </label>
               <input
+                id="promo-nombre"
                 name="nombre"
                 value={form.nombre}
                 onChange={handleChange}
@@ -323,8 +324,9 @@ function Promociones({ usuario }) {
 
             {/* Descripción */}
             <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Descripción</label>
+              <label htmlFor="promo-descripcion" style={labelStyle}>Descripción</label>
               <input
+                id="promo-descripcion"
                 name="descripcion"
                 value={form.descripcion}
                 onChange={handleChange}
@@ -335,10 +337,11 @@ function Promociones({ usuario }) {
 
             {/* Descuento */}
             <div>
-            <label style={labelStyle}>
+            <label htmlFor="promo-descuento" style={labelStyle}>
                 Descuento (%) <span style={{ color: "#E05252" }}>*</span>
             </label>
             <input
+                id="promo-descuento"
                 name="descuentoPorcentaje"
                 type="number"
                 min="0.01"
@@ -354,13 +357,14 @@ function Promociones({ usuario }) {
 
             {/* Mínimo de garrafones */}
             <div>
-            <label style={labelStyle}>
+            <label htmlFor="promo-min-garrafones" style={labelStyle}>
                 Mínimo de garrafones
                 <span style={{ color: "#8D9DB6", fontWeight: 400, marginLeft: 6, fontSize: 11 }}>
                 (opcional — dejar vacío para sin condición)
                 </span>
             </label>
             <input
+                id="promo-min-garrafones"
                 name="minGarrafones"
                 type="number"
                 min="1"
@@ -392,8 +396,9 @@ function Promociones({ usuario }) {
 
             {/* Sucursal — solo muestra */}
             <div style={{ gridColumn: "1 / -1" }}>
-            <label style={labelStyle}>Sucursal</label>
+            <label htmlFor="promo-sucursal" style={labelStyle}>Sucursal</label>
             <input
+                id="promo-sucursal"
                 value={usuario?.sucursalNombre || `Sucursal #${usuario?.sucursalId}` || "Tu sucursal"}
                 readOnly
                 style={{ ...inputStyle, opacity: 0.6, cursor: "not-allowed" }}
@@ -402,10 +407,11 @@ function Promociones({ usuario }) {
 
             {/* Fecha inicio */}
             <div>
-              <label style={labelStyle}>
+              <label htmlFor="promo-fecha-inicio" style={labelStyle}>
                 Fecha de inicio <span style={{ color: "#E05252" }}>*</span>
               </label>
               <input
+                id="promo-fecha-inicio"
                 name="fechaInicio"
                 type="datetime-local"
                 value={form.fechaInicio}
@@ -417,10 +423,11 @@ function Promociones({ usuario }) {
 
             {/* Fecha fin */}
             <div>
-              <label style={labelStyle}>
+              <label htmlFor="promo-fecha-fin" style={labelStyle}>
                 Fecha de fin <span style={{ color: "#E05252" }}>*</span>
               </label>
               <input
+                id="promo-fecha-fin"
                 name="fechaFin"
                 type="datetime-local"
                 value={form.fechaFin}

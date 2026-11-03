@@ -29,6 +29,7 @@ dist-ssr
 
 # Cobertura de pruebas
 coverage/
+.scannerwork/
 
 # Archivos temporales
 *.tmp
