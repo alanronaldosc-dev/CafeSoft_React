@@ -26,16 +26,20 @@
 | `git diff --check` | Aprobado. |
 | SonarQube Community Build 26.10.0.133078 | Ejecutado localmente contra el proyecto `cafesoft-react-hu033`, limitado a `Promociones.jsx` y `SegmentacionClientes.jsx`; Quality Gate **PASSED**. |
 | Hallazgos Sonar después de las correcciones | 0 bugs, 0 vulnerabilidades, 0 Security Hotspots y 0 code smells abiertos; 1,024 líneas de código analizadas. |
-| Cobertura reportada por Sonar | 0.0%; no hay reporte de cobertura de pruebas asociado a estos componentes. |
+| Pruebas automatizadas de HU-033 | 4 pruebas Vitest aprobadas en `Promociones.test.jsx` y `SegmentacionClientes.test.jsx`. |
+| Cobertura local de las dos pantallas | 80.25% líneas, 79.26% sentencias, 75.51% funciones y 53.28% ramas. |
 | Build de producción (`npm run build`) | Aprobado; Vite mostró una advertencia de tamaño de bundle superior a 500 kB. |
-| Pruebas automatizadas específicas de Promociones/Segmentación | No existen en el repositorio. La prueba E2E existente cubre canje de puntos y requiere `TEST_EMAIL`, por lo que no se considera evidencia de esta HU. |
+| Validación de runtime | Aprobadas las 4 comprobaciones standalone: build, ESLint focalizado, pruebas Vitest y respuesta HTTP 200 de la aplicación. |
+| ESLint global (`npm run lint`) | No aprobado: 43 errores y 14 advertencias en el repositorio fuera del alcance de esta HU. El lint de las dos pantallas y sus pruebas sí pasó. |
+| Cobertura del último análisis Sonar | El dashboard registra 0.0% porque el análisis Sonar aprobado se ejecutó antes de generar el reporte de cobertura. La cobertura Vitest indicada arriba es local; no se volvió a publicar en SonarQube. |
 
 ## Conclusión y pendientes
 
 El análisis estático solicitado quedó ejecutado y aprobado en SonarQube
 Community Build local; los hallazgos de las dos páginas se corrigieron y el
-reanálisis quedó sin issues abiertos. El build y ESLint también pasaron.
-**Sigue pendiente la evidencia de pruebas funcionales automatizadas y
-cobertura** para los flujos de promociones y segmentación; el Quality Gate no
-demuestra por sí solo esa cobertura. La instancia es local (`localhost:9000`),
-no SonarQube Cloud, y no está publicada para otros equipos.
+reanálisis quedó sin issues abiertos. Las pruebas automatizadas específicas
+ahora pasan y generan cobertura local. El build y el lint focalizado también
+pasaron; el lint global sigue fallando por hallazgos ajenos a esta HU. La
+cobertura no se ha vuelto a publicar en el dashboard Sonar. La instancia es
+local (`localhost:9000`), no SonarQube Cloud, y no está publicada para otros
+equipos.

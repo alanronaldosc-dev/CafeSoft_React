@@ -30,6 +30,7 @@ dist-ssr
 # Cobertura de pruebas
 coverage/
 .scannerwork/
+.tsupgrader/
 
 # Archivos temporales
 *.tmp
