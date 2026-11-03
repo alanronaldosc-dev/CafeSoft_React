@@ -47,6 +47,7 @@ function Promociones({ usuario }) {
 
   const cargarPromociones = useCallback(async () => {
     try {
+      setCargando(true);
       setPromociones(await obtenerPromociones());
       setError("");
     } catch (err) {
