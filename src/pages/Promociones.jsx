@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../services/api";
 
 // Recibe usuario como prop igual que Cargas, Clientes, etc.
@@ -40,17 +40,15 @@ function Promociones({ usuario }) {
     color: "#94a3b8",
   };
 
-  // ── Cargar al montar ──
-  useEffect(() => {
-    cargarPromociones();
+  const obtenerPromociones = useCallback(async () => {
+    const res = await api.get("/promociones");
+    return Array.isArray(res.data) ? res.data : [];
   }, []);
 
-  const cargarPromociones = async () => {
+  const cargarPromociones = useCallback(async () => {
     try {
-      setCargando(true);
+      setPromociones(await obtenerPromociones());
       setError("");
-      const res = await api.get("/promociones");
-      setPromociones(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       setError(
         err.response?.data?.mensaje ||
@@ -60,7 +58,36 @@ function Promociones({ usuario }) {
     } finally {
       setCargando(false);
     }
-  };
+  }, [obtenerPromociones]);
+
+  // ── Cargar al montar ──
+  useEffect(() => {
+    let activa = true;
+
+    obtenerPromociones()
+      .then((datos) => {
+        if (activa) {
+          setPromociones(datos);
+          setError("");
+        }
+      })
+      .catch((err) => {
+        if (activa) {
+          setError(
+            err.response?.data?.mensaje ||
+              err.response?.data?.message ||
+              "No se pudieron cargar las promociones."
+          );
+        }
+      })
+      .finally(() => {
+        if (activa) setCargando(false);
+      });
+
+    return () => {
+      activa = false;
+    };
+  }, [obtenerPromociones]);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -82,7 +109,8 @@ function Promociones({ usuario }) {
       descuentoPorcentaje: promo.descuentoPorcentaje,
       fechaInicio:         promo.fechaInicio?.slice(0, 16) || "",
       fechaFin:            promo.fechaFin?.slice(0, 16)    || "",
-      minGarrafones: form.minGarrafones !== "" ? Number(form.minGarrafones) : null,
+      minGarrafones:       String(promo.minGarrafones ?? ""),
+      acumulaPuntos:       promo.acumulaPuntos ?? true,
     });
     setMostrarForm(true);
     setMensaje("");

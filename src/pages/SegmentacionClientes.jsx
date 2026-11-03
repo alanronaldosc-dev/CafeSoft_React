@@ -70,23 +70,28 @@ export default function SegmentacionClientes() {
   const [actualizado, setActualizado] = useState(null);
   const perfilRef = useRef(null);
 
+  const obtenerSegmentacion = useCallback(async () => {
+    const [respuestaResumen, respuestaClientes] = await Promise.all([
+      api.get("/clientes/segmentos/resumen"),
+      api.get("/clientes/segmentos"),
+    ]);
+
+    return {
+      resumen: respuestaResumen.data,
+      clientes: Array.isArray(respuestaClientes.data)
+        ? respuestaClientes.data
+        : [],
+      actualizado: new Date(),
+    };
+  }, []);
+
   const cargar = useCallback(async () => {
-    setCargando(true);
-    setError("");
-
     try {
-      const [respuestaResumen, respuestaClientes] = await Promise.all([
-        api.get("/clientes/segmentos/resumen"),
-        api.get("/clientes/segmentos"),
-      ]);
-
-      setResumen(respuestaResumen.data);
-      setClientes(
-        Array.isArray(respuestaClientes.data)
-          ? respuestaClientes.data
-          : []
-      );
-      setActualizado(new Date());
+      const datos = await obtenerSegmentacion();
+      setResumen(datos.resumen);
+      setClientes(datos.clientes);
+      setActualizado(datos.actualizado);
+      setError("");
     } catch (e) {
       setError(
         e.response?.status === 403
@@ -96,11 +101,42 @@ export default function SegmentacionClientes() {
     } finally {
       setCargando(false);
     }
-  }, []);
+  }, [obtenerSegmentacion]);
+
+  const actualizar = () => {
+    setCargando(true);
+    setError("");
+    cargar();
+  };
 
   useEffect(() => {
-    cargar();
-  }, [cargar]);
+    let activa = true;
+
+    obtenerSegmentacion()
+      .then((datos) => {
+        if (activa) {
+          setResumen(datos.resumen);
+          setClientes(datos.clientes);
+          setActualizado(datos.actualizado);
+        }
+      })
+      .catch((e) => {
+        if (activa) {
+          setError(
+            e.response?.status === 403
+              ? "Solo los administradores pueden consultar la segmentación."
+              : "No fue posible cargar la segmentación. Verifica la conexión con la API."
+          );
+        }
+      })
+      .finally(() => {
+        if (activa) setCargando(false);
+      });
+
+    return () => {
+      activa = false;
+    };
+  }, [obtenerSegmentacion]);
 
   const clienteSeleccionado = clientes.find(
     (cliente) => cliente.clienteId === seleccionadoId
@@ -138,7 +174,7 @@ export default function SegmentacionClientes() {
 
         <button
           className="sc-boton-principal"
-          onClick={cargar}
+          onClick={actualizar}
           disabled={cargando}
           type="button"
         >
