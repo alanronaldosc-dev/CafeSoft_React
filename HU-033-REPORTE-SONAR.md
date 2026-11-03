@@ -21,7 +21,7 @@
 |---|---|
 | ESLint de los dos archivos objetivo | Aprobado. |
 | `git diff --check` | Aprobado. |
-| SonarQube for IDE sobre las páginas objetivo | Se solicitaron análisis de archivo; no se obtuvo reporte consolidado ni resultado de Quality Gate. |
+| SonarQube for IDE sobre las páginas objetivo | Se analizaron de nuevo ambos archivos; la vista Problems no reportó observaciones en ellos. No es un análisis consolidado del servidor ni un resultado de Quality Gate. |
 | Security Hotspots / taint de SonarQube | No disponibles: falta conectar el workspace a SonarQube Server o Cloud. |
 | SonarScanner de servidor | Bloqueado: no hay servidor configurado, scanner ni token de análisis. |
 | Pruebas automatizadas específicas de Promociones/Segmentación | No existen en el repositorio; la prueba E2E existente es de canje de puntos y requiere `TEST_EMAIL`, por lo que no se considera evidencia de esta HU. |
