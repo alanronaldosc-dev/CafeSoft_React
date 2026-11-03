@@ -72,14 +72,17 @@ export default function ConsultaPuntos({ clientes = [] }) {
           </p>
 
           <small>
-            1 punto por garrafón comprado.
-            Saldo de solo lectura.
+            5 puntos equivalen a $1 MXN en canjes. Los saldos se cargan por un
+            proceso administrativo y no se acumulan automáticamente.
           </small>
 
           <ul>
             {datos.movimientos?.map((movimiento) => (
               <li key={movimiento.ventaId}>
-                Venta #{movimiento.ventaId}: +{movimiento.puntos} puntos
+                Venta #{movimiento.ventaId}:{" "}
+                {movimiento.puntos < 0
+                  ? `${Math.abs(movimiento.puntos)} puntos canjeados`
+                  : `+${movimiento.puntos} puntos`}
               </li>
             ))}
           </ul>

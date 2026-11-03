@@ -57,6 +57,7 @@ describe("Promociones", () => {
       descuentoPorcentaje: 20,
       minGarrafones: 0,
       acumulaPuntos: true,
+      segmentoObjetivo: "ACTIVO",
     };
     api.get
       .mockResolvedValueOnce({ data: [] })
@@ -79,6 +80,9 @@ describe("Promociones", () => {
     fireEvent.change(screen.getByLabelText(/Fecha de fin/), {
       target: { value: "2026-11-30T10:00" },
     });
+    fireEvent.change(screen.getByLabelText("Segmento objetivo"), {
+      target: { value: "ACTIVO" },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: /Crear promoción/ }));
 
@@ -92,6 +96,7 @@ describe("Promociones", () => {
           fechaFin: "2026-11-30T10:00:00",
           minGarrafones: 0,
           acumulaPuntos: true,
+          segmentoObjetivo: "ACTIVO",
         }),
       );
     });

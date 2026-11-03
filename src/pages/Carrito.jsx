@@ -11,6 +11,9 @@ function Carrito({ usuario }) {
   const [ventaCompletada, setVentaCompletada] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [clienteId, setClienteId] = useState("");
+  const [promocionesDisponibles, setPromocionesDisponibles] = useState([]);
+  const [promocionId, setPromocionId] = useState("");
+  const [errorPromociones, setErrorPromociones] = useState("");
   const [puntosSolicitados, setPuntosSolicitados] = useState("");
   const [canjeAplicado, setCanjeAplicado] = useState(null);
   const [errorCanje, setErrorCanje] = useState("");
@@ -51,6 +54,57 @@ function Carrito({ usuario }) {
   const clienteSeleccionado = clientes.find(
     (cliente) => String(cliente.id) === clienteId
   );
+  const cantidadGarrafones = carrito.reduce(
+    (total, item) => total + item.cantidad,
+    0
+  );
+
+  useEffect(() => {
+    if (!clienteId || cantidadGarrafones <= 0) {
+      return undefined;
+    }
+
+    let activa = true;
+    api
+      .get("/promociones/aplicables", {
+        params: {
+          clienteId: Number(clienteId),
+          cantidadGarrafones,
+        },
+      })
+      .then((respuesta) => {
+        if (activa) {
+          const promociones = Array.isArray(respuesta.data)
+            ? respuesta.data
+            : [];
+          setPromocionesDisponibles(promociones);
+          setErrorPromociones("");
+          setPromocionId((actual) =>
+            promociones.some((promo) => String(promo.id) === actual)
+              ? actual
+              : ""
+          );
+        }
+      })
+      .catch((error) => {
+        if (activa) {
+          setPromocionesDisponibles([]);
+          setPromocionId("");
+          setErrorPromociones(
+            error.response?.data?.message ||
+              "No se pudieron consultar las promociones disponibles."
+          );
+        }
+      });
+
+    return () => {
+      activa = false;
+    };
+  }, [clienteId, cantidadGarrafones]);
+
+  const promocionSeleccionada = promocionesDisponibles.find(
+    (promocion) => String(promocion.id) === promocionId
+  );
   const saldoPuntos =
     clienteSeleccionado?.saldoPuntos === null ||
     clienteSeleccionado?.saldoPuntos === undefined
@@ -74,6 +128,9 @@ function Carrito({ usuario }) {
   // Agregar producto
   const agregarAlCarrito = (producto) => {
     setCanjeAplicado(null);
+    setPromocionesDisponibles([]);
+    setPromocionId("");
+    setErrorPromociones("");
     const existe = carrito.find(
       (i) => i.productoId === producto.id
     );
@@ -102,6 +159,9 @@ function Carrito({ usuario }) {
   // Quitar producto
   const quitarDelCarrito = (productoId) => {
     setCanjeAplicado(null);
+    setPromocionesDisponibles([]);
+    setPromocionId("");
+    setErrorPromociones("");
     setCarrito(
       carrito.filter((i) => i.productoId !== productoId)
     );
@@ -110,6 +170,9 @@ function Carrito({ usuario }) {
   // Cambiar cantidad
   const cambiarCantidad = (productoId, cantidad) => {
     setCanjeAplicado(null);
+    setPromocionesDisponibles([]);
+    setPromocionId("");
+    setErrorPromociones("");
     if (cantidad <= 0 || isNaN(cantidad)) {
       quitarDelCarrito(productoId);
       return;
@@ -133,15 +196,29 @@ function Carrito({ usuario }) {
   const impuestos = subtotal * 0.16;
 
   const totalSinDescuento = subtotal + impuestos;
+  const descuentoPromocion = promocionSeleccionada
+    ? Math.min(
+        subtotal,
+        Math.round(
+          (subtotal * Number(promocionSeleccionada.descuentoPorcentaje)) / 100 *
+            100
+        ) / 100
+      )
+    : 0;
+  const descuentoAplicado =
+    promocionSeleccionada
+      ? descuentoPromocion
+      : canjeAplicado?.descuento || 0;
   const total = Math.max(
     0,
-    totalSinDescuento - (canjeAplicado?.descuento || 0)
+    totalSinDescuento - descuentoAplicado
   );
 
   // HU-023: pedir al backend la cotización para mantener centralizada la regla de conversión.
   const cotizarCanje = async () => {
     setErrorCanje("");
     setCanjeAplicado(null);
+    setPromocionId("");
 
     const puntos = Number(puntosSolicitados);
     if (!clienteSeleccionado) {
@@ -241,8 +318,9 @@ function Carrito({ usuario }) {
 
       // HU-023: los puntos solo se consumen cuando el backend confirma la venta.
       clienteId: clienteSeleccionado?.id || null,
+      promocionId: promocionSeleccionada?.id || null,
       puntosCanjeados: canjeAplicado?.puntosCanjeados || 0,
-      descuento: canjeAplicado?.descuento || 0,
+      descuento: promocionSeleccionada ? 0 : canjeAplicado?.descuento || 0,
 
       detalles: carrito.map((i) => ({
         productoId: i.productoId,
@@ -270,6 +348,7 @@ function Carrito({ usuario }) {
         );
       }
       setCanjeAplicado(null);
+      setPromocionId("");
       setPuntosSolicitados("");
 
       // Limpiar carrito
@@ -623,6 +702,9 @@ function Carrito({ usuario }) {
               onChange={(event) => {
                 setClienteId(event.target.value);
                 setCanjeAplicado(null);
+                setPromocionesDisponibles([]);
+                setPromocionId("");
+                setErrorPromociones("");
                 setPuntosSolicitados("");
                 setErrorCanje("");
               }}
@@ -706,6 +788,40 @@ function Carrito({ usuario }) {
               <p role="alert" data-testid="error-canje">
                 {errorCanje}
               </p>
+            )}
+          </section>
+
+          <section aria-labelledby="promociones-disponibles-titulo">
+            <h3 id="promociones-disponibles-titulo">Promociones disponibles</h3>
+            <label htmlFor="promocion-aplicable">Promoción</label>
+            <select
+              id="promocion-aplicable"
+              value={promocionId}
+              onChange={(event) => {
+                setPromocionId(event.target.value);
+                setCanjeAplicado(null);
+                setPuntosSolicitados("");
+                setErrorCanje("");
+              }}
+              disabled={!clienteId || cantidadGarrafones === 0}
+              style={{ width: "100%", marginBottom: "0.5rem" }}
+            >
+              <option value="">Sin promoción</option>
+              {promocionesDisponibles.map((promocion) => (
+                <option key={promocion.id} value={promocion.id}>
+                  {promocion.nombre} — {promocion.descuentoPorcentaje}% (
+                  {promocion.segmentoObjetivo})
+                </option>
+              ))}
+            </select>
+            {promocionSeleccionada && (
+              <p role="status">
+                Descuento estimado: ${descuentoPromocion.toFixed(2)}. El servidor
+                validará su vigencia y segmento al registrar la venta.
+              </p>
+            )}
+            {errorPromociones && (
+              <p role="alert">{errorPromociones}</p>
             )}
           </section>
 

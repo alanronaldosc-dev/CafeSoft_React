@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import api from "../services/api";
 
-// Recibe usuario como prop igual que Cargas, Clientes, etc.
-function Promociones({ usuario }) {
+function Promociones() {
   const [promociones, setPromociones] = useState([]);
   const [cargando, setCargando]       = useState(true);
   const [error, setError]             = useState("");
@@ -18,6 +17,7 @@ function Promociones({ usuario }) {
     fechaFin: "",
     minGarrafones: "",
     acumulaPuntos: true,
+    segmentoObjetivo: "TODOS",
   };
   const [form, setForm] = useState(formVacio);
 
@@ -112,6 +112,7 @@ function Promociones({ usuario }) {
       fechaFin:            promo.fechaFin?.slice(0, 16)    || "",
       minGarrafones:       String(promo.minGarrafones ?? ""),
       acumulaPuntos:       promo.acumulaPuntos ?? true,
+      segmentoObjetivo:    promo.segmentoObjetivo || "TODOS",
     });
     setMostrarForm(true);
     setMensaje("");
@@ -125,7 +126,7 @@ function Promociones({ usuario }) {
   };
 
   // ── Crear / Actualizar ──
-  // La sucursal la toma el backend del JWT, no se envía desde el frontend
+  // El API actual no modela sucursales; las promociones son globales.
   const guardar = async (e) => {
     e.preventDefault();
     setMensaje("");
@@ -139,6 +140,7 @@ function Promociones({ usuario }) {
       fechaFin:            form.fechaFin    + ":00",
       minGarrafones:       form.minGarrafones ? Number(form.minGarrafones) : 0,
       acumulaPuntos:       form.acumulaPuntos,
+      segmentoObjetivo:    form.segmentoObjetivo,
     };
 
     try {
@@ -375,6 +377,26 @@ function Promociones({ usuario }) {
                 style={inputStyle}
             />
             </div>
+            {/* Segmento objetivo */}
+            <div style={{ gridColumn: "1 / -1" }}>
+            <label htmlFor="promo-segmento" style={labelStyle}>
+                Segmento objetivo
+            </label>
+            <select
+                id="promo-segmento"
+                name="segmentoObjetivo"
+                value={form.segmentoObjetivo}
+                onChange={handleChange}
+                style={inputStyle}
+            >
+                <option value="TODOS">Todos los clientes</option>
+                <option value="ACTIVO">Activo</option>
+                <option value="POTENCIAL">Potencial</option>
+                <option value="DORMIDO">Dormido</option>
+                <option value="POCO_FRECUENTE">Poco frecuente</option>
+            </select>
+            </div>
+
             {/* Acumular puntos */}
             <div style={{ gridColumn: "1 / -1" }}>
             <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
@@ -394,12 +416,12 @@ function Promociones({ usuario }) {
             </div>
 
 
-            {/* Sucursal — solo muestra */}
+            {/* Alcance global */}
             <div style={{ gridColumn: "1 / -1" }}>
-            <label htmlFor="promo-sucursal" style={labelStyle}>Sucursal</label>
+            <label htmlFor="promo-sucursal" style={labelStyle}>Alcance</label>
             <input
                 id="promo-sucursal"
-                value={usuario?.sucursalNombre || `Sucursal #${usuario?.sucursalId}` || "Tu sucursal"}
+                value="Todas las sucursales"
                 readOnly
                 style={{ ...inputStyle, opacity: 0.6, cursor: "not-allowed" }}
             />
@@ -474,6 +496,7 @@ function Promociones({ usuario }) {
               <tr>
                 <th>Nombre</th>
                 <th>Descuento</th>
+                <th>Segmento</th>
                 <th>Fecha inicio</th>
                 <th>Fecha fin</th>
                 <th>Sucursal</th>
@@ -500,6 +523,7 @@ function Promociones({ usuario }) {
                   <td style={{ fontWeight: 700 }}>
                     {p.descuentoPorcentaje}%
                   </td>
+                  <td>{p.segmentoObjetivo || "TODOS"}</td>
                   <td style={{ fontSize: "13px" }}>
                     {fmtFecha(p.fechaInicio)}
                   </td>
