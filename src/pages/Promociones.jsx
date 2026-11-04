@@ -39,17 +39,6 @@ const labelStyle = {
   color: "#94a3b8",
 };
 
-const mensajeStyle = (tipo) => ({
-  padding: "12px 16px",
-  marginBottom: 14,
-  borderRadius: 8,
-  background: tipo === "error" ? "#f8d7da" : "#d4edda",
-  color: tipo === "error" ? "#721c24" : "#155724",
-  border: `1px solid ${
-    tipo === "error" ? "#f5c6cb" : "#c3e6cb"
-  }`,
-});
-
 const botonStyle = {
   padding: "7px 12px",
   cursor: "pointer",
@@ -57,35 +46,26 @@ const botonStyle = {
   borderRadius: 6,
 };
 
-function obtenerEstado(promo) {
-  if (promo.activa === false) {
-    return "DESACTIVADA";
-  }
+function obtenerEstado(promo, instante = Date.now()) {
+  if (promo.activa === false) return "DESACTIVADA";
 
-  // Se calcula usando las fechas actuales para evitar
-  // mostrar un estado desactualizado en pantalla.
-  const ahora = new Date();
   const inicio = promo.fechaInicio
-    ? new Date(promo.fechaInicio)
-    : null;
-  const fin = promo.fechaFin
-    ? new Date(promo.fechaFin)
-    : null;
+    ? new Date(promo.fechaInicio).getTime()
+    : NaN;
 
-  if (inicio && !Number.isNaN(inicio.getTime()) && ahora < inicio) {
+  const fin = promo.fechaFin
+    ? new Date(promo.fechaFin).getTime()
+    : NaN;
+
+  if (Number.isFinite(inicio) && instante < inicio) {
     return "PROGRAMADA";
   }
 
-  if (fin && !Number.isNaN(fin.getTime()) && ahora > fin) {
+  if (Number.isFinite(fin) && instante > fin) {
     return "VENCIDA";
   }
 
-  if (
-    inicio &&
-    fin &&
-    !Number.isNaN(inicio.getTime()) &&
-    !Number.isNaN(fin.getTime())
-  ) {
+  if (Number.isFinite(inicio) && Number.isFinite(fin)) {
     return "VIGENTE";
   }
 
@@ -105,7 +85,7 @@ function formatearFecha(fecha) {
   });
 }
 
-function obtenerError(error, mensajePredeterminado) {
+function obtenerError(error, predeterminado) {
   const data = error?.response?.data;
 
   if (typeof data === "string" && data.trim()) {
@@ -116,39 +96,23 @@ function obtenerError(error, mensajePredeterminado) {
     data?.mensaje ||
     data?.message ||
     data?.error ||
-    mensajePredeterminado
+    predeterminado
   );
 }
 
 function BadgeEstado({ estado }) {
-  const configuracion = {
-    VIGENTE: {
-      texto: "Vigente",
-      color: "#166534",
-      fondo: "#dcfce7",
-    },
-    PROGRAMADA: {
-      texto: "Programada",
-      color: "#1d4ed8",
-      fondo: "#dbeafe",
-    },
-    VENCIDA: {
-      texto: "Vencida",
-      color: "#92400e",
-      fondo: "#fef3c7",
-    },
-    DESACTIVADA: {
-      texto: "Desactivada",
-      color: "#991b1b",
-      fondo: "#fee2e2",
-    },
+  const colores = {
+    VIGENTE: ["Vigente", "#166534", "#dcfce7"],
+    PROGRAMADA: ["Programada", "#1d4ed8", "#dbeafe"],
+    VENCIDA: ["Vencida", "#92400e", "#fef3c7"],
+    DESACTIVADA: ["Desactivada", "#991b1b", "#fee2e2"],
   };
 
-  const actual = configuracion[estado] || {
-    texto: "Sin determinar",
-    color: "#475569",
-    fondo: "#e2e8f0",
-  };
+  const [texto, color, fondo] = colores[estado] || [
+    "Sin determinar",
+    "#475569",
+    "#e2e8f0",
+  ];
 
   return (
     <span
@@ -158,17 +122,17 @@ function BadgeEstado({ estado }) {
         borderRadius: 999,
         fontSize: 12,
         fontWeight: 700,
-        color: actual.color,
-        background: actual.fondo,
+        color,
+        background: fondo,
         whiteSpace: "nowrap",
       }}
     >
-      {actual.texto}
+      {texto}
     </span>
   );
 }
 
-function Promociones({ usuario }) {
+export default function Promociones({ usuario }) {
   const [promociones, setPromociones] = useState([]);
   const [filtroEstado, setFiltroEstado] = useState("TODAS");
   const [cargando, setCargando] = useState(true);
@@ -188,7 +152,6 @@ function Promociones({ usuario }) {
       setCargando(true);
       setError("");
 
-      // El backend HU-039 expone este endpoint.
       const respuesta = await api.get("/promociones/estado", {
         params: { estado: "TODAS" },
       });
@@ -200,7 +163,7 @@ function Promociones({ usuario }) {
       setError(
         obtenerError(
           err,
-          "No se pudieron cargar las promociones. Verifica que la API esté funcionando."
+          "No se pudieron cargar las promociones."
         )
       );
     } finally {
@@ -213,8 +176,6 @@ function Promociones({ usuario }) {
   }, [cargarPromociones]);
 
   useEffect(() => {
-    // Actualiza la clasificación cuando transcurre el tiempo,
-    // aunque el usuario permanezca en esta pantalla.
     const intervalo = setInterval(() => {
       setAhora(Date.now());
     }, 60000);
@@ -235,7 +196,9 @@ function Promociones({ usuario }) {
         );
 
   const contarEstado = (estado) => {
-    if (estado === "TODAS") return promocionesConEstado.length;
+    if (estado === "TODAS") {
+      return promocionesConEstado.length;
+    }
 
     return promocionesConEstado.filter(
       (promo) => promo.estadoCalculado === estado
@@ -252,6 +215,8 @@ function Promociones({ usuario }) {
   };
 
   const abrirCrear = () => {
+    if (!esAdmin) return;
+
     setEditando(null);
     setForm({ ...FORM_VACIO });
     setMostrarForm(true);
@@ -260,6 +225,8 @@ function Promociones({ usuario }) {
   };
 
   const abrirEditar = (promo) => {
+    if (!esAdmin || promo.activa === false) return;
+
     setEditando(promo.id);
 
     setForm({
@@ -288,15 +255,19 @@ function Promociones({ usuario }) {
     e.preventDefault();
 
     if (!esAdmin) {
-      setError("Solo un administrador puede guardar promociones.");
+      setError(
+        "Solo un administrador puede guardar promociones."
+      );
       return;
     }
+
+    if (guardando) return;
 
     setError("");
     setMensaje("");
 
     if (!form.nombre.trim()) {
-      setError("El nombre de la promoción es obligatorio.");
+      setError("El nombre es obligatorio.");
       return;
     }
 
@@ -307,18 +278,19 @@ function Promociones({ usuario }) {
       descuento <= 0 ||
       descuento > 100
     ) {
-      setError("El descuento debe ser mayor que 0 y máximo 100.");
-      return;
-    }
-
-    if (!form.fechaInicio || !form.fechaFin) {
-      setError("Debes indicar las fechas de inicio y fin.");
-      return;
-    }
-
-    if (new Date(form.fechaFin) <= new Date(form.fechaInicio)) {
       setError(
-        "La fecha de fin debe ser posterior a la fecha de inicio."
+        "El descuento debe ser mayor que 0 y máximo 100."
+      );
+      return;
+    }
+
+    if (
+      !form.fechaInicio ||
+      !form.fechaFin ||
+      new Date(form.fechaFin) <= new Date(form.fechaInicio)
+    ) {
+      setError(
+        "Ingresa fechas válidas; la fecha final debe ser posterior a la inicial."
       );
       return;
     }
@@ -332,7 +304,21 @@ function Promociones({ usuario }) {
       !Number.isInteger(minimo) ||
       minimo < 0
     ) {
-      setError("El mínimo de garrafones debe ser un entero válido.");
+      setError(
+        "El mínimo de garrafones debe ser un entero no negativo."
+      );
+      return;
+    }
+
+    if (
+      editando !== null &&
+      promociones.some(
+        (p) => p.id === editando && p.activa === false
+      )
+    ) {
+      setError(
+        "No se puede editar una promoción desactivada."
+      );
       return;
     }
 
@@ -350,18 +336,33 @@ function Promociones({ usuario }) {
       setGuardando(true);
 
       if (editando !== null) {
-        await api.put(`/promociones/${editando}`, payload);
-        setMensaje("Promoción actualizada correctamente.");
+        await api.put(
+          `/promociones/${editando}`,
+          payload
+        );
+
+        setMensaje(
+          "Promoción actualizada correctamente."
+        );
       } else {
-        await api.post("/promociones", payload);
-        setMensaje("Promoción creada correctamente.");
+        await api.post(
+          "/promociones",
+          payload
+        );
+
+        setMensaje(
+          "Promoción creada correctamente."
+        );
       }
 
       cancelarForm();
       await cargarPromociones();
     } catch (err) {
       setError(
-        obtenerError(err, "No se pudo guardar la promoción.")
+        obtenerError(
+          err,
+          "No se pudo guardar la promoción."
+        )
       );
     } finally {
       setGuardando(false);
@@ -369,14 +370,17 @@ function Promociones({ usuario }) {
   };
 
   const desactivar = async (promo) => {
-    if (!esAdmin) {
-      setError("Solo un administrador puede desactivar promociones.");
+    if (
+      !esAdmin ||
+      promo.activa === false ||
+      procesandoId !== null
+    ) {
       return;
     }
 
     const confirmar = window.confirm(
       `¿Deseas desactivar la promoción "${promo.nombre}"?\n\n` +
-        "Dejará de estar disponible para nuevas aplicaciones."
+      "Dejará de estar disponible para nuevas aplicaciones."
     );
 
     if (!confirmar) return;
@@ -386,7 +390,9 @@ function Promociones({ usuario }) {
       setError("");
       setMensaje("");
 
-      await api.put(`/promociones/${promo.id}/desactivar`);
+      await api.put(
+        `/promociones/${promo.id}/desactivar`
+      );
 
       setMensaje(
         `La promoción "${promo.nombre}" fue desactivada.`
@@ -395,22 +401,30 @@ function Promociones({ usuario }) {
       await cargarPromociones();
     } catch (err) {
       setError(
-        obtenerError(err, "No se pudo desactivar la promoción.")
+        obtenerError(
+          err,
+          "No se pudo desactivar la promoción."
+        )
       );
+
+      await cargarPromociones();
     } finally {
       setProcesandoId(null);
     }
   };
 
   const eliminar = async (promo) => {
-    if (!esAdmin) {
-      setError("Solo un administrador puede eliminar promociones.");
+    if (
+      !esAdmin ||
+      promo.activa === false ||
+      procesandoId !== null
+    ) {
       return;
     }
 
     const confirmar = window.confirm(
       `¿Eliminar definitivamente la promoción "${promo.nombre}"?\n\n` +
-        "Esta acción no se puede deshacer."
+      "Esta acción no se puede deshacer."
     );
 
     if (!confirmar) return;
@@ -420,14 +434,21 @@ function Promociones({ usuario }) {
       setError("");
       setMensaje("");
 
-      await api.delete(`/promociones/${promo.id}`);
+      await api.delete(
+        `/promociones/${promo.id}`
+      );
 
-      setMensaje("Promoción eliminada correctamente.");
+      setMensaje(
+        "Promoción eliminada correctamente."
+      );
 
       await cargarPromociones();
     } catch (err) {
       setError(
-        obtenerError(err, "No se pudo eliminar la promoción.")
+        obtenerError(
+          err,
+          "No se pudo eliminar la promoción."
+        )
       );
     } finally {
       setProcesandoId(null);
@@ -442,6 +463,7 @@ function Promociones({ usuario }) {
 
   return (
     <section className="panel">
+
       {/* ENCABEZADO */}
       <div
         style={{
@@ -455,16 +477,17 @@ function Promociones({ usuario }) {
       >
         <div>
           <h1 style={{ marginBottom: 5 }}>
-            🏷️ Administración de promociones
+            Administración de promociones
           </h1>
+
           <p
             style={{
               color: "var(--texto-suave)",
               margin: 0,
             }}
           >
-            Consulta promociones, controla su vigencia y
-            administra sus estados.
+            Consulta promociones, controla su vigencia
+            y revisa las desactivaciones.
           </p>
         </div>
 
@@ -481,7 +504,7 @@ function Promociones({ usuario }) {
             disabled={cargando}
             style={botonStyle}
           >
-            🔄 Actualizar
+            Actualizar
           </button>
 
           {esAdmin && !mostrarForm && (
@@ -498,149 +521,88 @@ function Promociones({ usuario }) {
 
       {/* MENSAJES */}
       {mensaje && (
-        <div style={mensajeStyle("exito")}>
-          ✅ {mensaje}
+        <div
+          role="status"
+          style={{
+            padding: 12,
+            marginBottom: 14,
+            borderRadius: 8,
+            background: "#d4edda",
+            color: "#155724",
+          }}
+        >
+          {mensaje}
         </div>
       )}
 
       {error && (
-        <div style={mensajeStyle("error")}>
-          ❌ {error}
+        <div
+          role="alert"
+          style={{
+            padding: 12,
+            marginBottom: 14,
+            borderRadius: 8,
+            background: "#f8d7da",
+            color: "#721c24",
+          }}
+        >
+          {error}
         </div>
       )}
 
-      {/* INDICADORES Y FILTROS HU-039 */}
-      <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 18, marginBottom: 12 }}>
-          Estado de las promociones
-        </h2>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(145px, 1fr))",
-            gap: 12,
-          }}
-        >
-          {ESTADOS.map((estado) => {
-            const seleccionado =
-              filtroEstado === estado.valor;
-
-            return (
-              <button
-                key={estado.valor}
-                type="button"
-                onClick={() => setFiltroEstado(estado.valor)}
-                aria-pressed={seleccionado}
-                style={{
-                  padding: "16px 14px",
-                  textAlign: "left",
-                  borderRadius: 12,
-                  cursor: "pointer",
-                  background: seleccionado
-                    ? "#1e293b"
-                    : "var(--fondo-card, #0f172a)",
-                  border: seleccionado
-                    ? `2px solid ${estado.color}`
-                    : "1px solid #475569",
-                  color: "#e2e8f0",
-                  transition: "border-color 0.2s",
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: seleccionado
-                      ? "#f8fafc"
-                      : "#94a3b8",
-                    marginBottom: 8,
-                  }}
-                >
-                  {estado.nombre}
-                </div>
-
-                <div
-                  style={{
-                    fontSize: 28,
-                    fontWeight: 800,
-                    color: seleccionado
-                      ? "#ffffff"
-                      : "#cbd5e1",
-                  }}
-                >
-                  {contarEstado(estado.valor)}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            flexWrap: "wrap",
-            marginTop: 15,
-          }}
-        >
-          <label
-            htmlFor="filtro-promociones"
-            style={labelStyle}
-          >
-            Filtrar por estado:
-          </label>
-
-          <select
-            id="filtro-promociones"
-            value={filtroEstado}
-            onChange={(e) => setFiltroEstado(e.target.value)}
+      {/* FILTROS HU-039 */}
+      <div
+        style={{
+          display: "flex",
+          gap: 9,
+          flexWrap: "wrap",
+          marginBottom: 22,
+        }}
+      >
+        {ESTADOS.map(({ valor, nombre, color }) => (
+          <button
+            key={valor}
+            type="button"
+            onClick={() => setFiltroEstado(valor)}
+            aria-pressed={filtroEstado === valor}
             style={{
-              ...inputStyle,
-              width: "auto",
-              minWidth: 190,
+              ...botonStyle,
+              border: `1px solid ${color}`,
+              background:
+                filtroEstado === valor
+                  ? color
+                  : "transparent",
+              color:
+                filtroEstado === valor
+                  ? "white"
+                  : "var(--texto)",
+              fontWeight: 600,
+            }}
+          >
+            {nombre} ({contarEstado(valor)})
+          </button>
+        ))}
+      </div>
+
+      {/* FORMULARIO */}
+      {esAdmin && mostrarForm && (
+        <div
+          style={{
+            border: "1px solid var(--borde)",
+            borderRadius: 10,
+            padding: 20,
+            marginBottom: 24,
+          }}
+        >
+          <h2
+            style={{
+              fontSize: 18,
               marginTop: 0,
             }}
           >
-            {ESTADOS.map((estado) => (
-              <option
-                key={estado.valor}
-                value={estado.valor}
-              >
-                {estado.nombre}
-              </option>
-            ))}
-          </select>
-
-          <span
-            style={{
-              color: "var(--texto-suave)",
-              fontSize: 13,
-            }}
-          >
-            Mostrando {promocionesFiltradas.length} de{" "}
-            {promocionesConEstado.length} promociones
-          </span>
-        </div>
-      </div>
-
-      {/* FORMULARIO DE CREACIÓN Y EDICIÓN */}
-      {mostrarForm && esAdmin && (
-        <div
-          style={{
-            background: "var(--fondo-card)",
-            border: "1px solid var(--borde)",
-            borderRadius: 12,
-            padding: 24,
-            marginBottom: 28,
-          }}
-        >
-          <h2 style={{ marginTop: 0 }}>
             {editando !== null
-              ? "✏️ Editar promoción"
-              : "➕ Nueva promoción"}
+              ? "Editar promoción"
+              : "Nueva promoción"}
           </h2>
 
           <form
@@ -653,9 +615,13 @@ function Promociones({ usuario }) {
             }}
           >
             <div style={{ gridColumn: "1 / -1" }}>
-              <label htmlFor="promo-nombre" style={labelStyle}>
+              <label
+                htmlFor="promo-nombre"
+                style={labelStyle}
+              >
                 Nombre *
               </label>
+
               <input
                 id="promo-nombre"
                 name="nombre"
@@ -675,12 +641,13 @@ function Promociones({ usuario }) {
               >
                 Descripción
               </label>
+
               <input
                 id="promo-descripcion"
                 name="descripcion"
                 value={form.descripcion}
                 onChange={handleChange}
-                placeholder="Ej. 20% en todos los garrafones"
+                placeholder="Ej. 20% en garrafones"
                 style={inputStyle}
               />
             </div>
@@ -692,6 +659,7 @@ function Promociones({ usuario }) {
               >
                 Descuento (%) *
               </label>
+
               <input
                 id="promo-descuento"
                 name="descuentoPorcentaje"
@@ -713,6 +681,7 @@ function Promociones({ usuario }) {
               >
                 Mínimo de garrafones
               </label>
+
               <input
                 id="promo-minimo"
                 name="minGarrafones"
@@ -733,6 +702,7 @@ function Promociones({ usuario }) {
               >
                 Fecha de inicio *
               </label>
+
               <input
                 id="promo-inicio"
                 name="fechaInicio"
@@ -751,13 +721,14 @@ function Promociones({ usuario }) {
               >
                 Fecha de fin *
               </label>
+
               <input
                 id="promo-fin"
                 name="fechaFin"
                 type="datetime-local"
+                min={form.fechaInicio || undefined}
                 value={form.fechaFin}
                 onChange={handleChange}
-                min={form.fechaInicio || undefined}
                 required
                 style={inputStyle}
               />
@@ -770,6 +741,7 @@ function Promociones({ usuario }) {
               >
                 Sucursal
               </label>
+
               <input
                 id="promo-sucursal"
                 value={sucursalMostrada}
@@ -780,30 +752,34 @@ function Promociones({ usuario }) {
                   cursor: "not-allowed",
                 }}
               />
-              <small style={{ color: "#94a3b8" }}>
+
+              <small
+                style={{
+                  color: "#94a3b8",
+                }}
+              >
                 La sucursal se asigna desde el backend.
               </small>
             </div>
 
-            <div style={{ gridColumn: "1 / -1" }}>
-              <label
-                style={{
-                  ...labelStyle,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  name="acumulaPuntos"
-                  checked={form.acumulaPuntos}
-                  onChange={handleChange}
-                />
-                Acumular puntos con esta promoción
-              </label>
-            </div>
+            <label
+              style={{
+                ...labelStyle,
+                gridColumn: "1 / -1",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <input
+                type="checkbox"
+                name="acumulaPuntos"
+                checked={form.acumulaPuntos}
+                onChange={handleChange}
+              />
+
+              Acumular puntos con esta promoción
+            </label>
 
             <div
               style={{
@@ -811,7 +787,6 @@ function Promociones({ usuario }) {
                 display: "flex",
                 flexWrap: "wrap",
                 gap: 12,
-                marginTop: 8,
               }}
             >
               <button
@@ -822,8 +797,8 @@ function Promociones({ usuario }) {
                 {guardando
                   ? "Guardando..."
                   : editando !== null
-                    ? "💾 Guardar cambios"
-                    : "🏷️ Crear promoción"}
+                    ? "Guardar cambios"
+                    : "Crear promoción"}
               </button>
 
               <button
@@ -839,7 +814,7 @@ function Promociones({ usuario }) {
         </div>
       )}
 
-      {/* TABLA DE PROMOCIONES */}
+      {/* LISTADO DE PROMOCIONES */}
       <div
         style={{
           display: "flex",
@@ -850,7 +825,12 @@ function Promociones({ usuario }) {
           marginBottom: 12,
         }}
       >
-        <h2 style={{ fontSize: 18, margin: 0 }}>
+        <h2
+          style={{
+            fontSize: 18,
+            margin: 0,
+          }}
+        >
           Listado de promociones
         </h2>
 
@@ -861,9 +841,11 @@ function Promociones({ usuario }) {
           }}
         >
           Filtro:{" "}
-          {ESTADOS.find(
-            (estado) => estado.valor === filtroEstado
-          )?.nombre}
+          {
+            ESTADOS.find(
+              (e) => e.valor === filtroEstado
+            )?.nombre
+          }
         </span>
       </div>
 
@@ -880,7 +862,7 @@ function Promociones({ usuario }) {
             textAlign: "center",
           }}
         >
-          <p style={{ marginBottom: 12 }}>
+          <p>
             No hay promociones para el estado seleccionado.
           </p>
 
@@ -905,108 +887,179 @@ function Promociones({ usuario }) {
                 <th>Fecha fin</th>
                 <th>Sucursal</th>
                 <th>Estado</th>
+                <th>Auditoría HU-040</th>
+
                 {esAdmin && <th>Acciones</th>}
               </tr>
             </thead>
 
             <tbody>
-              {promocionesFiltradas.map((promo) => (
-                <tr key={promo.id}>
-                  <td>
-                    <strong>{promo.nombre}</strong>
+              {promocionesFiltradas.map((promo) => {
+                const desactivada =
+                  promo.activa === false;
 
-                    {promo.descripcion && (
-                      <div
-                        style={{
-                          fontSize: 12,
-                          color: "var(--texto-suave)",
-                          marginTop: 4,
-                        }}
-                      >
-                        {promo.descripcion}
-                      </div>
-                    )}
-                  </td>
-
-                  <td style={{ fontWeight: 700 }}>
-                    {promo.descuentoPorcentaje}%
-                  </td>
-
-                  <td style={{ fontSize: 13 }}>
-                    {formatearFecha(promo.fechaInicio)}
-                  </td>
-
-                  <td style={{ fontSize: 13 }}>
-                    {formatearFecha(promo.fechaFin)}
-                  </td>
-
-                  <td
-                    style={{
-                      fontSize: 13,
-                      color: "var(--texto-suave)",
-                    }}
-                  >
-                    {promo.sucursalNombre || "—"}
-                  </td>
-
-                  <td>
-                    <BadgeEstado
-                      estado={promo.estadoCalculado}
-                    />
-                  </td>
-
-                  {esAdmin && (
+                return (
+                  <tr key={promo.id}>
                     <td>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: 7,
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => abrirEditar(promo)}
-                          disabled={procesandoId === promo.id}
-                          style={botonStyle}
-                        >
-                          ✏️ Editar
-                        </button>
+                      <strong>{promo.nombre}</strong>
 
-                        {promo.activa !== false && (
-                          <button
-                            type="button"
-                            onClick={() => desactivar(promo)}
-                            disabled={procesandoId === promo.id}
-                            style={{
-                              ...botonStyle,
-                              background: "#2D2A1A",
-                              color: "#fbbf24",
-                              border: "1px solid #92400e",
-                            }}
-                          >
-                            ⏸ Desactivar
-                          </button>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => eliminar(promo)}
-                          disabled={procesandoId === promo.id}
+                      {promo.descripcion && (
+                        <div
                           style={{
-                            ...botonStyle,
-                            background: "#2D1A1A",
-                            color: "#f87171",
-                            border: "1px solid #991b1b",
+                            fontSize: 12,
+                            color: "var(--texto-suave)",
+                            marginTop: 4,
                           }}
                         >
-                          🗑️ Eliminar
-                        </button>
-                      </div>
+                          {promo.descripcion}
+                        </div>
+                      )}
                     </td>
-                  )}
-                </tr>
-              ))}
+
+                    <td style={{ fontWeight: 700 }}>
+                      {promo.descuentoPorcentaje}%
+                    </td>
+
+                    <td style={{ fontSize: 13 }}>
+                      {formatearFecha(promo.fechaInicio)}
+                    </td>
+
+                    <td style={{ fontSize: 13 }}>
+                      {formatearFecha(promo.fechaFin)}
+                    </td>
+
+                    <td style={{ fontSize: 13 }}>
+                      {promo.sucursalNombre || "—"}
+                    </td>
+
+                    <td>
+                      <BadgeEstado
+                        estado={promo.estadoCalculado}
+                      />
+                    </td>
+
+                    {/* AUDITORÍA HU-040 */}
+                    <td
+                      style={{
+                        fontSize: 12,
+                        minWidth: 170,
+                      }}
+                    >
+                      {desactivada ? (
+                        <div
+                          style={{
+                            display: "grid",
+                            gap: 4,
+                          }}
+                        >
+                          <strong>
+                            Fecha:{" "}
+                            {formatearFecha(
+                              promo.fechaDesactivacion
+                            )}
+                          </strong>
+
+                          <span>
+                            Por:{" "}
+                            {promo.desactivadaPorNombre ||
+                              (promo.desactivadaPorId != null
+                                ? `Usuario #${promo.desactivadaPorId}`
+                                : "No registrado")}
+                          </span>
+
+                          {promo.desactivadaPorEmail && (
+                            <span
+                              style={{
+                                overflowWrap: "anywhere",
+                              }}
+                            >
+                              {promo.desactivadaPorEmail}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+
+                    {/* ACCIONES ADMINISTRATIVAS */}
+                    {esAdmin && (
+                      <td>
+                        {desactivada ? (
+                          <span
+                            style={{
+                              color: "#94a3b8",
+                              fontSize: 12,
+                            }}
+                          >
+                            Sin acciones: promoción desactivada
+                          </span>
+                        ) : (
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: 7,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              onClick={() =>
+                                abrirEditar(promo)
+                              }
+                              disabled={
+                                procesandoId !== null ||
+                                guardando
+                              }
+                              style={botonStyle}
+                            >
+                              Editar
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                desactivar(promo)
+                              }
+                              disabled={
+                                procesandoId !== null ||
+                                guardando
+                              }
+                              style={{
+                                ...botonStyle,
+                                background: "#2D2A1A",
+                                color: "#fbbf24",
+                                border: "1px solid #92400e",
+                              }}
+                            >
+                              Desactivar
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                eliminar(promo)
+                              }
+                              disabled={
+                                procesandoId !== null ||
+                                guardando
+                              }
+                              style={{
+                                ...botonStyle,
+                                background: "#2D1A1A",
+                                color: "#f87171",
+                                border: "1px solid #991b1b",
+                              }}
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -1014,5 +1067,3 @@ function Promociones({ usuario }) {
     </section>
   );
 }
-
-export default Promociones;
