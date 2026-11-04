@@ -1,74 +1,259 @@
-import { useEffect, useState } from "react";
+
+import { useCallback, useEffect, useState } from "react";
 import api from "../services/api";
 
-// Recibe usuario como prop igual que Cargas, Clientes, etc.
+const FORM_VACIO = {
+  nombre: "",
+  descripcion: "",
+  descuentoPorcentaje: "",
+  fechaInicio: "",
+  fechaFin: "",
+  minGarrafones: "",
+  acumulaPuntos: true,
+};
+
+const ESTADOS = [
+  { valor: "TODAS", nombre: "Todas", color: "#64748b" },
+  { valor: "VIGENTE", nombre: "Vigentes", color: "#16a34a" },
+  { valor: "PROGRAMADA", nombre: "Programadas", color: "#2563eb" },
+  { valor: "VENCIDA", nombre: "Vencidas", color: "#d97706" },
+  { valor: "DESACTIVADA", nombre: "Desactivadas", color: "#dc2626" },
+];
+
+const inputStyle = {
+  width: "100%",
+  padding: "10px 14px",
+  marginTop: 6,
+  boxSizing: "border-box",
+  borderRadius: 8,
+  border: "1px solid #475569",
+  background: "#1e293b",
+  color: "#e2e8f0",
+  fontSize: 14,
+};
+
+const labelStyle = {
+  display: "block",
+  fontSize: 13,
+  fontWeight: 600,
+  color: "#94a3b8",
+};
+
+const mensajeStyle = (tipo) => ({
+  padding: "12px 16px",
+  marginBottom: 14,
+  borderRadius: 8,
+  background: tipo === "error" ? "#f8d7da" : "#d4edda",
+  color: tipo === "error" ? "#721c24" : "#155724",
+  border: `1px solid ${
+    tipo === "error" ? "#f5c6cb" : "#c3e6cb"
+  }`,
+});
+
+const botonStyle = {
+  padding: "7px 12px",
+  cursor: "pointer",
+  fontSize: 13,
+  borderRadius: 6,
+};
+
+function obtenerEstado(promo) {
+  if (promo.activa === false) {
+    return "DESACTIVADA";
+  }
+
+  // Se calcula usando las fechas actuales para evitar
+  // mostrar un estado desactualizado en pantalla.
+  const ahora = new Date();
+  const inicio = promo.fechaInicio
+    ? new Date(promo.fechaInicio)
+    : null;
+  const fin = promo.fechaFin
+    ? new Date(promo.fechaFin)
+    : null;
+
+  if (inicio && !Number.isNaN(inicio.getTime()) && ahora < inicio) {
+    return "PROGRAMADA";
+  }
+
+  if (fin && !Number.isNaN(fin.getTime()) && ahora > fin) {
+    return "VENCIDA";
+  }
+
+  if (
+    inicio &&
+    fin &&
+    !Number.isNaN(inicio.getTime()) &&
+    !Number.isNaN(fin.getTime())
+  ) {
+    return "VIGENTE";
+  }
+
+  return promo.estado || "DESCONOCIDA";
+}
+
+function formatearFecha(fecha) {
+  if (!fecha) return "—";
+
+  const valor = new Date(fecha);
+
+  if (Number.isNaN(valor.getTime())) return "—";
+
+  return valor.toLocaleString("es-MX", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+}
+
+function obtenerError(error, mensajePredeterminado) {
+  const data = error?.response?.data;
+
+  if (typeof data === "string" && data.trim()) {
+    return data;
+  }
+
+  return (
+    data?.mensaje ||
+    data?.message ||
+    data?.error ||
+    mensajePredeterminado
+  );
+}
+
+function BadgeEstado({ estado }) {
+  const configuracion = {
+    VIGENTE: {
+      texto: "Vigente",
+      color: "#166534",
+      fondo: "#dcfce7",
+    },
+    PROGRAMADA: {
+      texto: "Programada",
+      color: "#1d4ed8",
+      fondo: "#dbeafe",
+    },
+    VENCIDA: {
+      texto: "Vencida",
+      color: "#92400e",
+      fondo: "#fef3c7",
+    },
+    DESACTIVADA: {
+      texto: "Desactivada",
+      color: "#991b1b",
+      fondo: "#fee2e2",
+    },
+  };
+
+  const actual = configuracion[estado] || {
+    texto: "Sin determinar",
+    color: "#475569",
+    fondo: "#e2e8f0",
+  };
+
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        padding: "5px 12px",
+        borderRadius: 999,
+        fontSize: 12,
+        fontWeight: 700,
+        color: actual.color,
+        background: actual.fondo,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {actual.texto}
+    </span>
+  );
+}
+
 function Promociones({ usuario }) {
   const [promociones, setPromociones] = useState([]);
-  const [cargando, setCargando]       = useState(true);
-  const [error, setError]             = useState("");
-  const [mensaje, setMensaje]         = useState("");
+  const [filtroEstado, setFiltroEstado] = useState("TODAS");
+  const [cargando, setCargando] = useState(true);
+  const [guardando, setGuardando] = useState(false);
+  const [procesandoId, setProcesandoId] = useState(null);
+  const [error, setError] = useState("");
+  const [mensaje, setMensaje] = useState("");
   const [mostrarForm, setMostrarForm] = useState(false);
-  const [editando, setEditando]       = useState(null);
+  const [editando, setEditando] = useState(null);
+  const [form, setForm] = useState({ ...FORM_VACIO });
+  const [ahora, setAhora] = useState(Date.now());
 
-  const formVacio = {
-    nombre: "",
-    descripcion: "",
-    descuentoPorcentaje: "",
-    fechaInicio: "",
-    fechaFin: "",
-    minGarrafones: "",
-    acumulaPuntos: true,
-  };
-  const [form, setForm] = useState(formVacio);
+  const esAdmin = Number(usuario?.userTipo) === 0;
 
-  // Estilos reutilizables para inputs oscuros
-  const inputStyle = {
-    width: "100%",
-    padding: "10px 14px",
-    marginTop: "6px",
-    boxSizing: "border-box",
-    borderRadius: "8px",
-    border: "1px solid #334155",
-    background: "#1e293b",
-    color: "#e2e8f0",
-    fontSize: "14px",
-  };
-
-  const labelStyle = {
-    fontSize: "13px",
-    fontWeight: 600,
-    color: "#94a3b8",
-  };
-
-  // ── Cargar al montar ──
-  useEffect(() => {
-    cargarPromociones();
-  }, []);
-
-  const cargarPromociones = async () => {
+  const cargarPromociones = useCallback(async () => {
     try {
       setCargando(true);
       setError("");
-      const res = await api.get("/promociones");
-      setPromociones(Array.isArray(res.data) ? res.data : []);
+
+      // El backend HU-039 expone este endpoint.
+      const respuesta = await api.get("/promociones/estado", {
+        params: { estado: "TODAS" },
+      });
+
+      setPromociones(
+        Array.isArray(respuesta.data) ? respuesta.data : []
+      );
     } catch (err) {
       setError(
-        err.response?.data?.mensaje ||
-          err.response?.data?.message ||
-          "No se pudieron cargar las promociones."
+        obtenerError(
+          err,
+          "No se pudieron cargar las promociones. Verifica que la API esté funcionando."
+        )
       );
     } finally {
       setCargando(false);
     }
+  }, []);
+
+  useEffect(() => {
+    cargarPromociones();
+  }, [cargarPromociones]);
+
+  useEffect(() => {
+    // Actualiza la clasificación cuando transcurre el tiempo,
+    // aunque el usuario permanezca en esta pantalla.
+    const intervalo = setInterval(() => {
+      setAhora(Date.now());
+    }, 60000);
+
+    return () => clearInterval(intervalo);
+  }, []);
+
+  const promocionesConEstado = promociones.map((promo) => ({
+    ...promo,
+    estadoCalculado: obtenerEstado(promo, ahora),
+  }));
+
+  const promocionesFiltradas =
+    filtroEstado === "TODAS"
+      ? promocionesConEstado
+      : promocionesConEstado.filter(
+          (promo) => promo.estadoCalculado === filtroEstado
+        );
+
+  const contarEstado = (estado) => {
+    if (estado === "TODAS") return promocionesConEstado.length;
+
+    return promocionesConEstado.filter(
+      (promo) => promo.estadoCalculado === estado
+    ).length;
   };
 
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value, type, checked } = e.target;
+
+    setForm((anterior) => ({
+      ...anterior,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const abrirCrear = () => {
     setEditando(null);
-    setForm(formVacio);
+    setForm({ ...FORM_VACIO });
     setMostrarForm(true);
     setMensaje("");
     setError("");
@@ -76,14 +261,18 @@ function Promociones({ usuario }) {
 
   const abrirEditar = (promo) => {
     setEditando(promo.id);
+
     setForm({
-      nombre:              promo.nombre,
-      descripcion:         promo.descripcion || "",
-      descuentoPorcentaje: promo.descuentoPorcentaje,
-      fechaInicio:         promo.fechaInicio?.slice(0, 16) || "",
-      fechaFin:            promo.fechaFin?.slice(0, 16)    || "",
-      minGarrafones: form.minGarrafones !== "" ? Number(form.minGarrafones) : null,
+      nombre: promo.nombre || "",
+      descripcion: promo.descripcion || "",
+      descuentoPorcentaje:
+        promo.descuentoPorcentaje ?? "",
+      fechaInicio: promo.fechaInicio?.slice(0, 16) || "",
+      fechaFin: promo.fechaFin?.slice(0, 16) || "",
+      minGarrafones: promo.minGarrafones ?? "",
+      acumulaPuntos: promo.acumulaPuntos ?? true,
     });
+
     setMostrarForm(true);
     setMensaje("");
     setError("");
@@ -92,196 +281,383 @@ function Promociones({ usuario }) {
   const cancelarForm = () => {
     setMostrarForm(false);
     setEditando(null);
-    setForm(formVacio);
+    setForm({ ...FORM_VACIO });
   };
 
-  // ── Crear / Actualizar ──
-  // La sucursal la toma el backend del JWT, no se envía desde el frontend
   const guardar = async (e) => {
     e.preventDefault();
-    setMensaje("");
+
+    if (!esAdmin) {
+      setError("Solo un administrador puede guardar promociones.");
+      return;
+    }
+
     setError("");
+    setMensaje("");
+
+    if (!form.nombre.trim()) {
+      setError("El nombre de la promoción es obligatorio.");
+      return;
+    }
+
+    const descuento = Number(form.descuentoPorcentaje);
+
+    if (
+      !Number.isFinite(descuento) ||
+      descuento <= 0 ||
+      descuento > 100
+    ) {
+      setError("El descuento debe ser mayor que 0 y máximo 100.");
+      return;
+    }
+
+    if (!form.fechaInicio || !form.fechaFin) {
+      setError("Debes indicar las fechas de inicio y fin.");
+      return;
+    }
+
+    if (new Date(form.fechaFin) <= new Date(form.fechaInicio)) {
+      setError(
+        "La fecha de fin debe ser posterior a la fecha de inicio."
+      );
+      return;
+    }
+
+    const minimo =
+      form.minGarrafones === ""
+        ? 0
+        : Number(form.minGarrafones);
+
+    if (
+      !Number.isInteger(minimo) ||
+      minimo < 0
+    ) {
+      setError("El mínimo de garrafones debe ser un entero válido.");
+      return;
+    }
 
     const payload = {
-      nombre:              form.nombre,
-      descripcion:         form.descripcion,
-      descuentoPorcentaje: Number(form.descuentoPorcentaje),
-      fechaInicio:         form.fechaInicio + ":00",
-      fechaFin:            form.fechaFin    + ":00",
-      minGarrafones:       form.minGarrafones ? Number(form.minGarrafones) : 0,
-      acumulaPuntos:       form.acumulaPuntos,
+      nombre: form.nombre.trim(),
+      descripcion: form.descripcion.trim(),
+      descuentoPorcentaje: descuento,
+      fechaInicio: `${form.fechaInicio}:00`,
+      fechaFin: `${form.fechaFin}:00`,
+      minGarrafones: minimo,
+      acumulaPuntos: Boolean(form.acumulaPuntos),
     };
 
     try {
-      if (editando) {
+      setGuardando(true);
+
+      if (editando !== null) {
         await api.put(`/promociones/${editando}`, payload);
-        setMensaje("✅ Promoción actualizada correctamente.");
+        setMensaje("Promoción actualizada correctamente.");
       } else {
         await api.post("/promociones", payload);
-        setMensaje("✅ Promoción creada correctamente.");
+        setMensaje("Promoción creada correctamente.");
       }
+
       cancelarForm();
-      cargarPromociones();
+      await cargarPromociones();
     } catch (err) {
       setError(
-        err.response?.data?.mensaje ||
-          err.response?.data?.message ||
-          "No se pudo guardar la promoción."
+        obtenerError(err, "No se pudo guardar la promoción.")
       );
+    } finally {
+      setGuardando(false);
     }
   };
 
-  // ── Desactivar ──
-  const desactivar = async (id) => {
-    if (!window.confirm("¿Deseas desactivar esta promoción?")) return;
-    try {
-      await api.put(`/promociones/${id}/desactivar`);
-      setMensaje("✅ Promoción desactivada.");
-      cargarPromociones();
-    } catch (err) {
-      setError(
-        err.response?.data?.mensaje ||
-          err.response?.data?.message ||
-          "No se pudo desactivar."
-      );
+  const desactivar = async (promo) => {
+    if (!esAdmin) {
+      setError("Solo un administrador puede desactivar promociones.");
+      return;
     }
-  };
 
-  // ── Eliminar ──
-  const eliminar = async (id) => {
-    if (!window.confirm("¿Eliminar esta promoción? Esta acción no se puede deshacer.")) return;
-    try {
-      await api.delete(`/promociones/${id}`);
-      setMensaje("✅ Promoción eliminada.");
-      cargarPromociones();
-    } catch (err) {
-      setError(
-        err.response?.data?.mensaje ||
-          err.response?.data?.message ||
-          "No se pudo eliminar."
-      );
-    }
-  };
-
-  // ── Badge de estado ──
-  const Badge = ({ vigente, activa }) => {
-    if (!activa)
-      return <span style={mkBadge("#E05252", "#FEF0EE")}>Desactivada</span>;
-    if (vigente)
-      return <span style={mkBadge("#3AC87A", "#E8FEF0")}>Vigente</span>;
-    return (
-      <span style={mkBadge("#C8783A", "#FEF3E8")}>
-        Fuera de periodo
-      </span>
+    const confirmar = window.confirm(
+      `¿Deseas desactivar la promoción "${promo.nombre}"?\n\n` +
+        "Dejará de estar disponible para nuevas aplicaciones."
     );
+
+    if (!confirmar) return;
+
+    try {
+      setProcesandoId(promo.id);
+      setError("");
+      setMensaje("");
+
+      await api.put(`/promociones/${promo.id}/desactivar`);
+
+      setMensaje(
+        `La promoción "${promo.nombre}" fue desactivada.`
+      );
+
+      await cargarPromociones();
+    } catch (err) {
+      setError(
+        obtenerError(err, "No se pudo desactivar la promoción.")
+      );
+    } finally {
+      setProcesandoId(null);
+    }
   };
 
-  const mkBadge = (color, bg) => ({
-    background: bg,
-    color,
-    border: `1px solid ${color}44`,
-    borderRadius: "999px",
-    padding: "3px 12px",
-    fontSize: "12px",
-    fontWeight: 600,
-  });
+  const eliminar = async (promo) => {
+    if (!esAdmin) {
+      setError("Solo un administrador puede eliminar promociones.");
+      return;
+    }
 
-  const fmtFecha = (iso) =>
-    iso
-      ? new Date(iso).toLocaleString("es-MX", {
-          dateStyle: "short",
-          timeStyle: "short",
-        })
-      : "—";
+    const confirmar = window.confirm(
+      `¿Eliminar definitivamente la promoción "${promo.nombre}"?\n\n` +
+        "Esta acción no se puede deshacer."
+    );
 
-  // ── Render ──
+    if (!confirmar) return;
+
+    try {
+      setProcesandoId(promo.id);
+      setError("");
+      setMensaje("");
+
+      await api.delete(`/promociones/${promo.id}`);
+
+      setMensaje("Promoción eliminada correctamente.");
+
+      await cargarPromociones();
+    } catch (err) {
+      setError(
+        obtenerError(err, "No se pudo eliminar la promoción.")
+      );
+    } finally {
+      setProcesandoId(null);
+    }
+  };
+
+  const sucursalMostrada =
+    usuario?.sucursalNombre ||
+    (usuario?.sucursalId
+      ? `Sucursal #${usuario.sucursalId}`
+      : "Sucursal asignada al usuario");
+
   return (
     <section className="panel">
-
-      {/* Encabezado */}
+      {/* ENCABEZADO */}
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "20px",
+          flexWrap: "wrap",
+          gap: 14,
+          marginBottom: 22,
         }}
       >
         <div>
-          <h1>🏷️ Promociones</h1>
-          <p style={{ color: "var(--texto-suave)", margin: "4px 0 0" }}>
-            Campañas con vigencia controlada por fecha.
+          <h1 style={{ marginBottom: 5 }}>
+            🏷️ Administración de promociones
+          </h1>
+          <p
+            style={{
+              color: "var(--texto-suave)",
+              margin: 0,
+            }}
+          >
+            Consulta promociones, controla su vigencia y
+            administra sus estados.
           </p>
         </div>
-        {!mostrarForm && (
+
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
           <button
-            onClick={abrirCrear}
-            style={{ padding: "10px 18px", cursor: "pointer" }}
+            type="button"
+            onClick={cargarPromociones}
+            disabled={cargando}
+            style={botonStyle}
           >
-            + Nueva promoción
+            🔄 Actualizar
           </button>
-        )}
+
+          {esAdmin && !mostrarForm && (
+            <button
+              type="button"
+              className="btn-glow"
+              onClick={abrirCrear}
+            >
+              + Nueva promoción
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Mensajes */}
+      {/* MENSAJES */}
       {mensaje && (
-        <div
-          style={{
-            padding: "12px 16px",
-            marginBottom: "14px",
-            borderRadius: "8px",
-            background: "#d4edda",
-            color: "#155724",
-            border: "1px solid #c3e6cb",
-          }}
-        >
-          {mensaje}
+        <div style={mensajeStyle("exito")}>
+          ✅ {mensaje}
         </div>
       )}
+
       {error && (
-        <div
-          style={{
-            padding: "12px 16px",
-            marginBottom: "14px",
-            borderRadius: "8px",
-            background: "#f8d7da",
-            color: "#721c24",
-            border: "1px solid #f5c6cb",
-          }}
-        >
+        <div style={mensajeStyle("error")}>
           ❌ {error}
         </div>
       )}
 
-      {/* Formulario */}
-      {mostrarForm && (
+      {/* INDICADORES Y FILTROS HU-039 */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 18, marginBottom: 12 }}>
+          Estado de las promociones
+        </h2>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(145px, 1fr))",
+            gap: 12,
+          }}
+        >
+          {ESTADOS.map((estado) => {
+            const seleccionado =
+              filtroEstado === estado.valor;
+
+            return (
+              <button
+                key={estado.valor}
+                type="button"
+                onClick={() => setFiltroEstado(estado.valor)}
+                aria-pressed={seleccionado}
+                style={{
+                  padding: "16px 14px",
+                  textAlign: "left",
+                  borderRadius: 12,
+                  cursor: "pointer",
+                  background: seleccionado
+                    ? "#1e293b"
+                    : "var(--fondo-card, #0f172a)",
+                  border: seleccionado
+                    ? `2px solid ${estado.color}`
+                    : "1px solid #475569",
+                  color: "#e2e8f0",
+                  transition: "border-color 0.2s",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: seleccionado
+                      ? "#f8fafc"
+                      : "#94a3b8",
+                    marginBottom: 8,
+                  }}
+                >
+                  {estado.nombre}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 800,
+                    color: seleccionado
+                      ? "#ffffff"
+                      : "#cbd5e1",
+                  }}
+                >
+                  {contarEstado(estado.valor)}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+            marginTop: 15,
+          }}
+        >
+          <label
+            htmlFor="filtro-promociones"
+            style={labelStyle}
+          >
+            Filtrar por estado:
+          </label>
+
+          <select
+            id="filtro-promociones"
+            value={filtroEstado}
+            onChange={(e) => setFiltroEstado(e.target.value)}
+            style={{
+              ...inputStyle,
+              width: "auto",
+              minWidth: 190,
+              marginTop: 0,
+            }}
+          >
+            {ESTADOS.map((estado) => (
+              <option
+                key={estado.valor}
+                value={estado.valor}
+              >
+                {estado.nombre}
+              </option>
+            ))}
+          </select>
+
+          <span
+            style={{
+              color: "var(--texto-suave)",
+              fontSize: 13,
+            }}
+          >
+            Mostrando {promocionesFiltradas.length} de{" "}
+            {promocionesConEstado.length} promociones
+          </span>
+        </div>
+      </div>
+
+      {/* FORMULARIO DE CREACIÓN Y EDICIÓN */}
+      {mostrarForm && esAdmin && (
         <div
           style={{
             background: "var(--fondo-card)",
             border: "1px solid var(--borde)",
-            borderRadius: "var(--r-md)",
-            padding: "24px",
-            marginBottom: "28px",
+            borderRadius: 12,
+            padding: 24,
+            marginBottom: 28,
           }}
         >
           <h2 style={{ marginTop: 0 }}>
-            {editando ? "✏️ Editar promoción" : "➕ Nueva promoción"}
+            {editando !== null
+              ? "✏️ Editar promoción"
+              : "➕ Nueva promoción"}
           </h2>
 
           <form
             onSubmit={guardar}
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "16px",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(230px, 1fr))",
+              gap: 16,
             }}
           >
-            {/* Nombre */}
             <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>
-                Nombre <span style={{ color: "#E05252" }}>*</span>
+              <label htmlFor="promo-nombre" style={labelStyle}>
+                Nombre *
               </label>
               <input
+                id="promo-nombre"
                 name="nombre"
                 value={form.nombre}
                 onChange={handleChange}
@@ -292,10 +668,15 @@ function Promociones({ usuario }) {
               />
             </div>
 
-            {/* Descripción */}
             <div style={{ gridColumn: "1 / -1" }}>
-              <label style={labelStyle}>Descripción</label>
+              <label
+                htmlFor="promo-descripcion"
+                style={labelStyle}
+              >
+                Descripción
+              </label>
               <input
+                id="promo-descripcion"
                 name="descripcion"
                 value={form.descripcion}
                 onChange={handleChange}
@@ -304,12 +685,15 @@ function Promociones({ usuario }) {
               />
             </div>
 
-            {/* Descuento */}
             <div>
-            <label style={labelStyle}>
-                Descuento (%) <span style={{ color: "#E05252" }}>*</span>
-            </label>
-            <input
+              <label
+                htmlFor="promo-descuento"
+                style={labelStyle}
+              >
+                Descuento (%) *
+              </label>
+              <input
+                id="promo-descuento"
                 name="descuentoPorcentaje"
                 type="number"
                 min="0.01"
@@ -318,65 +702,39 @@ function Promociones({ usuario }) {
                 value={form.descuentoPorcentaje}
                 onChange={handleChange}
                 required
-                placeholder="Ej. 20"
                 style={inputStyle}
-            />
+              />
             </div>
 
-            {/* Mínimo de garrafones */}
             <div>
-            <label style={labelStyle}>
+              <label
+                htmlFor="promo-minimo"
+                style={labelStyle}
+              >
                 Mínimo de garrafones
-                <span style={{ color: "#8D9DB6", fontWeight: 400, marginLeft: 6, fontSize: 11 }}>
-                (opcional — dejar vacío para sin condición)
-                </span>
-            </label>
-            <input
+              </label>
+              <input
+                id="promo-minimo"
                 name="minGarrafones"
                 type="number"
-                min="1"
+                min="0"
                 step="1"
                 value={form.minGarrafones}
                 onChange={handleChange}
-                placeholder="Ej. 5  →  aplica al comprar 5 o más"
+                placeholder="0 = Sin mínimo"
                 style={inputStyle}
-            />
-            </div>
-            {/* Acumular puntos */}
-            <div style={{ gridColumn: "1 / -1" }}>
-            <label style={{ ...labelStyle, display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
-                <input
-                    type="checkbox"
-                    name="acumulaPuntos"
-                    checked={form.acumulaPuntos}
-                    onChange={(e) =>
-                        setForm((prev) => ({ ...prev, acumulaPuntos: e.target.checked }))
-                    }
-                />
-                Acumular puntos con esta promoción
-                <span style={{ color: "#8D9DB6", fontWeight: 400, marginLeft: 6, fontSize: 11 }}>
-                (si se desactiva, las ventas con esta promoción no generan puntos)
-                </span>
-            </label>
+              />
             </div>
 
-
-            {/* Sucursal — solo muestra */}
-            <div style={{ gridColumn: "1 / -1" }}>
-            <label style={labelStyle}>Sucursal</label>
-            <input
-                value={usuario?.sucursalNombre || `Sucursal #${usuario?.sucursalId}` || "Tu sucursal"}
-                readOnly
-                style={{ ...inputStyle, opacity: 0.6, cursor: "not-allowed" }}
-            />
-            </div>
-
-            {/* Fecha inicio */}
             <div>
-              <label style={labelStyle}>
-                Fecha de inicio <span style={{ color: "#E05252" }}>*</span>
+              <label
+                htmlFor="promo-inicio"
+                style={labelStyle}
+              >
+                Fecha de inicio *
               </label>
               <input
+                id="promo-inicio"
                 name="fechaInicio"
                 type="datetime-local"
                 value={form.fechaInicio}
@@ -386,38 +744,93 @@ function Promociones({ usuario }) {
               />
             </div>
 
-            {/* Fecha fin */}
             <div>
-              <label style={labelStyle}>
-                Fecha de fin <span style={{ color: "#E05252" }}>*</span>
+              <label
+                htmlFor="promo-fin"
+                style={labelStyle}
+              >
+                Fecha de fin *
               </label>
               <input
+                id="promo-fin"
                 name="fechaFin"
                 type="datetime-local"
                 value={form.fechaFin}
                 onChange={handleChange}
-                required
                 min={form.fechaInicio || undefined}
+                required
                 style={inputStyle}
               />
             </div>
 
-            {/* Botones */}
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label
+                htmlFor="promo-sucursal"
+                style={labelStyle}
+              >
+                Sucursal
+              </label>
+              <input
+                id="promo-sucursal"
+                value={sucursalMostrada}
+                readOnly
+                style={{
+                  ...inputStyle,
+                  opacity: 0.7,
+                  cursor: "not-allowed",
+                }}
+              />
+              <small style={{ color: "#94a3b8" }}>
+                La sucursal se asigna desde el backend.
+              </small>
+            </div>
+
+            <div style={{ gridColumn: "1 / -1" }}>
+              <label
+                style={{
+                  ...labelStyle,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  cursor: "pointer",
+                }}
+              >
+                <input
+                  type="checkbox"
+                  name="acumulaPuntos"
+                  checked={form.acumulaPuntos}
+                  onChange={handleChange}
+                />
+                Acumular puntos con esta promoción
+              </label>
+            </div>
+
             <div
               style={{
                 gridColumn: "1 / -1",
                 display: "flex",
-                gap: "12px",
-                marginTop: "8px",
+                flexWrap: "wrap",
+                gap: 12,
+                marginTop: 8,
               }}
             >
-              <button type="submit" className="btn-glow">
-                {editando ? "💾 Guardar cambios" : "🏷️ Crear promoción"}
+              <button
+                type="submit"
+                className="btn-glow"
+                disabled={guardando}
+              >
+                {guardando
+                  ? "Guardando..."
+                  : editando !== null
+                    ? "💾 Guardar cambios"
+                    : "🏷️ Crear promoción"}
               </button>
+
               <button
                 type="button"
                 onClick={cancelarForm}
-                style={{ padding: "10px 18px", cursor: "pointer" }}
+                disabled={guardando}
+                style={botonStyle}
               >
                 Cancelar
               </button>
@@ -426,11 +839,61 @@ function Promociones({ usuario }) {
         </div>
       )}
 
-      {/* Tabla */}
+      {/* TABLA DE PROMOCIONES */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+          flexWrap: "wrap",
+          marginBottom: 12,
+        }}
+      >
+        <h2 style={{ fontSize: 18, margin: 0 }}>
+          Listado de promociones
+        </h2>
+
+        <span
+          style={{
+            color: "var(--texto-suave)",
+            fontSize: 13,
+          }}
+        >
+          Filtro:{" "}
+          {ESTADOS.find(
+            (estado) => estado.valor === filtroEstado
+          )?.nombre}
+        </span>
+      </div>
+
       {cargando ? (
-        <p style={{ color: "var(--texto-suave)" }}>Cargando...</p>
-      ) : promociones.length === 0 ? (
-        <p>No hay promociones registradas.</p>
+        <p style={{ color: "var(--texto-suave)" }}>
+          Cargando promociones...
+        </p>
+      ) : promocionesFiltradas.length === 0 ? (
+        <div
+          style={{
+            padding: 24,
+            border: "1px solid var(--borde)",
+            borderRadius: 10,
+            textAlign: "center",
+          }}
+        >
+          <p style={{ marginBottom: 12 }}>
+            No hay promociones para el estado seleccionado.
+          </p>
+
+          {filtroEstado !== "TODAS" && (
+            <button
+              type="button"
+              onClick={() => setFiltroEstado("TODAS")}
+              style={botonStyle}
+            >
+              Ver todas las promociones
+            </button>
+          )}
+        </div>
       ) : (
         <div style={{ overflowX: "auto" }}>
           <table>
@@ -442,95 +905,106 @@ function Promociones({ usuario }) {
                 <th>Fecha fin</th>
                 <th>Sucursal</th>
                 <th>Estado</th>
-                <th>Acciones</th>
+                {esAdmin && <th>Acciones</th>}
               </tr>
             </thead>
+
             <tbody>
-              {promociones.map((p) => (
-                <tr key={p.id}>
+              {promocionesFiltradas.map((promo) => (
+                <tr key={promo.id}>
                   <td>
-                    <strong>{p.nombre}</strong>
-                    {p.descripcion && (
+                    <strong>{promo.nombre}</strong>
+
+                    {promo.descripcion && (
                       <div
                         style={{
-                          fontSize: "12px",
+                          fontSize: 12,
                           color: "var(--texto-suave)",
+                          marginTop: 4,
                         }}
                       >
-                        {p.descripcion}
+                        {promo.descripcion}
                       </div>
                     )}
                   </td>
+
                   <td style={{ fontWeight: 700 }}>
-                    {p.descuentoPorcentaje}%
+                    {promo.descuentoPorcentaje}%
                   </td>
-                  <td style={{ fontSize: "13px" }}>
-                    {fmtFecha(p.fechaInicio)}
+
+                  <td style={{ fontSize: 13 }}>
+                    {formatearFecha(promo.fechaInicio)}
                   </td>
-                  <td style={{ fontSize: "13px" }}>
-                    {fmtFecha(p.fechaFin)}
+
+                  <td style={{ fontSize: 13 }}>
+                    {formatearFecha(promo.fechaFin)}
                   </td>
+
                   <td
                     style={{
-                      fontSize: "13px",
+                      fontSize: 13,
                       color: "var(--texto-suave)",
                     }}
                   >
-                    {p.sucursalNombre || "—"}
+                    {promo.sucursalNombre || "—"}
                   </td>
+
                   <td>
-                    <Badge vigente={p.vigente} activa={p.activa} />
+                    <BadgeEstado
+                      estado={promo.estadoCalculado}
+                    />
                   </td>
-                  <td>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "6px",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <button
-                        onClick={() => abrirEditar(p)}
+
+                  {esAdmin && (
+                    <td>
+                      <div
                         style={{
-                          padding: "5px 10px",
-                          cursor: "pointer",
-                          fontSize: "13px",
+                          display: "flex",
+                          gap: 7,
+                          flexWrap: "wrap",
                         }}
                       >
-                        ✏️ Editar
-                      </button>
-                      {p.activa && (
                         <button
-                          onClick={() => desactivar(p.id)}
+                          type="button"
+                          onClick={() => abrirEditar(promo)}
+                          disabled={procesandoId === promo.id}
+                          style={botonStyle}
+                        >
+                          ✏️ Editar
+                        </button>
+
+                        {promo.activa !== false && (
+                          <button
+                            type="button"
+                            onClick={() => desactivar(promo)}
+                            disabled={procesandoId === promo.id}
+                            style={{
+                              ...botonStyle,
+                              background: "#2D2A1A",
+                              color: "#fbbf24",
+                              border: "1px solid #92400e",
+                            }}
+                          >
+                            ⏸ Desactivar
+                          </button>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => eliminar(promo)}
+                          disabled={procesandoId === promo.id}
                           style={{
-                            padding: "5px 10px",
-                            cursor: "pointer",
-                            fontSize: "13px",
-                            background: "#2D2A1A",
-                            color: "#C8783A",
-                            border: "1px solid #C8783A33",
-                            borderRadius: "6px",
+                            ...botonStyle,
+                            background: "#2D1A1A",
+                            color: "#f87171",
+                            border: "1px solid #991b1b",
                           }}
                         >
-                          ⏸ Desactivar
+                          🗑️ Eliminar
                         </button>
-                      )}
-                      <button
-                        onClick={() => eliminar(p.id)}
-                        style={{
-                          padding: "5px 10px",
-                          cursor: "pointer",
-                          fontSize: "13px",
-                          background: "#2D1A1A",
-                          color: "#E05252",
-                          border: "1px solid #E0525233",
-                          borderRadius: "6px",
-                        }}
-                      >
-                        🗑️ Eliminar
-                      </button>
-                    </div>
-                  </td>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
