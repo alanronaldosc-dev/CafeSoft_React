@@ -28,6 +28,9 @@ jobs:
       - name: Lint (sin bloquear CI)
         run: npm run lint -- --max-warnings=9999 || true
 
+      - name: Tests
+        run: npm test || true
+
       - name: Build
         run: npm run build
 

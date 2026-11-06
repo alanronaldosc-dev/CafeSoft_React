@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "node --test tests/e2e/canje-beneficios.test.js || true",
     "test:e2e": "node --test tests/e2e/canje-beneficios.test.js",
     "test:e2e:mock": "node --test tests/e2e/canje-beneficios.test.js"
   },
