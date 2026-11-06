@@ -15,16 +15,15 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Requerido por SonarCloud
+          fetch-depth: 0
 
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Instalar dependencias
-        run: npm ci
+        run: npm install
 
       - name: Lint
         run: npm run lint
@@ -40,6 +39,6 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=alanronaldosc-dev_CafeSoft_React
-            -Dsonar.organization=Alan Ronaldo Serrano Colin
+            -Dsonar.organization=alanronaldosc-dev
             -Dsonar.sources=src
             -Dsonar.exclusions=**/node_modules/**,**/dist/**
