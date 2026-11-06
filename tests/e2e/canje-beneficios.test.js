@@ -155,9 +155,30 @@ test("canjea puntos, recalcula el total y actualiza el saldo del cliente", async
     "El saldo restante debe reflejar los puntos consumidos en la venta."
   );
 
-  await driver.findElement(By.css('[data-testid="menu-clientes"]')).click();
-  const clientSearch = await driver.findElement(
-    By.css('[data-testid="buscar-clientes"]')
+  const clientMenu = await driver.wait(
+    async () => {
+      const items = await driver.findElements(
+        By.css('[data-testid="menu-clientes"], nav.menu p')
+      );
+      for (const item of items) {
+        if ((await item.getText()).includes("Clientes")) {
+          return item;
+        }
+      }
+      return null;
+    },
+    15000,
+    "No se encontró la opción Clientes en el menú principal."
+  );
+  await clientMenu.click();
+  const clientSearch = await driver.wait(
+    until.elementLocated(
+      By.css(
+        '[data-testid="buscar-clientes"], input[placeholder^="🔍 Buscar por nombre"]'
+      )
+    ),
+    15000,
+    "No se encontró el buscador de clientes en la ficha."
   );
   await clientSearch.sendKeys(clientName);
   const clientCard = await driver.wait(
