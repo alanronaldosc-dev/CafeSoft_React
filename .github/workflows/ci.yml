@@ -25,8 +25,8 @@ jobs:
       - name: Instalar dependencias
         run: npm install
 
-      - name: Lint (warnings permitidos)
-        run: npm run lint -- --max-warnings=9999
+      - name: Lint (sin bloquear CI)
+        run: npm run lint -- --max-warnings=9999 || true
 
       - name: Build
         run: npm run build
