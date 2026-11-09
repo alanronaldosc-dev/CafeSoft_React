@@ -120,11 +120,15 @@ export default function SegmentacionClientes() {
   const total = resumen?.total ?? clientes.length;
 
   return (
-    <main className="sc-contenedor">
+    <main className="sc-contenedor" aria-busy={cargando}>
       <header className="sc-encabezado">
         <div>
           <div className="sc-superior">
-            <span className="sc-icono-principal">📊</span>
+            <span className="sc-marca" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />
+              </svg>
+            </span>
             <span className="sc-modulo">CAFESOFT / ADMINISTRACIÓN</span>
           </div>
 
@@ -136,28 +140,53 @@ export default function SegmentacionClientes() {
           </p>
         </div>
 
-        <button
-          className="sc-boton-principal"
-          onClick={cargar}
-          disabled={cargando}
-          type="button"
-        >
-          <span>↻</span>
-          {cargando ? "Actualizando..." : "Actualizar clasificación"}
-        </button>
+        <div className="sc-acciones">
+          <span className="sc-sello-tiempo">
+            {actualizado
+              ? `Actualizado ${actualizado.toLocaleTimeString("es-MX", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}`
+              : "Sin actualizar"}
+          </span>
+
+          <button
+            className="sc-boton-principal"
+            onClick={cargar}
+            disabled={cargando}
+            type="button"
+          >
+            <span
+              className={`sc-refresh ${cargando ? "sc-girando" : ""}`}
+              aria-hidden="true"
+            >
+              ↻
+            </span>
+            {cargando ? "Actualizando..." : "Actualizar clasificación"}
+          </button>
+        </div>
       </header>
 
       {error && (
         <div className="sc-error" role="alert">
-          ⚠ {error}
+          <span className="sc-error-texto">⚠ {error}</span>
+          <button
+            type="button"
+            className="sc-error-reintentar"
+            onClick={cargar}
+          >
+            Reintentar
+          </button>
         </div>
       )}
 
-      <section className="sc-seccion">
+      <section className="sc-seccion" aria-labelledby="sc-clasificacion">
         <div className="sc-titulo-seccion">
           <div>
-            <span className="sc-hu">HU-035</span>
-            <h2>Clasificación general de clientes</h2>
+            <span className="sc-hu" title="Historia de usuario asociada">
+              HU-035
+            </span>
+            <h2 id="sc-clasificacion">Clasificación general de clientes</h2>
             <p>
               Distribución automática de clientes según sus compras.
             </p>
@@ -166,40 +195,53 @@ export default function SegmentacionClientes() {
           <div className="sc-total">
             <span>Total de clientes</span>
             <strong>{total}</strong>
+            <small>clientes clasificados</small>
           </div>
         </div>
 
-        <div className="sc-tarjetas">
+        <div className="sc-tarjetas" aria-busy={cargando && !resumen}>
           {Object.entries(SEGMENTOS).map(([clave, info]) => {
             const cantidad = resumen?.segmentos?.[clave] ?? 0;
             const porcentaje = total > 0
               ? ((cantidad / total) * 100).toFixed(1)
               : "0.0";
+            const activa = segmento === clave;
 
             return (
               <button
                 key={clave}
                 type="button"
                 className={`sc-tarjeta sc-borde-${info.color} ${
-                  segmento === clave ? "sc-tarjeta-activa" : ""
+                  activa ? "sc-tarjeta-activa" : ""
                 }`}
                 onClick={() =>
-                  setSegmento(segmento === clave ? "" : clave)
+                  setSegmento(activa ? "" : clave)
                 }
-                aria-pressed={segmento === clave}
+                aria-pressed={activa}
+                aria-label={`${info.nombre}: ${cantidad} clientes, ${porcentaje}% del total`}
               >
-                <div className="sc-tarjeta-superior">
-                  <span className={`sc-indicador sc-fondo-${info.color}`}>
-                    ●
-                  </span>
+                <span className="sc-tarjeta-superior">
+                  <span
+                    className={`sc-indicador sc-fondo-${info.color}`}
+                    aria-hidden="true"
+                  />
                   <span className="sc-tarjeta-porcentaje">
                     {porcentaje}%
                   </span>
-                </div>
+                </span>
 
-                <strong className="sc-numero">{cantidad}</strong>
-                <h3>{info.nombre}</h3>
-                <p>{info.descripcion}</p>
+                <span className="sc-numero">{cantidad}</span>
+                <span className="sc-tarjeta-nombre">{info.nombre}</span>
+                <span className="sc-tarjeta-desc">{info.descripcion}</span>
+
+                <span className="sc-barra" aria-hidden="true">
+                  <span
+                    className={`sc-barra-relleno sc-fondo-${info.color}`}
+                    style={{
+                      width: `${Math.max(Number(porcentaje), 1.5)}%`,
+                    }}
+                  />
+                </span>
               </button>
             );
           })}
@@ -214,7 +256,7 @@ export default function SegmentacionClientes() {
               </p>
             </div>
 
-            <span className="sc-contador">
+            <span className="sc-contador" aria-live="polite">
               {clientesVisibles.length} resultados
             </span>
           </div>
@@ -257,22 +299,42 @@ export default function SegmentacionClientes() {
 
           <div className="sc-tabla-contenedor">
             <table className="sc-tabla">
+              <caption className="sc-sr-only">
+                Clientes clasificados por segmento, con número de compras,
+                última compra y acceso a su perfil.
+              </caption>
               <thead>
                 <tr>
-                  <th>Cliente</th>
-                  <th>Segmento</th>
-                  <th>Compras</th>
-                  <th>Última compra</th>
-                  <th>Acciones</th>
+                  <th scope="col">Cliente</th>
+                  <th scope="col">Segmento</th>
+                  <th scope="col">Compras</th>
+                  <th scope="col">Última compra</th>
+                  <th scope="col">Acciones</th>
                 </tr>
               </thead>
 
               <tbody>
+                {cargando && clientes.length === 0 &&
+                  [0, 1, 2, 3, 4].map((fila) => (
+                    <tr key={`esqueleto-${fila}`} className="sc-fila-esqueleto">
+                      <td colSpan={5} aria-hidden="true">
+                        <span className="sc-esqueleto" />
+                      </td>
+                    </tr>
+                  ))}
+
                 {clientesVisibles.map((cliente) => (
-                  <tr key={cliente.clienteId}>
-                    <td>
+                  <tr
+                    key={cliente.clienteId}
+                    className={
+                      seleccionadoId === cliente.clienteId
+                        ? "sc-fila-activa"
+                        : ""
+                    }
+                  >
+                    <td data-label="Cliente">
                       <div className="sc-cliente">
-                        <span className="sc-avatar">
+                        <span className="sc-avatar" aria-hidden="true">
                           {(cliente.nombre || "C")
                             .charAt(0)
                             .toUpperCase()}
@@ -281,19 +343,21 @@ export default function SegmentacionClientes() {
                       </div>
                     </td>
 
-                    <td>
+                    <td data-label="Segmento">
                       <EtiquetaSegmento segmento={cliente.segmento} />
                     </td>
 
-                    <td>
+                    <td data-label="Compras">
                       <span className="sc-compras">
                         {cliente.compras ?? 0}
                       </span>
                     </td>
 
-                    <td>{cliente.ultimaCompra || "Sin compras"}</td>
+                    <td data-label="Última compra">
+                      {cliente.ultimaCompra || "Sin compras"}
+                    </td>
 
-                    <td>
+                    <td data-label="Acciones">
                       <button
                         type="button"
                         className="sc-boton-perfil"
@@ -355,7 +419,9 @@ export default function SegmentacionClientes() {
       <section className="sc-seccion sc-seccion-perfil" ref={perfilRef}>
         <div className="sc-titulo-seccion">
           <div>
-            <span className="sc-hu sc-hu-secundaria">HU-036</span>
+            <span className="sc-hu sc-hu-secundaria" title="Historia de usuario asociada">
+              HU-036
+            </span>
             <h2>Consulta individual del segmento</h2>
             <p>
               Visualiza la clasificación de un cliente y los
@@ -365,10 +431,10 @@ export default function SegmentacionClientes() {
         </div>
 
         {clienteSeleccionado ? (
-          <div className="sc-panel sc-perfil">
+          <div className="sc-panel sc-perfil" aria-live="polite">
             <div className="sc-perfil-superior">
               <div className="sc-cliente">
-                <span className="sc-avatar sc-avatar-grande">
+                <span className="sc-avatar sc-avatar-grande" aria-hidden="true">
                   {(clienteSeleccionado.nombre || "C")
                     .charAt(0)
                     .toUpperCase()}
@@ -386,6 +452,7 @@ export default function SegmentacionClientes() {
                 className="sc-boton-secundario"
                 type="button"
                 onClick={() => setSeleccionadoId(null)}
+                aria-label="Cerrar el perfil del cliente"
               >
                 Cerrar perfil
               </button>
@@ -449,8 +516,8 @@ export default function SegmentacionClientes() {
             <div className="sc-icono-vacio">👤</div>
             <h3>Ningún cliente seleccionado</h3>
             <p>
-              Selecciona «Ver perfil» en la tabla de HU-035
-              para consultar su segmento individual.
+              Selecciona «Ver perfil» en el directorio para consultar
+              su segmento individual.
             </p>
           </div>
         )}

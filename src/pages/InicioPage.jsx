@@ -2,6 +2,7 @@
 // InicioPage.jsx
 // Pantalla de inicio estilo AWS Console:
 //  - Banner de bienvenida con nombre de usuario
+//  - Resumen del negocio (ventas, inventario, reparto)
 //  - Carrusel de productos (ProductoShowcase)
 //  - Grid de widgets por módulo (según permisos)
 // ============================================================
@@ -215,7 +216,7 @@ const ORDEN_MODULOS = [
   "crearProducto", "reportes",
 ];
 
-// Patrón de columnas alternado: 2, 3, 2, 3...
+// Patrón de columnas alternado: 2, 3, 2, 3, 2, 3...
 const PATRON_COLUMNAS = [2, 3, 2, 3, 2, 3];
 
 // ── Widget individual ────────────────────────────────────────
@@ -359,7 +360,7 @@ function InicioPage({ usuario, tienePermiso, onNavegar }) {
   let patronIdx = 0;
   while (idx < modulosFiltrados.length) {
     const cols = busqueda.trim()
-      ? 3  // búsqueda activa: siempre 3 columnas para compactar
+      ? 3
       : PATRON_COLUMNAS[patronIdx % PATRON_COLUMNAS.length];
     filas.push(modulosFiltrados.slice(idx, idx + cols));
     idx += cols;
@@ -377,6 +378,22 @@ function InicioPage({ usuario, tienePermiso, onNavegar }) {
   // Hora del día
   const hora = new Date().getHours();
   const saludo = hora < 12 ? "Buenos días" : hora < 19 ? "Buenas tardes" : "Buenas noches";
+
+  const formatoVentas = (valor) =>
+    `$${valor.toLocaleString("es-MX", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} MXN`;
+
+  const VENTAS_REPARTIDORES = 58420;
+  const ENTREGAS_ACTIVAS = 3;
+
+  const INFO_OPERATIVA = [
+    { label: "Sucursal", valor: "Centro" },
+    { label: "Reparto activo", valor: "Ruta AquaRuta" },
+    { label: "Entregas hoy", valor: "3" },
+    { label: "Última actualización", valor: "Ahora" },
+  ];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
@@ -519,6 +536,124 @@ function InicioPage({ usuario, tienePermiso, onNavegar }) {
         </div>
       </div>
 
+      {/* ── Resumen del negocio ── */}
+      <section className="panel" style={{ marginBottom: 0 }} aria-labelledby="resumen-negocio">
+        <div style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: "16px",
+          flexWrap: "wrap",
+          marginBottom: "18px",
+        }}>
+          <div>
+            <h2 id="resumen-negocio" style={{ marginBottom: "6px" }}>Resumen del negocio</h2>
+            <p style={{ color: "var(--texto-suave)", fontSize: "14px", margin: 0 }}>
+              Ventas, inventario y operación de reparto en un solo lugar.
+            </p>
+          </div>
+
+          <button
+            onClick={() => onNavegar?.("reportes")}
+            style={{
+              background: "var(--cafe-oscuro)",
+              color: "var(--crema)",
+              border: "none",
+              borderRadius: "var(--r-sm)",
+              padding: "11px 18px",
+              fontSize: "13px",
+              fontWeight: "700",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Ver reportes →
+          </button>
+        </div>
+
+        {/* KPI de ventas */}
+        <div className="cards" style={{ marginBottom: "18px" }}>
+          <div
+            className="card"
+            style={{ cursor: "pointer" }}
+            onClick={() => onNavegar?.("ventas")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onNavegar?.("ventas");
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <span className="card-icon">💰</span>
+            <p>Ventas de repartidores</p>
+            <h2>{formatoVentas(VENTAS_REPARTIDORES)}</h2>
+            <p style={{ textTransform: "none", fontWeight: "600", color: "var(--texto)", letterSpacing: 0 }}>
+              ▲ 12% vs periodo anterior
+            </p>
+          </div>
+
+          <div
+            className="card"
+            style={{ cursor: "pointer" }}
+            onClick={() => onNavegar?.("dashboard")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onNavegar?.("dashboard");
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <span className="card-icon">🧪</span>
+            <p>Estado de inventario</p>
+            <h2>Óptimo</h2>
+            <p style={{ textTransform: "none", fontWeight: "600", color: "var(--texto)", letterSpacing: 0 }}>
+              Existencias saludables
+            </p>
+          </div>
+
+          <div
+            className="card"
+            style={{ cursor: "pointer" }}
+            onClick={() => onNavegar?.("cargas")}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onNavegar?.("cargas");
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <span className="card-icon">🚚</span>
+            <p>Reparto del día</p>
+            <h2>{ENTREGAS_ACTIVAS}</h2>
+            <p style={{ textTransform: "none", fontWeight: "600", color: "var(--texto)", letterSpacing: 0 }}>
+              Entregas activas
+            </p>
+          </div>
+        </div>
+
+        {/* Información operativa */}
+        <div className="panel" style={{ background: "var(--fondo)", boxShadow: "none" }}>
+          <h2>Información operativa</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "14px" }}>
+            {INFO_OPERATIVA.map((item) => (
+              <div
+                key={item.label}
+                style={{
+                  background: "var(--humo)",
+                  border: "1px solid var(--borde)",
+                  borderRadius: "var(--r-md)",
+                  padding: "14px 16px",
+                }}
+              >
+                <p style={{ margin: 0, fontSize: "11px", fontWeight: "700", letterSpacing: "0.5px", textTransform: "uppercase", color: "var(--texto-suave)" }}>
+                  {item.label}
+                </p>
+                <strong style={{ display: "block", marginTop: "6px", fontSize: "16px", fontWeight: "700", color: "var(--texto)" }}>
+                  {item.valor}
+                </strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Carrusel de productos ── */}
       <ProductoShowcase />
 
@@ -526,7 +661,9 @@ function InicioPage({ usuario, tienePermiso, onNavegar }) {
       <div>
         {/* Título sección */}
         <div style={{
-          display: "flex", alignItems: "center", gap: "10px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
           marginBottom: "16px",
         }}>
           <div style={{ width: "3px", height: "18px", background: "var(--caramelo)", borderRadius: "2px" }} />

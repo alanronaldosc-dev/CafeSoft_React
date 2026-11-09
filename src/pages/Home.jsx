@@ -371,6 +371,14 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
         <div
           className="user-card"
           onClick={() => cambiarSeccion("miPerfil")}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              cambiarSeccion("miPerfil");
+            }
+          }}
+          role="button"
+          tabIndex={0}
           style={{ cursor: "pointer" }}
           title="Ver mi perfil"
         >
@@ -394,6 +402,15 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
                 key={item.id}
                 data-testid={`menu-${item.id}`}
                 onClick={() => cambiarSeccion(item.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    cambiarSeccion(item.id);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-current={seccion === item.id ? "page" : undefined}
                 className={seccion === item.id ? "active-menu" : ""}
                 style={{ cursor: "pointer" }}
               >
@@ -407,7 +424,11 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
         </button>
       </aside>
 
-      <main className="content">{renderContenido()}</main>
+      <main className="content">
+        <div key={seccion} className="page-enter">
+          {renderContenido()}
+        </div>
+      </main>
       
     </div>
   );
