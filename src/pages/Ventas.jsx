@@ -16,7 +16,7 @@ const COLORES_PASTEL = [
   "#c4acff",
 ];
 
-function Ventas({ usuario }) {
+function Ventas({ usuario, onNavegar }) {
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -32,76 +32,94 @@ function Ventas({ usuario }) {
   const [cargandoProductos, setCargandoProductos] = useState(true);
   const [errorProductos, setErrorProductos] = useState(null);
   const [verTodos, setVerTodos] = useState(false);
+  const sucursalId = usuario?.sucursalId;
 
+  // Carga de ventas: la actualización de estado ocurre en los callbacks
+  // de la petición, cuando ya existe una respuesta asíncrona.
   useEffect(() => {
-    cargarVentas();
-  }, [usuario]);
+    let cancelado = false;
 
+    if (!sucursalId) {
+      return () => {
+        cancelado = true;
+      };
+    }
+
+    api.get("/ventas")
+      .then((res) => {
+        if (cancelado) return;
+        const todas = Array.isArray(res.data) ? res.data : [];
+        const filtradas = todas.filter(
+          (venta) => Number(venta.sucursalId) === Number(sucursalId),
+        );
+        setVentas(filtradas);
+        setError(null);
+      })
+      .catch((err) => {
+        if (cancelado) return;
+        console.error(err);
+        setError("No se pudieron cargar las ventas.");
+      })
+      .finally(() => {
+        if (!cancelado) setCargando(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [sucursalId]);
+
+  // Consulta el reporte y los productos más vendidos del periodo.
   useEffect(() => {
-    cargarReporte();
-    cargarProductos();
+    let cancelado = false;
+
+    api.get(`/ventas/reporte?periodo=${periodo}`)
+      .then((res) => {
+        if (!cancelado) setReporte(res.data);
+      })
+      .catch((err) => {
+        if (cancelado) return;
+        console.error(err);
+        const mensaje = err?.response?.data?.mensaje;
+        setErrorReporte(mensaje || "No se pudo cargar el reporte.");
+        setReporte(null);
+      })
+      .finally(() => {
+        if (!cancelado) setCargandoReporte(false);
+      });
+
+    api.get(`/ventas/reporte/top-productos?periodo=${periodo}`)
+      .then((res) => {
+        if (!cancelado) {
+          setProductos(Array.isArray(res.data) ? res.data : []);
+        }
+      })
+      .catch((err) => {
+        if (cancelado) return;
+        console.error(err);
+        const mensaje = err?.response?.data?.mensaje;
+        setErrorProductos(mensaje || "No se pudo cargar el ranking de productos.");
+        setProductos([]);
+      })
+      .finally(() => {
+        if (!cancelado) setCargandoProductos(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [periodo]);
+
+  const cambiarPeriodo = (nuevoPeriodo) => {
+    if (nuevoPeriodo === periodo) return;
+
+    // El cambio de filtros ocurre por interacción del usuario.
+    setPeriodo(nuevoPeriodo);
     setVerTodos(false);
-  }, [periodo, usuario]);
-
-  const cargarVentas = async () => {
-      console.log("usuario completo:", usuario);
-  console.log("sucursalId:", usuario?.sucursalId);
-  console.log("tipo:", typeof usuario?.sucursalId);
-    try {
-      const sucursalId = usuario?.sucursalId;
-
-      if (!sucursalId) {
-        setError("Tu cuenta no tiene una sucursal asignada. Contacta al administrador.");
-        setCargando(false);
-        return;
-      }
-
-      const res = await api.get("/ventas");
-      const todas = Array.isArray(res.data) ? res.data : [];
-
-      const filtradas = todas.filter((v) => Number(v.sucursalId) === Number(sucursalId));
-
-      setVentas(filtradas);
-    } catch (err) {
-      console.error(err);
-      setError("No se pudieron cargar las ventas.");
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  // ── Consulta el reporte del periodo seleccionado ──
-  const cargarReporte = async () => {
     setCargandoReporte(true);
-    setErrorReporte(null);
-    try {
-      const res = await api.get(`/ventas/reporte?periodo=${periodo}`);
-      setReporte(res.data);
-    } catch (err) {
-      console.error(err);
-      const mensaje = err?.response?.data?.mensaje;
-      setErrorReporte(mensaje || "No se pudo cargar el reporte.");
-      setReporte(null);
-    } finally {
-      setCargandoReporte(false);
-    }
-  };
-
-  // ── Consulta los productos más vendidos del periodo ──
-  const cargarProductos = async () => {
     setCargandoProductos(true);
+    setErrorReporte(null);
     setErrorProductos(null);
-    try {
-      const res = await api.get(`/ventas/reporte/top-productos?periodo=${periodo}`);
-      setProductos(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error(err);
-      const mensaje = err?.response?.data?.mensaje;
-      setErrorProductos(mensaje || "No se pudo cargar el ranking de productos.");
-      setProductos([]);
-    } finally {
-      setCargandoProductos(false);
-    }
   };
 
   const fmt = (valor) =>
@@ -129,25 +147,27 @@ function Ventas({ usuario }) {
     });
   }
 
-  let acc = 0;
-  const stops = totalUnidades > 0
-    ? segmentos.map((s) => {
-        const ini = (acc / totalUnidades) * 360;
-        acc += s.unidades;
-        const fin = (acc / totalUnidades) * 360;
-        return `${s.color} ${ini.toFixed(2)}deg ${fin.toFixed(2)}deg`;
-      })
-    : [];
-  const estiloDonut = { background: `conic-gradient(${stops.join(", ")})` };
-
   const filasMostradas = verTodos ? productos : productos.slice(0, 5);
 
   return (
     <section className="panel">
       <h1>🧾 Ventas</h1>
 
-      {error && (
-        <p style={{ color: "#E05252", marginBottom: "1rem" }}>⚠️ {error}</p>
+      {usuario?.userTipo === 0 && (
+        <button
+          type="button"
+          className="btn-secondary"
+          style={{ width: "auto", marginBottom: "1rem" }}
+          onClick={() => onNavegar?.("desempenoRepartidores")}
+        >
+          🏆 Desempeño de repartidores
+        </button>
+      )}
+
+      {(error || !sucursalId) && (
+        <p style={{ color: "#E05252", marginBottom: "1rem" }}>
+          ⚠️ {error || "Tu cuenta no tiene una sucursal asignada. Contacta al administrador."}
+        </p>
       )}
 
       {/* ==================================================
@@ -161,7 +181,7 @@ function Ventas({ usuario }) {
             <button
               key={p.id}
               className={periodo === p.id ? "activo" : ""}
-              onClick={() => setPeriodo(p.id)}
+              onClick={() => cambiarPeriodo(p.id)}
             >
               {p.etiqueta}
             </button>
@@ -427,7 +447,9 @@ function Ventas({ usuario }) {
           ================================================== */}
       <h2>🧾 Detalle de ventas</h2>
 
-      {cargando ? (
+      {!sucursalId ? (
+        <p>Asigna una sucursal a tu cuenta para consultar las ventas.</p>
+      ) : cargando ? (
         <p>Cargando...</p>
       ) : ventas.length === 0 ? (
         <p>No hay ventas registradas para esta sucursal.</p>
