@@ -3,8 +3,11 @@ import api from "../services/api";
 
 const PERIODOS = [
   { id: "hoy", etiqueta: "Hoy" },
+  { id: "semana", etiqueta: "Esta semana" },
   { id: "mes", etiqueta: "Este mes" },
   { id: "mes_anterior", etiqueta: "Mes anterior" },
+  { id: "anio", etiqueta: "Este año" },
+  { id: "personalizado", etiqueta: "Personalizado" },
 ];
 
 const COLORES_PASTEL = [
@@ -21,88 +24,119 @@ function Ventas({ usuario }) {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
 
-  // ── Estado del reporte (HU-016) ──
+  // Estado del reporte y los filtros de HU-050.
   const [periodo, setPeriodo] = useState("hoy");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin, setFechaFin] = useState("");
   const [reporte, setReporte] = useState(null);
   const [cargandoReporte, setCargandoReporte] = useState(true);
   const [errorReporte, setErrorReporte] = useState(null);
 
-  // ── Estado de productos más vendidos (HU-017) ──
+  // Estado de productos más vendidos.
   const [productos, setProductos] = useState([]);
   const [cargandoProductos, setCargandoProductos] = useState(true);
   const [errorProductos, setErrorProductos] = useState(null);
   const [verTodos, setVerTodos] = useState(false);
 
+  // El filtro aplicado es independiente de los valores que el usuario
+  // está editando. Así evitamos consultar rangos incompletos.
+  const [filtroAplicado, setFiltroAplicado] = useState({ periodo: "hoy" });
+  const [filtroPendiente, setFiltroPendiente] = useState(false);
+
+  const errorFiltroPeriodo =
+    periodo !== "personalizado"
+      ? null
+      : !fechaInicio || !fechaFin
+        ? "Selecciona una fecha inicial y una fecha final."
+        : fechaInicio > fechaFin
+          ? "La fecha inicial no puede ser posterior a la fecha final."
+          : null;
+
+  // Lista detallada: la respuesta de la API actualiza el estado únicamente
+  // dentro de callbacks asíncronos, no de forma síncrona en el efecto.
   useEffect(() => {
-    cargarVentas();
-  }, [usuario]);
+    let activo = true;
+    const sucursalId = usuario?.sucursalId;
 
+    if (!sucursalId) {
+      return () => {
+        activo = false;
+      };
+    }
+
+    api.get("/ventas")
+      .then((res) => {
+        if (!activo) return;
+        const todas = Array.isArray(res.data) ? res.data : [];
+        const filtradas = todas.filter(
+          (v) => Number(v.sucursalId) === Number(sucursalId)
+        );
+        setVentas(filtradas);
+        setError(null);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (activo) setError("No se pudieron cargar las ventas.");
+      })
+      .finally(() => {
+        if (activo) setCargando(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [usuario?.sucursalId]);
+
+  // El reporte y el ranking consultan exactamente el mismo período aplicado.
   useEffect(() => {
-    cargarReporte();
-    cargarProductos();
-    setVerTodos(false);
-  }, [periodo, usuario]);
+    let activo = true;
+    const params = new URLSearchParams({ periodo: filtroAplicado.periodo });
 
-  const cargarVentas = async () => {
-      console.log("usuario completo:", usuario);
-  console.log("sucursalId:", usuario?.sucursalId);
-  console.log("tipo:", typeof usuario?.sucursalId);
-    try {
-      const sucursalId = usuario?.sucursalId;
-
-      if (!sucursalId) {
-        setError("Tu cuenta no tiene una sucursal asignada. Contacta al administrador.");
-        setCargando(false);
-        return;
-      }
-
-      const res = await api.get("/ventas");
-      const todas = Array.isArray(res.data) ? res.data : [];
-
-      const filtradas = todas.filter((v) => Number(v.sucursalId) === Number(sucursalId));
-
-      setVentas(filtradas);
-    } catch (err) {
-      console.error(err);
-      setError("No se pudieron cargar las ventas.");
-    } finally {
-      setCargando(false);
+    if (filtroAplicado.periodo === "personalizado") {
+      params.set("desde", filtroAplicado.desde);
+      params.set("hasta", filtroAplicado.hasta);
     }
-  };
 
-  // ── Consulta el reporte del periodo seleccionado ──
-  const cargarReporte = async () => {
-    setCargandoReporte(true);
-    setErrorReporte(null);
-    try {
-      const res = await api.get(`/ventas/reporte?periodo=${periodo}`);
-      setReporte(res.data);
-    } catch (err) {
-      console.error(err);
-      const mensaje = err?.response?.data?.mensaje;
-      setErrorReporte(mensaje || "No se pudo cargar el reporte.");
-      setReporte(null);
-    } finally {
-      setCargandoReporte(false);
-    }
-  };
+    api.get(`/ventas/reporte?${params.toString()}`)
+      .then((res) => {
+        if (activo) setReporte(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (activo) {
+          const mensaje = err?.response?.data?.mensaje;
+          setErrorReporte(mensaje || "No se pudo cargar el reporte.");
+          setReporte(null);
+        }
+      })
+      .finally(() => {
+        if (activo) setCargandoReporte(false);
+      });
 
-  // ── Consulta los productos más vendidos del periodo ──
-  const cargarProductos = async () => {
-    setCargandoProductos(true);
-    setErrorProductos(null);
-    try {
-      const res = await api.get(`/ventas/reporte/top-productos?periodo=${periodo}`);
-      setProductos(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      console.error(err);
-      const mensaje = err?.response?.data?.mensaje;
-      setErrorProductos(mensaje || "No se pudo cargar el ranking de productos.");
-      setProductos([]);
-    } finally {
-      setCargandoProductos(false);
-    }
-  };
+    api.get(`/ventas/reporte/top-productos?${params.toString()}`)
+      .then((res) => {
+        if (activo) {
+          setProductos(Array.isArray(res.data) ? res.data : []);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        if (activo) {
+          const mensaje = err?.response?.data?.mensaje;
+          setErrorProductos(
+            mensaje || "No se pudo cargar el ranking de productos."
+          );
+          setProductos([]);
+        }
+      })
+      .finally(() => {
+        if (activo) setCargandoProductos(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [filtroAplicado, usuario?.id, usuario?.sucursalId]);
 
   const fmt = (valor) =>
     valor != null ? `$${Number(valor).toFixed(2)}` : "$0.00";
@@ -129,25 +163,16 @@ function Ventas({ usuario }) {
     });
   }
 
-  let acc = 0;
-  const stops = totalUnidades > 0
-    ? segmentos.map((s) => {
-        const ini = (acc / totalUnidades) * 360;
-        acc += s.unidades;
-        const fin = (acc / totalUnidades) * 360;
-        return `${s.color} ${ini.toFixed(2)}deg ${fin.toFixed(2)}deg`;
-      })
-    : [];
-  const estiloDonut = { background: `conic-gradient(${stops.join(", ")})` };
-
   const filasMostradas = verTodos ? productos : productos.slice(0, 5);
 
   return (
     <section className="panel">
       <h1>🧾 Ventas</h1>
 
-      {error && (
-        <p style={{ color: "#E05252", marginBottom: "1rem" }}>⚠️ {error}</p>
+      {(error || !usuario?.sucursalId) && (
+        <p style={{ color: "#E05252", marginBottom: "1rem" }}>
+          ⚠️ {error || "Tu cuenta no tiene una sucursal asignada. Contacta al administrador."}
+        </p>
       )}
 
       {/* ==================================================
@@ -160,15 +185,95 @@ function Ventas({ usuario }) {
           {PERIODOS.map((p) => (
             <button
               key={p.id}
+              type="button"
               className={periodo === p.id ? "activo" : ""}
-              onClick={() => setPeriodo(p.id)}
+              onClick={() => {
+                setPeriodo(p.id);
+                setVerTodos(false);
+                setFiltroPendiente(p.id === "personalizado");
+                if (p.id !== "personalizado") {
+                  setCargandoReporte(true);
+                  setCargandoProductos(true);
+                  setErrorReporte(null);
+                  setErrorProductos(null);
+                  setFiltroAplicado({ periodo: p.id });
+                }
+              }}
             >
               {p.etiqueta}
             </button>
           ))}
         </div>
 
-        {cargandoReporte ? (
+        {periodo === "personalizado" && (
+          <div
+            className="reporte-fechas-personalizadas"
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "flex-end",
+              gap: "14px",
+              marginBottom: "16px",
+            }}
+          >
+            <label style={{ display: "grid", gap: "6px", minWidth: "190px" }}>
+              Fecha inicial
+              <input
+                type="date"
+                value={fechaInicio}
+                onChange={(e) => {
+                  setFechaInicio(e.target.value);
+                  setFiltroPendiente(true);
+                  setVerTodos(false);
+                }}
+                aria-label="Fecha inicial del reporte"
+              />
+            </label>
+
+            <label style={{ display: "grid", gap: "6px", minWidth: "190px" }}>
+              Fecha final
+              <input
+                type="date"
+                value={fechaFin}
+                onChange={(e) => {
+                  setFechaFin(e.target.value);
+                  setFiltroPendiente(true);
+                  setVerTodos(false);
+                }}
+                aria-label="Fecha final del reporte"
+              />
+            </label>
+            <button
+              type="button"
+              disabled={Boolean(errorFiltroPeriodo)}
+              onClick={() => {
+                setVerTodos(false);
+                setErrorReporte(null);
+                setErrorProductos(null);
+                setCargandoReporte(true);
+                setCargandoProductos(true);
+                setFiltroPendiente(false);
+                setFiltroAplicado({
+                  periodo: "personalizado",
+                  desde: fechaInicio,
+                  hasta: fechaFin,
+                });
+              }}
+            >
+              Aplicar período
+            </button>
+          </div>
+        )}
+
+        {errorFiltroPeriodo && (
+          <p role="alert" style={{ color: "#E05252", marginBottom: "12px" }}>
+            {errorFiltroPeriodo}
+          </p>
+        )}
+
+        {errorFiltroPeriodo ? null : filtroPendiente ? (
+          <p>Selecciona las fechas y pulsa Aplicar período para actualizar el reporte.</p>
+        ) : cargandoReporte ? (
           <p>Cargando reporte...</p>
         ) : errorReporte ? (
           <p style={{ color: "#E05252" }}>⚠️ {errorReporte}</p>
@@ -427,7 +532,9 @@ function Ventas({ usuario }) {
           ================================================== */}
       <h2>🧾 Detalle de ventas</h2>
 
-      {cargando ? (
+      {!usuario?.sucursalId ? (
+        <p>No se puede consultar el detalle sin una sucursal asignada.</p>
+      ) : cargando ? (
         <p>Cargando...</p>
       ) : ventas.length === 0 ? (
         <p>No hay ventas registradas para esta sucursal.</p>
