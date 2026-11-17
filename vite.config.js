@@ -10,6 +10,7 @@ export default defineConfig({
     coverage: {
       reporter: ['text', 'lcov'],
       include: [
+        'src/pages/ClientesFrecuentes.jsx',
         'src/pages/Promociones.jsx',
         'src/pages/SegmentacionClientes.jsx',
       ],
