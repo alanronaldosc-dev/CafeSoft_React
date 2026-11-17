@@ -3,6 +3,9 @@ import "./VentasNavegacion.css";
 import { useEffect, useState } from "react";
 import PatronesConsumo from "../components/PatronesConsumo";
 import api from "../services/api";
+import DashboardVentas from "../components/DashboardVentas";
+import ProductosMasVendidos from "../components/ProductosMasVendidos";
+import { moneda } from "../utils/formato";
 
 const PERIODOS = [
   { id: "hoy", etiqueta: "Hoy" },
@@ -10,36 +13,20 @@ const PERIODOS = [
   { id: "mes_anterior", etiqueta: "Mes anterior" },
 ];
 
-const COLORES_PASTEL = [
-  "#7e4cfe",
-  "#956bff",
-  "#a37fff",
-  "#b291fd",
-  "#b597ff",
-  "#c4acff",
-];
-
 function Ventas({ usuario }) {
   const [vistaVentas, setVistaVentas] = useState("ventas");
   const [ventas, setVentas] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
+  const [cargandoVentas, setCargandoVentas] = useState(true);
+  const [errorVentas, setErrorVentas] = useState(null);
 
-  // ── Estado del reporte (HU-016) ──
+  // ── Dashboard del periodo (HU-041 / HU-042) ──
   const [periodo, setPeriodo] = useState("hoy");
-  const [reporte, setReporte] = useState(null);
-  const [cargandoReporte, setCargandoReporte] = useState(true);
-  const [errorReporte, setErrorReporte] = useState(null);
-
-  // ── Estado de productos más vendidos (HU-017) ──
-  const [productos, setProductos] = useState([]);
-  const [cargandoProductos, setCargandoProductos] = useState(true);
-  const [errorProductos, setErrorProductos] = useState(null);
-  const [verTodos, setVerTodos] = useState(false);
+  const [dashboard, setDashboard] = useState(null);
+  const [cargandoDashboard, setCargandoDashboard] = useState(true);
+  const [errorDashboard, setErrorDashboard] = useState(null);
 
   useEffect(() => {
-    cargarVentas();
-  }, [usuario]);
+    let cancelado = false;
 
   useEffect(() => {
     cargarReporte();
