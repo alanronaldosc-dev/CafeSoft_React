@@ -31,8 +31,8 @@ jobs:
       - name: Tests (e2e)
         run: npm test || true
 
-      - name: Tests unitarios (Vitest)
-        run: npm run test:unit || true
+      - name: Tests unitarios con cobertura (Vitest)
+        run: npm run test:coverage
 
       - name: Build
         run: npm run build
@@ -47,4 +47,5 @@ jobs:
             -Dsonar.projectKey=alanronaldosc-dev_CafeSoft_React
             -Dsonar.organization=alanronaldosc-dev
             -Dsonar.sources=src
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,src/__tests__/**,src/test/**
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
