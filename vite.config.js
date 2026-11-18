@@ -10,9 +10,19 @@ export default defineConfig({
     exclude: ["tests/e2e/**", "node_modules/**"],
     coverage: {
       provider: "v8",
-      reporter: ["text", "lcov", "html"],
-      include: ["src/pages/DesempenoRepartidores.jsx", "src/pages/Ventas.jsx", "src/pages/Home.jsx"],
-      exclude: ["**/*.test.*", "src/test/**"],
+      reporter: ["text", "lcov"],
+      reportsDirectory: "./coverage",
+      include: [
+        "src/pages/DesempenoRepartidores.jsx",
+        "src/pages/Ventas.jsx",
+        "src/pages/Home.jsx",
+      ],
+      exclude: [
+        "**/*.test.*",
+        "src/main.jsx",
+        "src/__tests__/**",
+        "src/test/**",
+      ],
     },
   },
 });

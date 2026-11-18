@@ -1,4 +1,4 @@
-﻿name: CI - Web React
+name: CI - Web React
 
 on:
   push:
@@ -28,7 +28,10 @@ jobs:
       - name: Lint
         run: npm run lint -- --max-warnings=9999 || true
 
-      - name: Tests with coverage
+      - name: E2E tests
+        run: npm run test:e2e || true
+
+      - name: Unit tests with coverage
         run: npm test
 
       - name: Production build
@@ -44,5 +47,5 @@ jobs:
             -Dsonar.projectKey=alanronaldosc-dev_CafeSoft_React
             -Dsonar.organization=alanronaldosc-dev
             -Dsonar.sources=src
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/*.png,**/*.jpg,**/*.jpeg,**/*.gif,**/*.webp,**/*.test.*
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,src/__tests__/**,src/test/**,**/*.test.*,**/*.png,**/*.jpg,**/*.jpeg,**/*.gif,**/*.webp
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
