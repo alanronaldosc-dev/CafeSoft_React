@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "test": "node --test tests/e2e/canje-beneficios.test.js || true",
     "test:e2e": "node --test tests/e2e/canje-beneficios.test.js",
-    "test:e2e:mock": "node --test tests/e2e/canje-beneficios.test.js"
+    "test:e2e:mock": "node --test tests/e2e/canje-beneficios.test.js",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:unit:watch": "vitest"
   },
   "dependencies": {
     "axios": "^1.18.0",
@@ -23,17 +26,22 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.3.1",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.0.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/coverage-v8": "^3.2.7",
     "autoprefixer": "^10.5.0",
     "eslint": "^10.3.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
+    "jsdom": "^26.0.0",
     "postcss": "^8.5.15",
     "selenium-webdriver": "^4.51.0",
     "tailwindcss": "^4.3.1",
-    "vite": "^8.0.12"
+    "vite": "^8.0.12",
+    "vitest": "^3.0.0"
   }
 }

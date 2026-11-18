@@ -9,5 +9,12 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/test/setup.js',
     exclude: ['tests/e2e/**', 'node_modules/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['src/pages/Ventas.jsx'],
+      exclude: ['src/main.jsx', 'src/__tests__/**', 'src/test/**'],
+    },
   },
 })
