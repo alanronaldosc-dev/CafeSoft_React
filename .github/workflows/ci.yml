@@ -1,10 +1,10 @@
-name: CI â€“ Web React
+﻿name: CI - Web React
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-lint-sonar:
@@ -12,29 +12,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout cÃ³digo
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Configurar Node.js
+      - name: Configure Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
-      - name: Instalar dependencias
-        run: npm install
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Lint (sin bloquear CI)
+      - name: Lint
         run: npm run lint -- --max-warnings=9999 || true
 
-      - name: Tests
+      - name: Tests with coverage
         run: npm test
 
-      - name: Build
+      - name: Production build
         run: npm run build
 
-      - name: AnÃ¡lisis SonarCloud
+      - name: SonarCloud analysis
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
