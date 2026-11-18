@@ -1,4 +1,4 @@
-name: CI – Web React
+name: CI â€“ Web React
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      - name: Checkout cÃ³digo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -29,12 +29,12 @@ jobs:
         run: npm run lint -- --max-warnings=9999 || true
 
       - name: Tests
-        run: npm test || true
+        run: npm test
 
       - name: Build
         run: npm run build
 
-      - name: Análisis SonarCloud
+      - name: AnÃ¡lisis SonarCloud
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,4 +44,5 @@ jobs:
             -Dsonar.projectKey=alanronaldosc-dev_CafeSoft_React
             -Dsonar.organization=alanronaldosc-dev
             -Dsonar.sources=src
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/*.png,**/*.jpg,**/*.jpeg,**/*.gif,**/*.webp,**/*.test.*
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
