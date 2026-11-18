@@ -82,7 +82,7 @@ export default function DesempenoRepartidores({ onVolver }) {
       }
     };
 
-    cargarDesempeno();
+    void cargarDesempeno();
     return () => { activo = false; };
   }, []);
 
