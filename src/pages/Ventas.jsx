@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../services/api";
 import DashboardVentas from "../components/DashboardVentas";
 import ProductosMasVendidos from "../components/ProductosMasVendidos";
