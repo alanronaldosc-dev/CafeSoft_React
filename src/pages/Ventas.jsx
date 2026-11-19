@@ -12,8 +12,12 @@ const PERIODOS = [
   { id: "mes_anterior", etiqueta: "Mes anterior" },
 ];
 
+
+function Ventas({ usuario, onNavegar }) {
+
 function Ventas({ usuario }) {
   const [vistaVentas, setVistaVentas] = useState("ventas");
+
   // ── Detalle de ventas de la sucursal ──
   const [ventas, setVentas] = useState([]);
   const [cargandoVentas, setCargandoVentas] = useState(true);
@@ -100,6 +104,19 @@ function Ventas({ usuario }) {
 
   return (
     <section className="panel">
+
+      <h1>🧾 Ventas</h1>
+      {usuario?.userTipo === 0 && (
+        <button
+          type="button"
+          className="btn-secondary"
+          style={{ width: "auto", marginBottom: "1rem" }}
+          onClick={() => onNavegar?.("desempenoRepartidores")}
+        >
+          🏆 Desempeño de repartidores
+        </button>
+      )}
+
       <header className="ventas-dashboard-header">
         <div>
           <span className="ventas-eyebrow">CAFESOFT · ADMINISTRACIÓN</span>
@@ -135,6 +152,7 @@ function Ventas({ usuario }) {
       {vistaVentas === "diarios" && <PatronesConsumo modo="diarios" />}
       {vistaVentas === "ventas" && (
         <>
+
 
 
       {errorVentas && (

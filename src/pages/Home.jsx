@@ -5,6 +5,7 @@ import InicioPage from "./InicioPage";
 import Register from "./Register";
 import Productos from "./Productos";
 import Ventas from "./Ventas";
+import DesempenoRepartidores from "./DesempenoRepartidores";
 import Pedidos from "./Pedidos";
 import Usuarios from "./Usuarios";
 import CrearProducto from "./CrearProducto";
@@ -22,9 +23,7 @@ import Promociones from "./Promociones";
 
 import PerfilUsuario from "./PerfilUsuario";
 
-import Dashboard from "./Dashboard";
 import InventarioProductos from "./InventarioProductos";
-import RecibirProducto from "./RecibirProducto";
 
 // HU-013 - PROVEEDORES
 import Proveedores from "./Proveedores";
@@ -93,6 +92,9 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
   // un módulo determinado.
   // ============================================
   const tienePermiso = (permiso) => {
+    // HU-049: el desempeño de repartidores es exclusivo del administrador.
+    if (permiso === "desempenoRepartidores") return usuario.userTipo === 0;
+
     // Administrador: acceso completo.
     if (usuario.userTipo === 0) return true;
 
@@ -197,7 +199,14 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
         return <CrearProducto usuario={usuario} />;
 
       case "ventas":
-        return <Ventas usuario={usuario} />;
+        return <Ventas usuario={usuario} onNavegar={cambiarSeccion} />;
+
+      case "desempenoRepartidores":
+        return (
+          <DesempenoRepartidores
+            onVolver={() => cambiarSeccion("ventas")}
+          />
+        );
 
       case "pedidos":
         return <Pedidos />;
