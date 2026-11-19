@@ -1,0 +1,20 @@
+/* Navegación del módulo Ventas - CafeSoft */
+.ventas-dashboard-header { margin: 0 0 22px; }
+.ventas-eyebrow { display:block; color:#b6a3f9; font-size:11px; font-weight:800; letter-spacing:1.7px; margin-bottom:8px; }
+.ventas-dashboard-header h1 { margin:0 0 7px; color:#f8f6ff; font-size:clamp(25px, 3vw, 34px); letter-spacing:-.8px; }
+.ventas-dashboard-header p { margin:0; color:#a9a3bc; font-size:14px; }
+.ventas-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; padding:10px; margin-bottom:24px; background:#191724; border:1px solid #353047; border-radius:17px; }
+.ventas-tab { appearance:none; display:flex; align-items:center; gap:13px; position:relative; min-width:0; padding:16px 18px; border:1px solid #39334c; border-radius:12px; background:#252135; color:#ece8f9; cursor:pointer; text-align:left; transition:background .2s, border-color .2s, transform .2s, box-shadow .2s; }
+.ventas-tab:hover { background:#332a4c; border-color:#8e69ec; transform:translateY(-1px); }
+.ventas-tab:focus-visible { outline:3px solid #c1a9ff; outline-offset:3px; }
+.ventas-tab--active { background:linear-gradient(120deg,#7847ed,#633bd2); border-color:#a389ff; box-shadow:0 6px 18px #5b35bb36; color:#fff; }
+.ventas-tab--active:hover { background:linear-gradient(120deg,#8658f3,#7044df); }
+.ventas-tab-icon { display:grid; place-items:center; width:43px; height:43px; flex-shrink:0; border-radius:11px; background:#ffffff12; font-size:22px; }
+.ventas-tab--active .ventas-tab-icon { background:#ffffff24; }
+.ventas-tab-content { display:flex; flex-direction:column; min-width:0; gap:3px; }
+.ventas-tab-content strong { font-size:15px; font-weight:750; }
+.ventas-tab-content small { font-size:12px; color:#b8b1ca; line-height:1.3; }
+.ventas-tab--active .ventas-tab-content small { color:#e5dafa; }
+.ventas-tab-indicator { position:absolute; right:12px; top:12px; width:7px; height:7px; border-radius:50%; background:transparent; }
+.ventas-tab--active .ventas-tab-indicator { background:#e9dcff; box-shadow:0 0 0 3px #ffffff20; }
+@media(max-width:760px) { .ventas-tabs { grid-template-columns:1fr; } .ventas-tab { padding:12px 14px; } .ventas-tab-icon { width:38px; height:38px; } }

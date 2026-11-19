@@ -1,4 +1,10 @@
+
 import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
+import "./VentasNavegacion.css";
+import PatronesConsumo from "../components/PatronesConsumo";
+
 import api from "../services/api";
 import DashboardVentas from "../components/DashboardVentas";
 import ProductosMasVendidos from "../components/ProductosMasVendidos";
@@ -13,7 +19,16 @@ const PERIODOS = [
   { id: "personalizado", etiqueta: "Personalizado" },
 ];
 
+
+function Ventas({ usuario, onNavegar }) {
+
 function Ventas({ usuario }) {
+
+=======
+  const [vistaVentas, setVistaVentas] = useState("ventas");
+
+  // ── Detalle de ventas de la sucursal ──
+
   const [ventas, setVentas] = useState([]);
   const [cargandoVentas, setCargandoVentas] = useState(true);
   const [errorVentas, setErrorVentas] = useState(null);
@@ -211,7 +226,56 @@ function Ventas({ usuario }) {
 
   return (
     <section className="panel">
+
       <h1>🧾 Ventas</h1>
+      {usuario?.userTipo === 0 && (
+        <button
+          type="button"
+          className="btn-secondary"
+          style={{ width: "auto", marginBottom: "1rem" }}
+          onClick={() => onNavegar?.("desempenoRepartidores")}
+        >
+          🏆 Desempeño de repartidores
+        </button>
+      )}
+
+      <header className="ventas-dashboard-header">
+        <div>
+          <span className="ventas-eyebrow">CAFESOFT · ADMINISTRACIÓN</span>
+          <h1>Panel de ventas</h1>
+          <p>Consulta tus ventas y analiza el consumo de tu sucursal.</p>
+        </div>
+      </header>
+
+      <nav className="ventas-tabs" aria-label="Secciones de ventas">
+        {[
+          { id: "ventas", icono: "🧾", titulo: "Ventas", descripcion: "Resumen general" },
+          { id: "horarios", icono: "🕒", titulo: "Por horario", descripcion: "Horas de consumo" },
+          { id: "diarios", icono: "📊", titulo: "Por día", descripcion: "Patrones diarios" },
+        ].map((opcion) => (
+          <button
+            key={opcion.id}
+            type="button"
+            className={`ventas-tab ${vistaVentas === opcion.id ? "ventas-tab--active" : ""}`}
+            onClick={() => setVistaVentas(opcion.id)}
+            aria-pressed={vistaVentas === opcion.id}
+          >
+            <span className="ventas-tab-icon" aria-hidden="true">{opcion.icono}</span>
+            <span className="ventas-tab-content">
+              <strong>{opcion.titulo}</strong>
+              <small>{opcion.descripcion}</small>
+            </span>
+            <span className="ventas-tab-indicator" aria-hidden="true" />
+          </button>
+        ))}
+      </nav>
+
+      {vistaVentas === "horarios" && <PatronesConsumo modo="horarios" />}
+      {vistaVentas === "diarios" && <PatronesConsumo modo="diarios" />}
+      {vistaVentas === "ventas" && (
+        <>
+
+
 
       {errorVentas && (
         <p className="aviso-error" role="alert">
@@ -419,6 +483,8 @@ function Ventas({ usuario }) {
             ))}
           </tbody>
         </table>
+            )}
+        </>
       )}
     </section>
   );
