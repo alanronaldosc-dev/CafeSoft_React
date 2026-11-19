@@ -4,6 +4,16 @@
 **Fecha de validación:** 13 de noviembre de 2026  
 **Alcance:** CafeSoft React y ApiCoffeSoft Java.
 
+## Resumen ejecutivo
+
+La HU-043 quedó validada con pruebas automatizadas focalizadas en el frontend:
+**4 pruebas Vitest aprobadas**, ESLint aprobado y build de producción completado.
+La API cuenta con pruebas de cálculo, seguridad y contrato HTTP. El rendimiento
+real de PostgreSQL y una prueba E2E con frontend/API conectados no pudieron
+ejecutarse en esta sesión.
+
+**Estado:** APROBADA con limitaciones documentadas.
+
 ## Criterios de aceptación
 
 | Criterio | Validación |
@@ -58,6 +68,34 @@ mvn -o "-Dtest=ClientesFrecuentesServiceTest,SecurityConfigTest" test
 | Pruebas Java focalizadas | 13/13 aprobadas entre `ClientesFrecuentesServiceTest` (4) y `SecurityConfigTest` (9). |
 | Suite completa de la API | 31 pruebas; 30 aprobadas y 1 error en `ApiSpringCafeSoftApplicationTests.contextLoads` porque PostgreSQL rechaza la autenticación configurada localmente. |
 | Export de la app móvil | No aplica a esta HU; el intento falló porque falta `babel-preset-expo` en la app React Native. |
+
+| Comando | Resultado verificable |
+|---|---|
+| `npm exec -- vitest run src/pages/ClientesFrecuentes.test.jsx --coverage` | 1 archivo aprobado, 4/4 pruebas aprobadas. |
+| `npm exec -- eslint src/pages/ClientesFrecuentes.jsx src/pages/ClientesFrecuentes.test.jsx` | Sin errores ni advertencias. |
+| `npm run build` | Build exitoso en 613 ms; 603.61 kB para el bundle JS. Vite emitió el aviso habitual por superar 500 kB. |
+
+## Evidencia funcional
+
+Se demostró que la pantalla:
+
+- obtiene el ranking usando periodo y mínimo de compras;
+- presenta los clientes frecuentes y el importe acumulado;
+- cambia el ranking al modificar los filtros;
+- ignora respuestas tardías de filtros anteriores;
+- renderiza una lista simulada de 1,000 clientes por debajo de 5 segundos.
+
+La prueba de 1,000 clientes usa datos simulados. Por ello demuestra el
+comportamiento de la interfaz, pero no valida PostgreSQL, la red ni el tiempo
+de respuesta completo de una instalación productiva.
+
+## Hallazgos y riesgos
+
+| Hallazgo | Impacto | Acción |
+|---|---|---|
+| La prueba completa de la API no inicia por autenticación rechazada de PostgreSQL. | No se pudo validar todo el contexto integrado ni el rendimiento SQL real. | Configurar credenciales QA autorizadas y ejecutar la suite completa. |
+| No hay prueba E2E con servidor web/API activo. | Falta comprobar el login, navegación y endpoints conectados de punta a punta. | Levantar frontend y API, iniciar sesión como ADMIN y registrar evidencias. |
+| El bundle supera el umbral de advertencia de Vite. | Puede aumentar el tiempo de carga inicial. | Evaluar carga diferida o división de módulos antes de definir una optimización. |
 
 El servicio calcula los límites de periodo sin escribir ventas. La prueba de
 rendimiento del servicio usa proyecciones simuladas: **no mide la consulta real
