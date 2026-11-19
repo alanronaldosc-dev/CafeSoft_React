@@ -1,14 +1,20 @@
-name: CI – Web React
+
+name: CI - Web React
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
   build-lint-sonar:
-    name: Build, Lint & SonarCloud
+    name: Build, Tests, Coverage & SonarCloud
     runs-on: ubuntu-latest
 
     steps:
@@ -20,32 +26,37 @@ jobs:
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+          cache: 'npm'
 
       - name: Instalar dependencias
-        run: npm install
+        run: npm ci
 
       - name: Lint (sin bloquear CI)
         run: npm run lint -- --max-warnings=9999 || true
 
-      - name: Tests (e2e)
-        run: npm test || true
+      - name: Ejecutar pruebas con cobertura
+        run: npx vitest run --coverage
 
-      - name: Tests unitarios con cobertura (Vitest)
-        run: npm run test:coverage
+      - name: Verificar reporte de cobertura
+        run: |
+          test -f coverage/lcov.info
+          echo "Reporte de cobertura generado correctamente"
 
-      - name: Build
+      - name: Build de producción
         run: npm run build
 
       - name: Análisis SonarCloud
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: >
             -Dsonar.projectKey=alanronaldosc-dev_CafeSoft_React
             -Dsonar.organization=alanronaldosc-dev
             -Dsonar.sources=src
+            -Dsonar.tests=src/__tests__
+            -Dsonar.test.inclusions=src/__tests__/**/*.test.js,src/__tests__/**/*.test.jsx
             -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,src/__tests__/**,src/test/**
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
