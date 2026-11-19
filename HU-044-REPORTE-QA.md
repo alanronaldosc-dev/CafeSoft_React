@@ -4,6 +4,17 @@
 **Fecha de validación:** 13 de noviembre de 2026  
 **Alcance:** CafeSoft React y ApiCoffeSoft Java.
 
+## Resumen ejecutivo
+
+La HU-044 quedó validada con pruebas automatizadas focalizadas en el frontend:
+**4 pruebas Vitest aprobadas** y el build de producción de Vite completado.
+La clasificación de los cuatro segmentos cuenta con pruebas unitarias y
+pruebas de seguridad HTTP en la API; sin embargo, el rendimiento real con
+PostgreSQL y una prueba E2E con frontend/API conectados no pudieron ejecutarse
+en esta sesión.
+
+**Estado:** APROBADA con limitaciones documentadas.
+
 ## Criterios de aceptación
 
 | Criterio | Validación |
@@ -63,6 +74,36 @@ mvn -o "-Dtest=SegmentacionClienteServiceTest,SecurityConfigTest" test
 | Pruebas Java focalizadas | 11/11 aprobadas entre `SegmentacionClienteServiceTest` (2) y `SecurityConfigTest` (9). |
 | Suite completa de la API | 31 pruebas; 30 aprobadas y 1 error en `ApiSpringCafeSoftApplicationTests.contextLoads` porque PostgreSQL rechaza la autenticación configurada localmente. |
 | Export de la app móvil | No aplica a esta HU; el intento falló porque falta `babel-preset-expo` en la app React Native. |
+
+| Comando | Resultado verificable |
+|---|---|
+| `npm exec -- vitest run src/pages/SegmentacionClientes.test.jsx --coverage` | 1 archivo aprobado, 4/4 pruebas aprobadas. |
+| `npm exec -- eslint src/pages/SegmentacionClientes.jsx src/pages/SegmentacionClientes.test.jsx` | Sin errores ni advertencias. |
+| `npm run build` | Build exitoso en 536 ms; 603.61 kB para el bundle JS. Vite emitió el aviso habitual por superar 500 kB. |
+
+## Evidencia funcional
+
+Se demostró que la pantalla:
+
+- carga y compara los cuatro segmentos con conteos y porcentajes;
+- permite filtrar por segmento y buscar clientes por nombre;
+- refresca simultáneamente el resumen y el directorio;
+- informa como administrador requerido cuando el endpoint responde 403;
+- renderiza 1,000 clientes, conserva 250 clientes por segmento y completa
+  la comprobación local por debajo de 5 segundos.
+
+La prueba de 1,000 clientes usa datos simulados. Por ello demuestra el
+comportamiento de la interfaz y el listado local, pero no valida el tamaño real
+de la consulta SQL, PostgreSQL ni la red del entorno.
+
+## Hallazgos y riesgos
+
+| Hallazgo | Impacto | Acción |
+|---|---|---|
+| Las reglas de 30 y 90 días no están confirmadas por un criterio de negocio adicional. | Riesgo de que se interpreten incorrectamente los límites. | Confirmar con el dueño del producto los umbrales aprobados. |
+| La suite completa de la API no inicia por autenticación rechazada de PostgreSQL. | No se pudo validar todo el contexto integrado ni el rendimiento SQL real. | Configurar credenciales QA autorizadas y ejecutar la suite completa. |
+| No hay prueba E2E con servidor web/API activo. | Falta comprobar la navegación real y la integración completa. | Levantar frontend y API, iniciar sesión como ADMIN y registrar los pasos en evidencia. |
+| El bundle supera el umbral de advertencia de Vite. | Puede aumentar el tiempo de carga inicial. | Evaluar carga diferida o división de módulos antes de definir una optimización. |
 
 Las respuestas de frontend se simulan; el servicio Java sí valida clasificación
 y resumen, pero el caso de 1,000 clientes es una prueba de mapeo con proyecciones
