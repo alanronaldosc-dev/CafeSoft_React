@@ -189,6 +189,89 @@
   }
 }
 
+/* ── FILTRO DE PERÍODO ── */
+
+.desempeno-filtro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 4px;
+  padding: 16px;
+  background: var(--fondo-card);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-md);
+}
+
+.desempeno-filtro-periodos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.desempeno-filtro-btn {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--borde);
+  background: transparent;
+  color: var(--texto-suave);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  width: auto;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.desempeno-filtro-btn:hover {
+  border-color: var(--caramelo);
+  color: var(--caramelo);
+}
+
+.desempeno-filtro-btn.activo {
+  background: var(--caramelo);
+  border-color: var(--caramelo);
+  color: #101319;
+  font-weight: 700;
+}
+
+.desempeno-filtro-row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.desempeno-filtro-fechas {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.desempeno-filtro-fechas label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+
+.desempeno-filtro-aplicar {
+  padding: 7px 20px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.desempeno-error-fechas {
+  color: #ef4444;
+  font-size: 12px;
+}
+
+.desempeno-periodo-activo {
+  font-size: 13px;
+  color: var(--texto-suave);
+  margin-bottom: 4px;
+}
+
 @media (max-width: 700px) {
   .desempeno-resumen {
     grid-template-columns: 1fr;

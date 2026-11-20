@@ -2,10 +2,15 @@ import { useEffect, useState } from "react";
 import api from "../services/api";
 import "./DesempenoRepartidores.css";
 
-const moneda = new Intl.NumberFormat("es-MX", {
-  style: "currency",
-  currency: "MXN",
-});
+const fmt = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" });
+
+const PERIODOS = [
+  { id: "hoy",          etiqueta: "Hoy" },
+  { id: "semana",       etiqueta: "Esta semana" },
+  { id: "mes",          etiqueta: "Este mes" },
+  { id: "mes_anterior", etiqueta: "Mes anterior" },
+  { id: "personalizado",etiqueta: "Personalizado" },
+];
 
 function Ranking({ titulo, descripcion, filas, tipo }) {
   return (
@@ -17,9 +22,8 @@ function Ranking({ titulo, descripcion, filas, tipo }) {
         </div>
         <span className="desempeno-ranking-count">{filas.length} repartidores</span>
       </div>
-
       {filas.length === 0 ? (
-        <div className="desempeno-vacio">No hay entregas confirmadas para mostrar.</div>
+        <div className="desempeno-vacio">No hay entregas confirmadas en este período.</div>
       ) : (
         <div className="desempeno-tabla-wrap">
           <table className="desempeno-tabla">
@@ -28,7 +32,7 @@ function Ranking({ titulo, descripcion, filas, tipo }) {
                 <th>Posición</th>
                 <th>Repartidor</th>
                 {tipo === "ventas" && <th>Ventas</th>}
-                {tipo === "monto" && <th>Monto cobrado</th>}
+                {tipo === "monto"  && <th>Monto cobrado</th>}
               </tr>
             </thead>
             <tbody>
@@ -44,7 +48,7 @@ function Ranking({ titulo, descripcion, filas, tipo }) {
                     <small>ID: {fila.repartidorId}</small>
                   </td>
                   {tipo === "ventas" && <td>{fila.cantidadVentas ?? 0}</td>}
-                  {tipo === "monto" && <td className="desempeno-monto">{moneda.format(Number(fila.montoTotal) || 0)}</td>}
+                  {tipo === "monto"  && <td className="desempeno-monto">{fmt.format(Number(fila.montoTotal) || 0)}</td>}
                 </tr>
               ))}
             </tbody>
@@ -56,35 +60,53 @@ function Ranking({ titulo, descripcion, filas, tipo }) {
 }
 
 export default function DesempenoRepartidores({ onVolver }) {
-  const [datos, setDatos] = useState(null);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState("");
+  const [periodo,     setPeriodo]     = useState("mes");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaFin,    setFechaFin]    = useState("");
+  const [filtro,      setFiltro]      = useState({ periodo: "mes" });
+
+  const [datos,     setDatos]     = useState(null);
+  const [cargando,  setCargando]  = useState(true);
+  const [error,     setError]     = useState("");
+
+  const errorFechas =
+    periodo !== "personalizado" ? null
+    : !fechaInicio || !fechaFin ? "Selecciona fecha inicial y final."
+    : fechaInicio > fechaFin    ? "La fecha inicial no puede ser posterior a la final."
+    : null;
 
   useEffect(() => {
     let activo = true;
+    setCargando(true);
+    setError("");
 
-    const cargarDesempeno = async () => {
-      setCargando(true);
-      setError("");
-      try {
-        const respuesta = await api.get("/ventas/desempeno-repartidores");
-        if (activo) setDatos(respuesta.data);
-      } catch (err) {
-        const mensaje = err?.response?.data?.mensaje
+    const params = new URLSearchParams({ periodo: filtro.periodo });
+    if (filtro.periodo === "personalizado") {
+      params.set("desde", filtro.desde);
+      params.set("hasta", filtro.hasta);
+    }
+
+    api.get(`/ventas/desempeno-repartidores?${params}`)
+      .then((r) => { if (activo) setDatos(r.data); })
+      .catch((err) => {
+        const msg = err?.response?.data?.mensaje
           || err?.response?.data?.error
-          || "No fue posible consultar el desempeño de los repartidores.";
-        if (activo) {
-          setError(mensaje);
-          setDatos(null);
-        }
-      } finally {
-        if (activo) setCargando(false);
-      }
-    };
+          || "No fue posible consultar el desempeño.";
+        if (activo) { setError(msg); setDatos(null); }
+      })
+      .finally(() => { if (activo) setCargando(false); });
 
-    void cargarDesempeno();
     return () => { activo = false; };
-  }, []);
+  }, [filtro]);
+
+  const aplicar = () => {
+    if (errorFechas) return;
+    if (periodo === "personalizado") {
+      setFiltro({ periodo: "personalizado", desde: fechaInicio, hasta: fechaFin });
+    } else {
+      setFiltro({ periodo });
+    }
+  };
 
   return (
     <section className="panel desempeno-panel">
@@ -99,6 +121,70 @@ export default function DesempenoRepartidores({ onVolver }) {
         </button>
       </header>
 
+{/* ── FILTRO DE PERÍODO ── */}
+<div className="desempeno-filtro">
+  <div className="desempeno-filtro-row">
+    <div className="desempeno-filtro-periodos">
+      {PERIODOS.map((p) => (
+        <button
+          key={p.id}
+          type="button"
+          className={`desempeno-filtro-btn ${periodo === p.id ? "activo" : ""}`}
+          onClick={() => setPeriodo(p.id)}
+        >
+          {p.etiqueta}
+        </button>
+      ))}
+    </div>
+
+    {periodo !== "personalizado" && (
+      <button
+        type="button"
+        className="btn-primary desempeno-filtro-aplicar"
+        onClick={aplicar}
+      >
+        Aplicar filtro
+      </button>
+    )}
+  </div>
+
+  {periodo === "personalizado" && (
+    <div className="desempeno-filtro-row">
+      <div className="desempeno-filtro-fechas">
+        <label>
+          Desde
+          <input type="date" value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)} />
+        </label>
+        <label>
+          Hasta
+          <input type="date" value={fechaFin}
+            onChange={(e) => setFechaFin(e.target.value)} />
+        </label>
+      </div>
+      {errorFechas && <p className="desempeno-error-fechas" role="alert">{errorFechas}</p>}
+      <button
+        type="button"
+        className="btn-primary desempeno-filtro-aplicar"
+        disabled={Boolean(errorFechas)}
+        onClick={aplicar}
+      >
+        Aplicar filtro
+      </button>
+    </div>
+  )}
+</div>
+
+      {/* ── PERÍODO ACTIVO ── */}
+      {datos?.periodoEtiqueta && (
+        <p className="desempeno-periodo-activo">
+          Período: <strong>{datos.periodoEtiqueta}</strong>
+          {datos.periodoDesde && datos.periodoHasta &&
+            ` (${datos.periodoDesde} → ${datos.periodoHasta})`}
+        </p>
+      )}
+
+      {/* ── CONTENIDO ── */}
       {cargando ? (
         <p className="desempeno-mensaje">Cargando desempeño...</p>
       ) : error ? (
@@ -107,7 +193,6 @@ export default function DesempenoRepartidores({ onVolver }) {
         <>
           <p className="desempeno-contexto">
             Sucursal: <strong>{datos.sucursalNombre || "Sin nombre"}</strong>
-            <span> · Histórico de entregas confirmadas</span>
           </p>
 
           <div className="desempeno-resumen">
@@ -117,7 +202,7 @@ export default function DesempenoRepartidores({ onVolver }) {
             </article>
             <article className="desempeno-indicador">
               <span>Monto cobrado</span>
-              <strong>{moneda.format(Number(datos.montoTotal) || 0)}</strong>
+              <strong>{fmt.format(Number(datos.montoTotal) || 0)}</strong>
             </article>
             <article className="desempeno-indicador">
               <span>Repartidores con entregas</span>
@@ -139,8 +224,9 @@ export default function DesempenoRepartidores({ onVolver }) {
               tipo="monto"
             />
           </div>
+
           <p className="desempeno-nota">
-            Solo se contabilizan entregas con resultado ENTREGADO. Las incidencias y entregas no confirmadas no forman parte de los rankings.
+            Solo se contabilizan entregas con resultado ENTREGADO.
           </p>
         </>
       ) : (

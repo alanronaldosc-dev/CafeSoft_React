@@ -1,7 +1,4 @@
-
 import React, { useEffect, useState } from "react";
-
-import { useEffect, useState } from "react";
 import "./VentasNavegacion.css";
 import PatronesConsumo from "../components/PatronesConsumo";
 
@@ -19,16 +16,10 @@ const PERIODOS = [
   { id: "personalizado", etiqueta: "Personalizado" },
 ];
 
-
 function Ventas({ usuario, onNavegar }) {
-
-function Ventas({ usuario }) {
-
-=======
   const [vistaVentas, setVistaVentas] = useState("ventas");
 
   // ── Detalle de ventas de la sucursal ──
-
   const [ventas, setVentas] = useState([]);
   const [cargandoVentas, setCargandoVentas] = useState(true);
   const [errorVentas, setErrorVentas] = useState(null);
@@ -226,7 +217,6 @@ function Ventas({ usuario }) {
 
   return (
     <section className="panel">
-
       <h1>🧾 Ventas</h1>
       {usuario?.userTipo === 0 && (
         <button
@@ -274,216 +264,213 @@ function Ventas({ usuario }) {
       {vistaVentas === "diarios" && <PatronesConsumo modo="diarios" />}
       {vistaVentas === "ventas" && (
         <>
-
-
-
-      {errorVentas && (
-        <p className="aviso-error" role="alert">
-          ⚠️ {errorVentas}
-        </p>
-      )}
-
-      {/* HU-050: filtros y dashboard de ventas. */}
-      <DashboardVentas
-        datos={filtroPendiente ? null : datosDashboard}
-        cargando={filtroPendiente ? false : cargandoReporte}
-        error={filtroPendiente ? null : errorReporte}
-        periodo={periodo}
-        periodos={PERIODOS}
-        onCambiarPeriodo={cambiarPeriodo}
-      />
-
-      {periodo === "personalizado" && (
-        <div
-          className="reporte-fechas-personalizadas"
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "flex-end",
-            gap: "14px",
-            marginBottom: "16px",
-          }}
-        >
-          <label style={{ display: "grid", gap: "6px", minWidth: "190px" }}>
-            Fecha inicial
-            <input
-              type="date"
-              value={fechaInicio}
-              aria-label="Fecha inicial del reporte"
-              onChange={(e) => {
-                setFechaInicio(e.target.value);
-                setFiltroPendiente(true);
-                setReporte(null);
-                setProductos([]);
-              }}
-            />
-          </label>
-
-          <label style={{ display: "grid", gap: "6px", minWidth: "190px" }}>
-            Fecha final
-            <input
-              type="date"
-              value={fechaFin}
-              aria-label="Fecha final del reporte"
-              onChange={(e) => {
-                setFechaFin(e.target.value);
-                setFiltroPendiente(true);
-                setReporte(null);
-                setProductos([]);
-              }}
-            />
-          </label>
-
-          <button
-            type="button"
-            disabled={Boolean(errorFiltroPeriodo)}
-            onClick={aplicarPeriodoPersonalizado}
-          >
-            Aplicar período
-          </button>
-        </div>
-      )}
-
-      {errorFiltroPeriodo && (
-        <p role="alert" style={{ color: "#E05252", marginBottom: "12px" }}>
-          {errorFiltroPeriodo}
-        </p>
-      )}
-
-      {filtroPendiente && !errorFiltroPeriodo && (
-        <p>
-          Selecciona las fechas y pulsa Aplicar período para actualizar el
-          dashboard y los reportes.
-        </p>
-      )}
-
-      {/* Desglose del reporte para el periodo aplicado. */}
-      {!filtroPendiente && reporte && !errorReporte && (
-        <div className="reporte-box">
-          <h2>📊 Desglose del periodo</h2>
-
-          <p className="reporte-nota">
-            Periodo: <strong>{reporte.periodoEtiqueta}</strong> ·
-            Sucursal: <strong>{reporte.sucursalNombre}</strong>
-          </p>
-
-          <h3 className="reporte-h3">📅 Ventas por día</h3>
-          {reporte.desglosePorDia?.length ? (
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Fecha</th>
-                  <th scope="col">Ventas</th>
-                  <th scope="col">Monto total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reporte.desglosePorDia.map((dia) => (
-                  <tr key={dia.fecha}>
-                    <td>{dia.fecha}</td>
-                    <td>{dia.numeroVentas}</td>
-                    <td>{moneda(dia.montoTotal)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>Sin ventas en el periodo.</p>
+          {errorVentas && (
+            <p className="aviso-error" role="alert">
+              ⚠️ {errorVentas}
+            </p>
           )}
 
-          <h3 className="reporte-h3">💳 Ventas por método de pago</h3>
-          {reporte.desglosePorMetodoPago?.length ? (
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Método de pago</th>
-                  <th scope="col">Ventas</th>
-                  <th scope="col">Monto total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reporte.desglosePorMetodoPago.map((metodo) => (
-                  <tr key={metodo.metodoPago}>
-                    <td>{metodo.metodoPago}</td>
-                    <td>{metodo.numeroVentas}</td>
-                    <td>{moneda(metodo.montoTotal)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>Sin ventas en el periodo.</p>
-          )}
-
-          <p className="reporte-nota">
-            Los totales corresponden a las ventas registradas en el periodo y
-            la sucursal seleccionados.
-          </p>
-        </div>
-      )}
-
-      {/* El ranking utiliza el mismo periodo que el dashboard. */}
-      <div className="reporte-box">
-        <h2>🏆 Productos más vendidos</h2>
-
-        {filtroPendiente ? (
-          <p>Aplica un periodo para consultar los productos más vendidos.</p>
-        ) : (
-          <ProductosMasVendidos
-            productos={productos}
-            cargando={cargandoProductos}
-            error={errorProductos}
+          {/* HU-050: filtros y dashboard de ventas. */}
+          <DashboardVentas
+            datos={filtroPendiente ? null : datosDashboard}
+            cargando={filtroPendiente ? false : cargandoReporte}
+            error={filtroPendiente ? null : errorReporte}
+            periodo={periodo}
+            periodos={PERIODOS}
+            onCambiarPeriodo={cambiarPeriodo}
           />
-        )}
-      </div>
 
-      {/* Detalle de ventas de la sucursal. */}
-      <h2>🧾 Detalle de ventas</h2>
+          {periodo === "personalizado" && (
+            <div
+              className="reporte-fechas-personalizadas"
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "flex-end",
+                gap: "14px",
+                marginBottom: "16px",
+              }}
+            >
+              <label style={{ display: "grid", gap: "6px", minWidth: "190px" }}>
+                Fecha inicial
+                <input
+                  type="date"
+                  value={fechaInicio}
+                  aria-label="Fecha inicial del reporte"
+                  onChange={(e) => {
+                    setFechaInicio(e.target.value);
+                    setFiltroPendiente(true);
+                    setReporte(null);
+                    setProductos([]);
+                  }}
+                />
+              </label>
 
-      {!usuario?.sucursalId ? (
-        <p>No hay ventas registradas para esta sucursal.</p>
-      ) : cargandoVentas ? (
-        <p>Cargando...</p>
-      ) : ventas.length === 0 ? (
-        <p>No hay ventas registradas para esta sucursal.</p>
-      ) : (
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Folio</th>
-              <th scope="col">Puntos HU-025</th>
-              <th scope="col">Fecha</th>
-              <th scope="col">Subtotal</th>
-              <th scope="col">IVA</th>
-              <th scope="col">Total</th>
-              <th scope="col">Pago</th>
-              <th scope="col">Cambio</th>
-              <th scope="col">Cajero</th>
-              <th scope="col">Sucursal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ventas.map((venta) => (
-              <tr key={venta.id}>
-                <td>{venta.folio}</td>
-                <td>
-                  {venta.clienteFidelidadId
-                    ? `+${venta.puntosGenerados ?? 0} (cliente #${venta.clienteFidelidadId})`
-                    : "Sin cliente asociado"}
-                </td>
-                <td>{new Date(venta.fecha).toLocaleString()}</td>
-                <td>{moneda(venta.subtotal)}</td>
-                <td>{moneda(venta.impuestos)}</td>
-                <td><strong>{moneda(venta.total)}</strong></td>
-                <td>{venta.metodoPago}</td>
-                <td>{venta.cambio != null ? moneda(venta.cambio) : "—"}</td>
-                <td>{venta.usuarioNombre}</td>
-                <td>{venta.sucursalNombre || "—"}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              <label style={{ display: "grid", gap: "6px", minWidth: "190px" }}>
+                Fecha final
+                <input
+                  type="date"
+                  value={fechaFin}
+                  aria-label="Fecha final del reporte"
+                  onChange={(e) => {
+                    setFechaFin(e.target.value);
+                    setFiltroPendiente(true);
+                    setReporte(null);
+                    setProductos([]);
+                  }}
+                />
+              </label>
+
+              <button
+                type="button"
+                disabled={Boolean(errorFiltroPeriodo)}
+                onClick={aplicarPeriodoPersonalizado}
+              >
+                Aplicar período
+              </button>
+            </div>
+          )}
+
+          {errorFiltroPeriodo && (
+            <p role="alert" style={{ color: "#E05252", marginBottom: "12px" }}>
+              {errorFiltroPeriodo}
+            </p>
+          )}
+
+          {filtroPendiente && !errorFiltroPeriodo && (
+            <p>
+              Selecciona las fechas y pulsa Aplicar período para actualizar el
+              dashboard y los reportes.
+            </p>
+          )}
+
+          {/* Desglose del reporte para el periodo aplicado. */}
+          {!filtroPendiente && reporte && !errorReporte && (
+            <div className="reporte-box">
+              <h2>📊 Desglose del periodo</h2>
+
+              <p className="reporte-nota">
+                Periodo: <strong>{reporte.periodoEtiqueta}</strong> ·
+                Sucursal: <strong>{reporte.sucursalNombre}</strong>
+              </p>
+
+              <h3 className="reporte-h3">📅 Ventas por día</h3>
+              {reporte.desglosePorDia?.length ? (
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Fecha</th>
+                      <th scope="col">Ventas</th>
+                      <th scope="col">Monto total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reporte.desglosePorDia.map((dia) => (
+                      <tr key={dia.fecha}>
+                        <td>{dia.fecha}</td>
+                        <td>{dia.numeroVentas}</td>
+                        <td>{moneda(dia.montoTotal)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>Sin ventas en el periodo.</p>
+              )}
+
+              <h3 className="reporte-h3">💳 Ventas por método de pago</h3>
+              {reporte.desglosePorMetodoPago?.length ? (
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Método de pago</th>
+                      <th scope="col">Ventas</th>
+                      <th scope="col">Monto total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reporte.desglosePorMetodoPago.map((metodo) => (
+                      <tr key={metodo.metodoPago}>
+                        <td>{metodo.metodoPago}</td>
+                        <td>{metodo.numeroVentas}</td>
+                        <td>{moneda(metodo.montoTotal)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p>Sin ventas en el periodo.</p>
+              )}
+
+              <p className="reporte-nota">
+                Los totales corresponden a las ventas registradas en el periodo y
+                la sucursal seleccionados.
+              </p>
+            </div>
+          )}
+
+          {/* El ranking utiliza el mismo periodo que el dashboard. */}
+          <div className="reporte-box">
+            <h2>🏆 Productos más vendidos</h2>
+
+            {filtroPendiente ? (
+              <p>Aplica un periodo para consultar los productos más vendidos.</p>
+            ) : (
+              <ProductosMasVendidos
+                productos={productos}
+                cargando={cargandoProductos}
+                error={errorProductos}
+              />
             )}
+          </div>
+
+          {/* Detalle de ventas de la sucursal. */}
+          <h2>🧾 Detalle de ventas</h2>
+
+          {!usuario?.sucursalId ? (
+            <p>No hay ventas registradas para esta sucursal.</p>
+          ) : cargandoVentas ? (
+            <p>Cargando...</p>
+          ) : ventas.length === 0 ? (
+            <p>No hay ventas registradas para esta sucursal.</p>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Folio</th>
+                  <th scope="col">Puntos HU-025</th>
+                  <th scope="col">Fecha</th>
+                  <th scope="col">Subtotal</th>
+                  <th scope="col">IVA</th>
+                  <th scope="col">Total</th>
+                  <th scope="col">Pago</th>
+                  <th scope="col">Cambio</th>
+                  <th scope="col">Cajero</th>
+                  <th scope="col">Sucursal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ventas.map((venta) => (
+                  <tr key={venta.id}>
+                    <td>{venta.folio}</td>
+                    <td>
+                      {venta.clienteFidelidadId
+                        ? `+${venta.puntosGenerados ?? 0} (cliente #${venta.clienteFidelidadId})`
+                        : "Sin cliente asociado"}
+                    </td>
+                    <td>{new Date(venta.fecha).toLocaleString()}</td>
+                    <td>{moneda(venta.subtotal)}</td>
+                    <td>{moneda(venta.impuestos)}</td>
+                    <td><strong>{moneda(venta.total)}</strong></td>
+                    <td>{venta.metodoPago}</td>
+                    <td>{venta.cambio != null ? moneda(venta.cambio) : "—"}</td>
+                    <td>{venta.usuarioNombre}</td>
+                    <td>{venta.sucursalNombre || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </>
       )}
     </section>
