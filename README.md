@@ -2,7 +2,7 @@
 
 ## HU-023: Canje de puntos en el pago
 
-La pantalla de carrito integra la API de fidelización:
+La pantalla de carrito integra los endpoints implementados en `ApiCoffeSoft_Java`:
 
 - `GET /clientes` debe incluir `saldoPuntos` (entero no negativo) en cada cliente.
 - El canje configurado es de 5 puntos por $1.00 MXN; la cotización limita el
@@ -14,6 +14,15 @@ La pantalla de carrito integra la API de fidelización:
 - `POST /ventas` recibe `clienteId`, `puntosCanjeados` y `descuento` junto con
   los campos existentes. Debe guardar la venta y descontar puntos en una sola
   operación, y responder con `saldoPuntosRestante`.
+- El backend valida de nuevo el saldo y calcula el descuento al registrar la
+  venta; no confía en el importe enviado por el navegador. No se combinan
+  promociones con canjes de puntos.
+- `GET /clientes/{id}/puntos` devuelve el saldo y los canjes registrados.
+  Los saldos iniciales se cargan mediante un proceso administrativo controlado;
+  no se acumulan puntos automáticamente en esta integración.
+- El saldo se guarda en `usuarios.saldo_puntos` (columna creada por Hibernate
+  con valor inicial `0`). La cotización no consume; el cobro bloquea y vuelve
+  a validar el registro del cliente para evitar canjes concurrentes.
 
 La automatización Selenium necesita la aplicación y una API que implemente ese
 contrato, un usuario autorizado y Chrome instalado. Configura `APP_BASE_URL`,
