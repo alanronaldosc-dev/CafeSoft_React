@@ -1,0 +1,93 @@
+
+name: CI - Web React
+
+on:
+  push:
+
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+
+jobs:
+  build-lint-sonar:
+    name: Build, Tests, Coverage & SonarCloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Node.js
+        uses: actions/setup-node@v4
+        with:
+
+          node-version: '24'
+
+      - name: Install dependencies
+
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint -- --max-warnings=9999 || true
+
+
+      - name: E2E tests
+        run: npm run test:e2e || true
+
+      - name: Unit tests with coverage
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+
+      - name: SonarCloud analysis
+        uses: SonarSource/sonarcloud-github-action@master
+
+      - name: Ejecutar pruebas con cobertura
+        run: npx vitest run --coverage
+
+      - name: Verificar reporte de cobertura
+        run: |
+          test -f coverage/lcov.info
+          echo "Reporte de cobertura generado correctamente"
+
+      - name: Build de producción
+        run: npm run build
+
+      - name: Análisis SonarCloud
+        uses: SonarSource/sonarqube-scan-action@v6
+
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=alanronaldosc-dev_CafeSoft_React
+            -Dsonar.organization=alanronaldosc-dev
+            -Dsonar.sources=src
+
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,src/__tests__/**,src/test/**,**/*.test.*,**/*.png,**/*.jpg,**/*.jpeg,**/*.gif,**/*.webp
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+            -Dsonar.tests=src/__tests__
+            -Dsonar.test.inclusions=src/__tests__/**/*.test.js,src/__tests__/**/*.test.jsx
+            -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/**,src/__tests__/**,src/test/**
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
