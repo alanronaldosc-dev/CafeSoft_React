@@ -59,7 +59,7 @@ function EtiquetaSegmento({ segmento }) {
   );
 }
 
-export default function SegmentacionClientes() {
+export default function SegmentacionClientes({ onNavegar }) {
   const [resumen, setResumen] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [segmento, setSegmento] = useState("");
@@ -136,15 +136,25 @@ export default function SegmentacionClientes() {
           </p>
         </div>
 
-        <button
-          className="sc-boton-principal"
-          onClick={cargar}
-          disabled={cargando}
-          type="button"
-        >
-          <span>↻</span>
-          {cargando ? "Actualizando..." : "Actualizar clasificación"}
-        </button>
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+          <button
+            className="sc-boton-principal"
+            onClick={cargar}
+            disabled={cargando}
+            type="button"
+          >
+            <span>↻</span>
+            {cargando ? "Actualizando..." : "Actualizar clasificación"}
+          </button>
+
+          <button
+            className="sc-boton-riesgo"
+            onClick={() => onNavegar?.("clientesEnRiesgo")}
+            type="button"
+          >
+            🚨 Ver clientes en riesgo
+          </button>
+        </div>
       </header>
 
       {error && (
