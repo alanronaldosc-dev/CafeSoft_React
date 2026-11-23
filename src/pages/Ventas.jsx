@@ -5,6 +5,7 @@ import PatronesConsumo from "../components/PatronesConsumo";
 import api from "../services/api";
 import DashboardVentas from "../components/DashboardVentas";
 import ProductosMasVendidos from "../components/ProductosMasVendidos";
+import RankingPredictivo from "../components/RankingPredictivo";
 import { moneda } from "../utils/formato";
 
 const PERIODOS = [
@@ -18,6 +19,7 @@ const PERIODOS = [
 
 function Ventas({ usuario, onNavegar }) {
   const [vistaVentas, setVistaVentas] = useState("ventas");
+  const esAdministrador = usuario?.userTipo === 0;
 
   // ── Detalle de ventas de la sucursal ──
   const [ventas, setVentas] = useState([]);
@@ -38,6 +40,11 @@ function Ventas({ usuario, onNavegar }) {
   const [productos, setProductos] = useState([]);
   const [cargandoProductos, setCargandoProductos] = useState(true);
   const [errorProductos, setErrorProductos] = useState(null);
+
+  const [horizonte, setHorizonte] = useState(7);
+  const [prediccion, setPrediccion] = useState(null);
+  const [cargandoPrediccion, setCargandoPrediccion] = useState(true);
+  const [errorPrediccion, setErrorPrediccion] = useState(null);
 
   const errorFiltroPeriodo =
     periodo !== "personalizado"
@@ -158,6 +165,35 @@ function Ventas({ usuario, onNavegar }) {
     };
   }, [filtroAplicado, usuario?.id, usuario?.sucursalId]);
 
+  useEffect(() => {
+    if (!esAdministrador || !usuario?.sucursalId) return undefined;
+
+    let cancelado = false;
+
+    api.get(`/ventas/reporte/prediccion-productos?horizonte=${horizonte}`)
+      .then((res) => {
+        if (!cancelado) setPrediccion(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+
+        if (!cancelado) {
+          setPrediccion(null);
+          setErrorPrediccion(
+            err?.response?.data?.mensaje ||
+            "No se pudo cargar la predicción de productos."
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelado) setCargandoPrediccion(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [esAdministrador, usuario?.sucursalId, horizonte]);
+
   // Adapta la respuesta del reporte al formato del dashboard HU-041.
   const datosDashboard = reporte
     ? {
@@ -174,6 +210,15 @@ function Ventas({ usuario, onNavegar }) {
         desglosePorDia: reporte.desglosePorDia || [],
       }
     : null;
+
+  const cambiarHorizonte = (nuevoHorizonte) => {
+    if (nuevoHorizonte === horizonte) return;
+
+    setHorizonte(nuevoHorizonte);
+    setPrediccion(null);
+    setErrorPrediccion(null);
+    setCargandoPrediccion(true);
+  };
 
   const cambiarPeriodo = (nuevoPeriodo) => {
     if (nuevoPeriodo === periodo) return;
@@ -218,7 +263,7 @@ function Ventas({ usuario, onNavegar }) {
   return (
     <section className="panel">
       <h1>🧾 Ventas</h1>
-      {usuario?.userTipo === 0 && (
+      {esAdministrador && (
         <button
           type="button"
           className="btn-secondary"
@@ -423,6 +468,16 @@ function Ventas({ usuario, onNavegar }) {
               />
             )}
           </div>
+
+          {esAdministrador && (
+            <RankingPredictivo
+              datos={prediccion}
+              cargando={cargandoPrediccion}
+              error={errorPrediccion}
+              horizonte={horizonte}
+              onCambiarHorizonte={cambiarHorizonte}
+            />
+          )}
 
           {/* Detalle de ventas de la sucursal. */}
           <h2>🧾 Detalle de ventas</h2>
