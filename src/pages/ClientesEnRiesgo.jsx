@@ -58,6 +58,12 @@ export default function ClientesEnRiesgo({ onNavegar, usuario }) {
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
 
+  // HU-060: estado del submódulo de anomalías.
+const [mostrarAnomalias, setMostrarAnomalias] = useState(false);
+const [anomalias, setAnomalias] = useState([]);
+const [cargandoAnomalias, setCargandoAnomalias] = useState(false);
+const [errorAnomalias, setErrorAnomalias] = useState("");
+
   const cargar = useCallback(async () => {
     setCargando(true);
     setError("");
@@ -84,8 +90,51 @@ export default function ClientesEnRiesgo({ onNavegar, usuario }) {
   }, []);
 
   useEffect(() => {
-    cargar();
-  }, [cargar]);
+  let cancelado = false;
+
+  const consultarInicial = async () => {
+    try {
+      const [respuestaClientes, respuestaResumen] = await Promise.all([
+        api.get("/clientes/segmentos/riesgo"),
+        api.get("/acciones-retencion/resumen"),
+      ]);
+
+      if (cancelado) return;
+
+      setClientes(
+        Array.isArray(respuestaClientes.data)
+          ? respuestaClientes.data
+          : []
+      );
+
+      const mapa = {};
+      (Array.isArray(respuestaResumen.data) ? respuestaResumen.data : [])
+        .forEach((item) => {
+          mapa[item.clienteId] = item;
+        });
+
+      setResumen(mapa);
+    } catch (e) {
+      if (cancelado) return;
+
+      setError(
+        e.response?.status === 403
+          ? "Solo los administradores pueden consultar los clientes en riesgo."
+          : "No fue posible calcular el riesgo. Verifica la conexión con la API."
+      );
+    } finally {
+      if (!cancelado) {
+        setCargando(false);
+      }
+    }
+  };
+
+  consultarInicial();
+
+  return () => {
+    cancelado = true;
+  };
+}, []);
 
   const cargarAcciones = async (clienteId) => {
     try {
@@ -98,6 +147,29 @@ export default function ClientesEnRiesgo({ onNavegar, usuario }) {
       setError("No fue posible cargar el historial de acciones de retención.");
     }
   };
+
+  // HU-060: consultar anomalías de clientes.
+const cargarAnomalias = async () => {
+  setMostrarAnomalias(true);
+  setCargandoAnomalias(true);
+  setErrorAnomalias("");
+
+  try {
+    const respuesta = await api.get("/clientes/segmentos/anomalias");
+
+    setAnomalias(
+      Array.isArray(respuesta.data) ? respuesta.data : []
+    );
+  } catch (e) {
+    setAnomalias([]);
+    setErrorAnomalias(
+      e.response?.data?.message ||
+      "No fue posible consultar las anomalías de clientes."
+    );
+  } finally {
+    setCargandoAnomalias(false);
+  }
+};
 
   const alternarHistorial = (clienteId) => {
     if (historialId === clienteId) {
@@ -164,6 +236,114 @@ export default function ClientesEnRiesgo({ onNavegar, usuario }) {
   const conteo = (nivel) => clientes.filter((c) => c.nivel === nivel).length;
   const fechaCalculo = clientes[0]?.fechaCalculo;
 
+  // HU-060: vista de anomalías de clientes.
+if (mostrarAnomalias) {
+  return (
+    <main className="cr-contenedor">
+      <header className="cr-encabezado">
+        <div>
+          <div className="cr-superior">
+            <span className="cr-icono">⚠️</span>
+            <span className="cr-modulo">CAFESOFT / ADMINISTRACIÓN</span>
+          </div>
+
+          <h1>Anomalías de clientes</h1>
+
+          <p>
+            Comportamientos de compra fuera de lo habitual
+            identificados para revisión.
+          </p>
+        </div>
+
+        <div className="cr-acciones-encabezado">
+          <button
+            type="button"
+            className="cr-boton-secundario"
+            onClick={() => setMostrarAnomalias(false)}
+          >
+            ← Volver a clientes en riesgo
+          </button>
+
+          <button
+            type="button"
+            className="cr-boton-principal"
+            onClick={cargarAnomalias}
+            disabled={cargandoAnomalias}
+          >
+            {cargandoAnomalias ? "Consultando..." : "Actualizar anomalías"}
+          </button>
+        </div>
+      </header>
+
+      {errorAnomalias && (
+        <div className="cr-error" role="alert">
+          {errorAnomalias}
+        </div>
+      )}
+
+      <section className="cr-panel">
+        <div className="cr-panel-encabezado">
+          <div>
+            <h3>Alertas detectadas</h3>
+            <p>
+              {anomalias.length} anomalía(s) identificada(s).
+            </p>
+          </div>
+        </div>
+
+        <p className="cr-referencia">
+          Las alertas son señales para revisión y no representan
+          diagnósticos definitivos.
+        </p>
+
+        <div className="cr-tabla-contenedor">
+          <table className="cr-tabla">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Anomalía</th>
+                <th>Métrica</th>
+                <th>Valor detectado</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {cargandoAnomalias ? (
+                <tr>
+                  <td colSpan="6" className="cr-vacio">
+                    Consultando anomalías...
+                  </td>
+                </tr>
+              ) : anomalias.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="cr-vacio">
+                    No se detectaron anomalías de clientes.
+                  </td>
+                </tr>
+              ) : (
+                anomalias.map((anomalia, indice) => (
+                  <tr key={`${anomalia.clienteId}-${anomalia.tipo}-${anomalia.fechaDeteccion}-${indice}`}>
+                    <td>{anomalia.nombre}</td>
+                    <td>{formatoFecha(anomalia.fechaDeteccion)}</td>
+                    <td>{anomalia.tipo.replaceAll("_", " ")}</td>
+                    <td>{anomalia.metrica.replaceAll("_", " ")}</td>
+                    <td>
+                      {anomalia.valorDetectado?.toLocaleString("es-MX") ?? "—"}
+                    </td>
+                    <td>{anomalia.detalle}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  );
+}
+
   return (
     <main className="cr-contenedor">
       <header className="cr-encabezado">
@@ -192,6 +372,14 @@ export default function ClientesEnRiesgo({ onNavegar, usuario }) {
             onClick={() => onNavegar?.("segmentacion")}
           >
             ← Volver a segmentación
+          </button>
+          <button
+            type="button"
+            className="cr-boton-secundario"
+            onClick={cargarAnomalias}
+            disabled={cargandoAnomalias}
+       >
+           ⚠️ Anomalías de clientes
           </button>
         </div>
       </header>
