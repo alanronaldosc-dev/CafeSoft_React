@@ -1,3 +1,4 @@
+import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import api from "../services/api";
@@ -5,11 +6,13 @@ import Ventas from "../pages/Ventas";
 
 vi.mock("../services/api", () => ({ default: { get: vi.fn() } }));
 
-// ── Fixtures ──
+const USUARIO = {
+  id: 7,
+  nombre: "Ana",
+  sucursalId: 1,
+};
 
-const USUARIO = { id: 7, nombre: "Ana", sucursalId: 1, sucursalNombre: "Bonafont" };
-
-const DASHBOARD = {
+const REPORTE = {
   periodo: "hoy",
   periodoEtiqueta: "16 de noviembre de 2026",
   sucursalNombre: "Bonafont",
@@ -17,15 +20,28 @@ const DASHBOARD = {
   montoTotal: 1400,
   subtotal: 1206.9,
   impuestos: 193.1,
-  ticketPromedio: 350,
-  diasConVentas: 1,
-  desglosePorDia: [{ fecha: "2026-11-16", numeroVentas: 4, montoTotal: 1400 }],
-  desglosePorMetodoPago: [{ metodoPago: "efectivo", numeroVentas: 4, montoTotal: 1400 }],
-  topProductos: [
-    { productoId: 1, nombre: "Garrafón 20L", unidadesVendidas: 2, montoTotal: 700 },
+  desglosePorDia: [
+    { fecha: "2026-11-16", numeroVentas: 4, montoTotal: 1400 },
   ],
-  actualizadoEn: "2026-11-16T10:30:00",
+  desglosePorMetodoPago: [
+    { metodoPago: "efectivo", numeroVentas: 4, montoTotal: 1400 },
+  ],
 };
+
+const PRODUCTOS = [
+  {
+    productoId: 1,
+    nombre: "Garrafón 20L",
+    unidadesVendidas: 8,
+    montoTotal: 400,
+  },
+  {
+    productoId: 2,
+    nombre: "Botella 1L",
+    unidadesVendidas: 20,
+    montoTotal: 300,
+  },
+];
 
 const VENTAS = [
   {
@@ -47,51 +63,43 @@ const VENTAS = [
     id: 2,
     folio: "V-002",
     sucursalId: 2,
-    sucursalNombre: null,
-    clienteFidelidadId: null,
     fecha: "2026-11-16T10:00:00",
     subtotal: 100,
     impuestos: 16,
     total: 116,
     metodoPago: "tarjeta",
-    cambio: null,
     usuarioNombre: "Luis",
-  },
-  {
-    id: 3,
-    folio: "V-003",
-    sucursalId: 1,
-    sucursalNombre: null,
-    clienteFidelidadId: null,
-    fecha: "2026-11-16T11:00:00",
-    subtotal: 200,
-    impuestos: 32,
-    total: 232,
-    metodoPago: "transferencia",
-    cambio: null,
-    usuarioNombre: "Ana",
   },
 ];
 
-/**
- * Configura el mock de la API.
- * El endpoint del dashboard recibe ?periodo=... y devuelve el fixture
- * con el periodo solicitado, para comprobar que se refetchea.
- */
 function configurarApi({
   ventas = VENTAS,
-  dashboard = DASHBOARD,
+  reporte = REPORTE,
+  productos = PRODUCTOS,
   falloVentas = null,
-  falloDashboard = null,
+  falloReporte = null,
+  falloProductos = null,
 } = {}) {
   api.get.mockImplementation((url) => {
-    if (url.startsWith("/ventas/dashboard")) {
-      if (falloDashboard) return Promise.reject(falloDashboard);
-      const periodo = new URLSearchParams(url.split("?")[1]).get("periodo");
-      return Promise.resolve({ data: { ...dashboard, periodo } });
+    if (url === "/ventas") {
+      return falloVentas
+        ? Promise.reject(falloVentas)
+        : Promise.resolve({ data: ventas });
     }
-    if (falloVentas) return Promise.reject(falloVentas);
-    return Promise.resolve({ data: ventas });
+
+    if (url.startsWith("/ventas/reporte/top-productos?")) {
+      return falloProductos
+        ? Promise.reject(falloProductos)
+        : Promise.resolve({ data: productos });
+    }
+
+    if (url.startsWith("/ventas/reporte?")) {
+      return falloReporte
+        ? Promise.reject(falloReporte)
+        : Promise.resolve({ data: reporte });
+    }
+
+    return Promise.reject(new Error(`Endpoint inesperado: ${url}`));
   });
 }
 
@@ -104,124 +112,203 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// ── HU-041 / HU-042: página "Ver ventas" ──
-
-describe("Ventas (HU-041 / HU-042)", () => {
-  it("muestra el dashboard del periodo y el desglose del reporte", async () => {
+describe("Ventas (HU-050)", () => {
+  it("muestra el dashboard, el desglose y los productos del periodo", async () => {
     configurarApi();
     render(<Ventas usuario={USUARIO} />);
 
     expect(await screen.findByText("Ventas del periodo")).toBeInTheDocument();
     expect(screen.getAllByText("$1,400.00").length).toBeGreaterThan(0);
-    expect(screen.getByText("16 de noviembre de 2026")).toBeInTheDocument();
+    expect(screen.getByText("$350.00")).toBeInTheDocument();
+    expect(screen.getAllByText("16 de noviembre de 2026").length).toBeGreaterThan(0);
 
-    // Desglose diario y por método de pago (HU-016).
     expect(screen.getByText("📅 Ventas por día")).toBeInTheDocument();
     expect(screen.getByText("2026-11-16")).toBeInTheDocument();
     expect(screen.getByText("💳 Ventas por método de pago")).toBeInTheDocument();
-    expect(screen.getAllByText("efectivo").length).toBeGreaterThan(0);
+
+    expect(screen.getAllByText("Garrafón 20L").length).toBeGreaterThan(0);
+    expect(screen.getByText("V-001")).toBeInTheDocument();
+    expect(screen.queryByText("V-002")).not.toBeInTheDocument();
+
+    const fila = screen.getByText("V-001").closest("tr");
+    expect(within(fila).getByText("+5 (cliente #9)")).toBeInTheDocument();
   });
 
-  it("consulta el dashboard del periodo seleccionado", async () => {
+  it("consulta los endpoints de reporte y productos con el periodo inicial", async () => {
     configurarApi();
     render(<Ventas usuario={USUARIO} />);
 
     await screen.findByText("Ventas del periodo");
-    expect(api.get).toHaveBeenCalledWith("/ventas/dashboard?periodo=hoy");
-  });
 
-  it("vuelve a consultar el dashboard al cambiar el periodo", async () => {
-    configurarApi();
-    render(<Ventas usuario={USUARIO} />);
-
-    await screen.findByText("Ventas del periodo");
-    fireEvent.click(screen.getByRole("button", { name: "Este mes" }));
-
-    await waitFor(() =>
-      expect(api.get).toHaveBeenCalledWith("/ventas/dashboard?periodo=mes"),
+    expect(api.get).toHaveBeenCalledWith("/ventas/reporte?periodo=hoy");
+    expect(api.get).toHaveBeenCalledWith(
+      "/ventas/reporte/top-productos?periodo=hoy"
     );
   });
 
-  it("solo lista las ventas de la sucursal del usuario", async () => {
+  it("actualiza el reporte y los productos al seleccionar otro periodo", async () => {
     configurarApi();
     render(<Ventas usuario={USUARIO} />);
 
-    await screen.findByText("V-001");
-    expect(screen.queryByText("V-002")).toBeNull();
+    await screen.findByText("Ventas del periodo");
+    fireEvent.click(screen.getByRole("button", { name: "Esta semana" }));
 
-    // Venta con cliente frecuente: muestra los puntos generados.
-    expect(screen.getByText("+5 (cliente #9)")).toBeInTheDocument();
-    // Venta sin cliente y sin cambio: usa los valores por defecto.
-    const fila = screen.getByText("V-003").closest("tr");
-    expect(within(fila).getByText("Sin cliente asociado")).toBeInTheDocument();
-    expect(within(fila).getAllByText("—")).toHaveLength(2);
+    await waitFor(() => {
+      expect(api.get).toHaveBeenCalledWith("/ventas/reporte?periodo=semana");
+      expect(api.get).toHaveBeenCalledWith(
+        "/ventas/reporte/top-productos?periodo=semana"
+      );
+    });
   });
 
-  it("avisa cuando la cuenta no tiene sucursal asignada", async () => {
+  it("aplica un rango personalizado a ambos endpoints", async () => {
+    configurarApi();
+    render(<Ventas usuario={USUARIO} />);
+
+    await screen.findByText("Ventas del periodo");
+    fireEvent.click(screen.getByRole("button", { name: "Personalizado" }));
+
+    fireEvent.change(screen.getByLabelText("Fecha inicial del reporte"), {
+      target: { value: "2026-11-01" },
+    });
+    fireEvent.change(screen.getByLabelText("Fecha final del reporte"), {
+      target: { value: "2026-11-18" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Aplicar período" }));
+
+    await waitFor(() => {
+      expect(api.get).toHaveBeenCalledWith(
+        "/ventas/reporte?periodo=personalizado&desde=2026-11-01&hasta=2026-11-18"
+      );
+      expect(api.get).toHaveBeenCalledWith(
+        "/ventas/reporte/top-productos?periodo=personalizado&desde=2026-11-01&hasta=2026-11-18"
+      );
+    });
+  });
+
+  it("impide aplicar un rango personalizado sin fechas", async () => {
+    configurarApi();
+    render(<Ventas usuario={USUARIO} />);
+
+    await screen.findByText("Ventas del periodo");
+    fireEvent.click(screen.getByRole("button", { name: "Personalizado" }));
+
+    expect(
+      screen.getByRole("alert"),
+    ).toHaveTextContent("Selecciona una fecha inicial y una fecha final.");
+
+    expect(
+      screen.getByRole("button", { name: "Aplicar período" }),
+    ).toBeDisabled();
+
+    expect(api.get).not.toHaveBeenCalledWith(
+      expect.stringContaining("periodo=personalizado")
+    );
+  });
+
+  it("impide aplicar un rango donde la fecha inicial es posterior a la final", async () => {
+    configurarApi();
+    render(<Ventas usuario={USUARIO} />);
+
+    await screen.findByText("Ventas del periodo");
+    fireEvent.click(screen.getByRole("button", { name: "Personalizado" }));
+
+    fireEvent.change(screen.getByLabelText("Fecha inicial del reporte"), {
+      target: { value: "2026-11-20" },
+    });
+    fireEvent.change(screen.getByLabelText("Fecha final del reporte"), {
+      target: { value: "2026-11-18" },
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "La fecha inicial no puede ser posterior a la fecha final."
+    );
+    expect(
+      screen.getByRole("button", { name: "Aplicar período" }),
+    ).toBeDisabled();
+  });
+
+  it("muestra el mensaje de error devuelto por el reporte", async () => {
+    configurarApi({
+      falloReporte: {
+        response: { data: { mensaje: "Periodo no válido." } },
+      },
+    });
+
+    render(<Ventas usuario={USUARIO} />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Periodo no válido."
+    );
+  });
+
+  it("muestra un mensaje si falla la consulta de productos", async () => {
+    configurarApi({
+      falloProductos: new Error("Error de conexión"),
+    });
+
+    render(<Ventas usuario={USUARIO} />);
+
+    const alertas = await screen.findAllByRole("alert");
+    expect(
+      alertas.some((alerta) =>
+        alerta.textContent.includes("No se pudo cargar el ranking de productos.")
+      )
+    ).toBe(true);
+  });
+
+  it("muestra un aviso cuando falla la carga del detalle de ventas", async () => {
+    configurarApi({
+      falloVentas: new Error("Error de conexión"),
+    });
+
+    render(<Ventas usuario={USUARIO} />);
+
+    const alertas = await screen.findAllByRole("alert");
+    expect(
+      alertas.some((alerta) =>
+        alerta.textContent.includes("No se pudieron cargar las ventas.")
+      )
+    ).toBe(true);
+  });
+
+  it("avisa cuando el usuario no tiene sucursal asignada", async () => {
     configurarApi();
     render(<Ventas usuario={{ id: 7, nombre: "Ana" }} />);
 
     expect(
       await screen.findByText(/no tiene una sucursal asignada/i),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("No hay ventas registradas para esta sucursal."),
-    ).toBeInTheDocument();
-    // El dashboard sí se carga, porque el endpoint resuelve la sucursal por token.
-    expect(screen.getByText("Ventas del periodo")).toBeInTheDocument();
+
     expect(api.get).not.toHaveBeenCalledWith("/ventas");
   });
 
-  it("muestra el mensaje de error que devuelve el dashboard", async () => {
-    configurarApi({
-      falloDashboard: { response: { data: { mensaje: "Periodo no válido." } } },
-    });
-    render(<Ventas usuario={USUARIO} />);
-
-    const alertas = await screen.findAllByRole("alert");
-    expect(
-      alertas.some((a) => a.textContent.includes("Periodo no válido.")),
-    ).toBe(true);
-  });
-
-  it("usa un mensaje genérico si el dashboard falla sin respuesta del servidor", async () => {
-    configurarApi({ falloDashboard: new Error("offline") });
-    render(<Ventas usuario={USUARIO} />);
-
-    const alertas = await screen.findAllByRole("alert");
-    expect(
-      alertas.some((a) =>
-        a.textContent.includes("No se pudo cargar el dashboard."),
-      ),
-    ).toBe(true);
-  });
-
-  it("avisa cuando no se pudo cargar el detalle de ventas", async () => {
-    configurarApi({ falloVentas: new Error("500") });
-    render(<Ventas usuario={USUARIO} />);
-
-    expect(
-      await screen.findByText(/No se pudieron cargar las ventas/i),
-    ).toBeInTheDocument();
-  });
-
-  it("muestra el estado vacío cuando el periodo no tiene ventas", async () => {
+  it("muestra los estados vacíos cuando no existen ventas ni productos", async () => {
     configurarApi({
       ventas: [],
-      dashboard: {
-        ...DASHBOARD,
+      productos: [],
+      reporte: {
+        ...REPORTE,
+        numeroVentas: 0,
+        montoTotal: 0,
         desglosePorDia: [],
         desglosePorMetodoPago: [],
-        topProductos: [],
       },
     });
+
     render(<Ventas usuario={USUARIO} />);
 
-    await screen.findByText("Ventas del periodo");
-    expect(screen.getAllByText("Sin ventas en el periodo.")).toHaveLength(2);
+    expect(
+      await screen.findByText("Sin ventas registradas en el periodo. La tendencia aparecerá cuando se registre la primera venta."),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(/El ranking aparecerá cuando se registre la primera venta/i),
+    ).toBeInTheDocument();
+
     expect(
       screen.getByText("No hay ventas registradas para esta sucursal."),
     ).toBeInTheDocument();
-    expect(screen.getByText(/El ranking aparecerá/i)).toBeInTheDocument();
   });
 });

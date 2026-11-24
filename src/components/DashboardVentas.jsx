@@ -1,4 +1,4 @@
-import { useId } from "react";
+import React, { useId } from "react";
 import { diaCorto, horaCorta, moneda, numero } from "../utils/formato";
 
 /**

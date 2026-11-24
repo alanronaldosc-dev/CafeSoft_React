@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import React, { useId, useState } from "react";
 import { moneda, numero } from "../utils/formato";
 
 const COLORES_PASTEL = [
