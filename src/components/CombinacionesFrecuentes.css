@@ -1,0 +1,219 @@
+
+/* HU-055 - Combinaciones frecuentes */
+
+.combinaciones-panel {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 32px;
+  color: #29233b;
+  box-shadow: 0 8px 30px rgba(25, 18, 53, 0.12);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Títulos y descripción */
+
+.combinaciones-panel h2,
+.combinaciones-panel h3 {
+  color: #342451 !important;
+  font-weight: 800;
+  margin: 0 0 12px;
+}
+
+.combinaciones-panel p {
+  color: #666078 !important;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Filtros */
+
+.combinaciones-filtros {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 28px 0;
+  padding: 24px;
+  background: #f7f4ff;
+  border: 1px solid #e9e1ff;
+  border-radius: 16px;
+}
+
+.combinaciones-filtros label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex: 1 1 190px;
+  min-width: 0;
+  color: #342451 !important;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.combinaciones-filtros input {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  background: #ffffff !important;
+  color: #29233b !important;
+  border: 1px solid #d9d0ed !important;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  color-scheme: light;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.combinaciones-filtros input:focus {
+  border-color: #7045df !important;
+  box-shadow: 0 0 0 3px rgba(112, 69, 223, .12);
+}
+
+/* Botón */
+
+.combinaciones-filtros button {
+  flex: 0 0 auto;
+  width: auto !important;
+  min-height: 46px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #7045df, #5731bd);
+  color: #ffffff !important;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(112, 69, 223, .2);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.combinaciones-filtros button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(112, 69, 223, .3);
+}
+
+.combinaciones-filtros button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* Tabla */
+
+.combinaciones-tabla {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e9e4f2;
+  border-radius: 14px;
+}
+
+.combinaciones-tabla table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.combinaciones-tabla th {
+  background: #eee7ff !important;
+  color: #342451 !important;
+  padding: 16px 18px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.combinaciones-tabla td {
+  padding: 17px 18px;
+  color: #403650 !important;
+  background: #ffffff;
+  border-bottom: 1px solid #eeeaf4;
+  font-size: 14px;
+  text-align: left;
+}
+
+.combinaciones-tabla tbody tr:nth-child(even) td {
+  background: #faf8ff;
+}
+
+.combinaciones-tabla tbody tr:hover td {
+  background: #f1ebff;
+}
+
+.combinaciones-tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.combinaciones-tabla td:first-child {
+  font-weight: 800;
+  color: #7045df !important;
+}
+
+.combinaciones-tabla td:nth-child(2) {
+  font-weight: 600;
+  color: #29233b !important;
+}
+
+/* Mensajes */
+
+.combinaciones-error {
+  padding: 14px 18px;
+  background: #fff0f0;
+  color: #b42318 !important;
+  border: 1px solid #ffd5d5;
+  border-radius: 10px;
+  margin: 16px 0;
+}
+
+.combinaciones-panel .combinaciones-vacio {
+  color: #777084 !important;
+  text-align: center;
+  padding: 24px;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .combinaciones-panel {
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .combinaciones-filtros {
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .combinaciones-filtros label {
+    flex: 1 1 100%;
+  }
+
+  .combinaciones-filtros button {
+    width: 100% !important;
+  }
+
+  .combinaciones-tabla th,
+  .combinaciones-tabla td {
+    padding: 13px 12px;
+    font-size: 12px;
+  }
+}
+
+/* HU-055: acciones y formulario para promociones de combos */
+.combinaciones-panel .combinaciones-accion {
+  background: #7045df; color: #fff; border: 0; border-radius: 9px;
+  padding: 10px 14px; font-weight: 700; cursor: pointer; white-space: nowrap;
+}
+.combinaciones-panel .combinaciones-accion:disabled { opacity: .6; cursor: wait; }
+.combinaciones-panel .combinaciones-exito { background: #ecfdf3; color: #166534 !important; padding: 14px; border-radius: 10px; }
+.combinaciones-modal-fondo { position: fixed; inset: 0; z-index: 9999; background: rgba(20,14,35,.65); display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+.combinaciones-modal { width: min(100%, 560px); max-height: 92vh; overflow-y: auto; background: white; color: #29233b; border-radius: 18px; padding: 26px; box-shadow: 0 15px 55px #0003; }
+.combinaciones-form-promo { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: 15px; }
+.combinaciones-form-promo label { display: flex; flex-direction: column; gap: 7px; color: #342451; font-size: 13px; font-weight: 700; }
+.combinaciones-form-promo input { min-height: 43px; padding: 10px; box-sizing: border-box; background: #fff; color: #29233b; border: 1px solid #d9d0ed; border-radius: 8px; color-scheme: light; }
+.combinaciones-modal-acciones { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+.combinaciones-cancelar { border: 1px solid #d9d0ed; background: #f7f4ff; color: #342451; padding: 10px 14px; border-radius: 9px; cursor: pointer; }
