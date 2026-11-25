@@ -17,7 +17,7 @@ pipeline {
 
         stage('Instalar dependencias') {
             steps {
-                sh 'npm ci'
+                sh 'npm install --engine-strict=false'
             }
         }
 
