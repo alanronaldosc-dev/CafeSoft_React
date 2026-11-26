@@ -1,4 +1,3 @@
-import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import api from "../services/api";
@@ -9,7 +8,24 @@ vi.mock("../services/api", () => ({ default: { get: vi.fn() } }));
 const USUARIO = {
   id: 7,
   nombre: "Ana",
+  userTipo: 0,
   sucursalId: 1,
+};
+
+const PREDICCION = {
+  horizonteDias: 7,
+  historialDias: 28,
+  esEstimacion: true,
+  sucursalNombre: "Bonafont",
+  generadoEn: "2026-11-22T12:00:00",
+  masVendidos: [
+    { productoId: 1, nombre: "Garrafón 20L", unidadesHistoricas: 280, unidadesEstimadas: 70 },
+    { productoId: 2, nombre: "Botella 1L", unidadesHistoricas: 140, unidadesEstimadas: 35 },
+  ],
+  menosVendidos: [
+    { productoId: 3, nombre: "Agua 500ml", unidadesHistoricas: 0, unidadesEstimadas: 0 },
+    { productoId: 4, nombre: "Agua 1.5L", unidadesHistoricas: 0, unidadesEstimadas: 0 },
+  ],
 };
 
 const REPORTE = {
@@ -76,15 +92,23 @@ function configurarApi({
   ventas = VENTAS,
   reporte = REPORTE,
   productos = PRODUCTOS,
+  prediccion = PREDICCION,
   falloVentas = null,
   falloReporte = null,
   falloProductos = null,
+  falloPrediccion = null,
 } = {}) {
   api.get.mockImplementation((url) => {
     if (url === "/ventas") {
       return falloVentas
         ? Promise.reject(falloVentas)
         : Promise.resolve({ data: ventas });
+    }
+
+    if (url.startsWith("/ventas/reporte/prediccion-productos?")) {
+      return falloPrediccion
+        ? Promise.reject(falloPrediccion)
+        : Promise.resolve({ data: prediccion });
     }
 
     if (url.startsWith("/ventas/reporte/top-productos?")) {
@@ -310,5 +334,67 @@ describe("Ventas (HU-050)", () => {
     expect(
       screen.getByText("No hay ventas registradas para esta sucursal."),
     ).toBeInTheDocument();
+  });
+
+  it("muestra el ranking predictivo en dos tarjetas y lo identifica como estimación", async () => {
+    configurarApi();
+    render(<Ventas usuario={USUARIO} />);
+
+    expect(
+      await screen.findByText("Ranking predictivo de productos"),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/Estimación/).length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { name: "Top 5 más vendidos" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Top 5 menos vendidos" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("70 uds")).toBeInTheDocument();
+    expect(api.get).toHaveBeenCalledWith(
+      "/ventas/reporte/prediccion-productos?horizonte=7",
+    );
+  });
+
+  it("consultar la predicción con otro horizonte actualiza el reporte", async () => {
+    configurarApi();
+    render(<Ventas usuario={USUARIO} />);
+
+    await screen.findByText("Ranking predictivo de productos");
+    fireEvent.click(screen.getByRole("button", { name: "30 días" }));
+
+    await waitFor(() => {
+      expect(api.get).toHaveBeenCalledWith(
+        "/ventas/reporte/prediccion-productos?horizonte=30",
+      );
+      expect(screen.getByText(/próximos 30 días/)).toBeInTheDocument();
+    });
+  });
+
+  it("muestra el error devuelto por la predicción", async () => {
+    configurarApi({
+      falloPrediccion: {
+        response: { data: { mensaje: "Horizonte no válido." } },
+      },
+    });
+
+    render(<Ventas usuario={USUARIO} />);
+
+    expect(
+      await screen.findByText("⚠️ Horizonte no válido."),
+    ).toBeInTheDocument();
+  });
+
+  it("no muestra el ranking predictivo a usuarios que no son administradores", async () => {
+    configurarApi();
+    render(<Ventas usuario={{ ...USUARIO, userTipo: 1 }} />);
+
+    await screen.findByText("Ventas del periodo");
+    expect(
+      screen.queryByText("Ranking predictivo de productos"),
+    ).not.toBeInTheDocument();
+    expect(api.get).not.toHaveBeenCalledWith(
+      expect.stringContaining("prediccion-productos"),
+    );
   });
 });

@@ -1996,3 +1996,949 @@ label {
   margin: 0;
   line-height: 1.6;
 }
+
+/* ============================================================
+   AMBIENT GRADIENTS & REPORT CARDS (INICIO PAGE REDESIGN)
+   ============================================================ */
+
+/* ── Gradientes ambientales para .content ── */
+.content {
+  position: relative;
+}
+
+.content::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 10% 30%, rgba(74, 159, 212, 0.04) 0%, transparent 55%),
+    radial-gradient(circle at 90% 70%, rgba(155, 122, 200, 0.03) 0%, transparent 55%);
+}
+
+.content > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Contenedor y Grid de Reportes ── */
+.inicio-page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.reportes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  align-items: stretch;
+}
+
+@media (max-width: 1024px) {
+  .reportes-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* ── Animación Staggered de Tarjetas ── */
+@keyframes reportCardEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes reportCardFadeSimple {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.report-card {
+  background: rgba(15, 18, 26, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-md);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  animation: reportCardEntrance 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.report-card:hover {
+  border-color: rgba(74, 159, 212, 0.35);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+.report-card:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.report-card:nth-child(2) {
+  animation-delay: 80ms;
+}
+
+.report-card:nth-child(3) {
+  animation-delay: 160ms;
+}
+
+.report-card:nth-child(4) {
+  animation-delay: 240ms;
+}
+
+.report-card:nth-child(5) {
+  animation-delay: 320ms;
+}
+
+.report-card:nth-child(6) {
+  animation-delay: 400ms;
+}
+
+.report-card:nth-child(7) {
+  animation-delay: 480ms;
+}
+
+.report-card:nth-child(8) {
+  animation-delay: 560ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-card {
+    animation: reportCardFadeSimple 150ms ease-out both !important;
+    transform: none !important;
+  }
+  .report-card:nth-child(n) {
+    animation-delay: 0ms !important;
+  }
+}
+
+/* ── Encabezado de Tarjeta ── */
+.report-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.report-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--texto-suave);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Badges Compactos ── */
+.report-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.badge-critico {
+  background: rgba(224, 82, 82, 0.16);
+  color: #ff6b6b;
+  border: 1px solid rgba(224, 82, 82, 0.35);
+}
+
+.badge-atencion {
+  background: rgba(255, 153, 0, 0.16);
+  color: #ffaa33;
+  border: 1px solid rgba(255, 153, 0, 0.35);
+}
+
+.badge-normal {
+  background: rgba(58, 200, 122, 0.16);
+  color: #3ac87a;
+  border: 1px solid rgba(58, 200, 122, 0.35);
+}
+
+/* ── Cuerpo de Tarjeta ── */
+.report-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+/* ── Stat Grid (Tarjeta 1: Inventario) ── */
+.report-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.report-stat-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--r-sm);
+  padding: 12px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 80px;
+}
+
+.report-stat-box.stat-danger {
+  border-color: rgba(224, 82, 82, 0.28);
+  background: rgba(224, 82, 82, 0.05);
+}
+
+.report-stat-box.stat-warning {
+  border-color: rgba(255, 153, 0, 0.28);
+  background: rgba(255, 153, 0, 0.05);
+}
+
+.report-stat-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--texto-suave);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+}
+
+.report-stat-val {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--texto);
+  line-height: 1.2;
+}
+
+.report-stat-val.val-danger {
+  color: #ff6b6b;
+}
+
+.report-stat-val.val-warning {
+  color: #ffaa33;
+}
+
+.report-stat-val.val-normal {
+  color: #3ac87a;
+}
+
+.report-stat-sub {
+  font-size: 10px;
+  color: var(--texto-placeholder);
+  margin-top: 3px;
+}
+
+/* ── Segmented Bar ── */
+.report-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.report-bar-track {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  width: 100%;
+}
+
+.report-bar-seg {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.report-bar-seg.seg-normal {
+  background: #3ac87a;
+}
+
+.report-bar-seg.seg-bajo {
+  background: #ffaa33;
+}
+
+.report-bar-seg.seg-agotado {
+  background: #ff6b6b;
+}
+
+.report-bar-legend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--texto-suave);
+}
+
+/* ── Rutas (Tarjeta 2) ── */
+.report-rutas-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--texto-suave);
+}
+
+.report-rutas-summary strong {
+  color: var(--texto);
+}
+
+.report-rutas-predominante {
+  font-size: 11px;
+  color: var(--cafe-claro);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.report-mini-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.report-mini-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  padding: 8px 10px;
+  transition: background 0.15s ease;
+}
+
+.report-mini-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.report-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.report-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.report-status-dot.dot-active {
+  background: #3ac87a;
+  box-shadow: 0 0 6px rgba(58, 200, 122, 0.6);
+}
+
+.report-status-dot.dot-pending {
+  background: #ffaa33;
+  box-shadow: 0 0 6px rgba(255, 170, 51, 0.6);
+}
+
+.report-row-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--texto);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.report-row-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.report-row-tag.tag-active {
+  background: rgba(58, 200, 122, 0.12);
+  color: #3ac87a;
+  border: 1px solid rgba(58, 200, 122, 0.25);
+}
+
+.report-row-tag.tag-pending {
+  background: rgba(255, 153, 0, 0.12);
+  color: #ffaa33;
+  border: 1px solid rgba(255, 153, 0, 0.25);
+}
+
+.report-row-tag.tag-danger {
+  background: rgba(224, 82, 82, 0.12);
+  color: #ff6b6b;
+  border: 1px solid rgba(224, 82, 82, 0.25);
+}
+
+.report-row-subtext {
+  font-size: 11px;
+  color: var(--texto-suave);
+  white-space: nowrap;
+}
+
+/* ── Alertas de Stock (Tarjeta 3) ── */
+.report-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  text-align: center;
+  gap: 8px;
+}
+
+.report-check-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(58, 200, 122, 0.15);
+  border: 1px solid rgba(58, 200, 122, 0.35);
+  color: #3ac87a;
+  font-size: 18px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-empty-text {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--texto);
+  margin: 0;
+}
+
+.report-empty-sub {
+  font-size: 11.5px;
+  color: var(--texto-suave);
+}
+
+.report-btn-toggle {
+  width: 100%;
+  padding: 7px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: var(--texto-suave);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.report-btn-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--texto);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Skeletons ── */
+.skeleton-line {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  animation: reportSkeletonPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes reportSkeletonPulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.8; }
+}
+
+.skeleton-title {
+  width: 60%;
+  height: 10px;
+  margin: 0 auto 8px;
+}
+
+.skeleton-number {
+  width: 50%;
+  height: 20px;
+  margin: 0 auto;
+}
+
+.skeleton-row {
+  height: 36px;
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* ── Inline Error ── */
+.report-card-inline-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(224, 82, 82, 0.08);
+  border: 1px solid rgba(224, 82, 82, 0.25);
+  border-radius: 8px;
+  color: #ff8a8a;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.report-card-inline-error span {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   AURACOMPUTE STYLE ENHANCEMENTS — BENTO GRID & EXTRA CARDS
+   ============================================================ */
+
+/* ── Section Headers ── */
+.inicio-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 14px;
+  margin-bottom: 2px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.inicio-section-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.inicio-section-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--cafe-claro);
+  background: rgba(74, 159, 212, 0.08);
+  border: 1px solid rgba(74, 159, 212, 0.22);
+  border-radius: 999px;
+  padding: 3px 10px;
+  width: fit-content;
+}
+
+.inicio-section-pill.pill-purple {
+  color: #9B7AC8;
+  background: rgba(155, 122, 200, 0.08);
+  border-color: rgba(155, 122, 200, 0.25);
+}
+
+.inicio-section-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.3px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inicio-system-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texto-suave);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+/* ── Glowing Pulse Dots (AuraCompute Style) ── */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+
+.pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  animation: pulseGlow 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.dot-green {
+  background: #3ac87a;
+  box-shadow: 0 0 8px rgba(58, 200, 122, 0.65);
+}
+
+.dot-cyan {
+  background: #4A9FD4;
+  box-shadow: 0 0 8px rgba(74, 159, 212, 0.65);
+}
+
+.dot-purple {
+  background: #9B7AC8;
+  box-shadow: 0 0 8px rgba(155, 122, 200, 0.65);
+}
+
+.dot-amber {
+  background: #ffaa33;
+  box-shadow: 0 0 8px rgba(255, 170, 51, 0.65);
+}
+
+.dot-red {
+  background: #ff6b6b;
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.65);
+}
+
+/* ── Bento Grid para Tarjetas Adicionales ── */
+.reportes-bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  align-items: stretch;
+}
+
+.bento-span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 1100px) {
+  .reportes-bento-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .bento-span-2 {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .reportes-bento-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .bento-span-2 {
+    grid-column: span 1;
+  }
+}
+
+/* ── Elementos Internos de Tarjetas (AuraCompute Style) ── */
+.report-hero-stat-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 2px 0 6px;
+  flex-wrap: wrap;
+}
+
+.report-hero-val {
+  font-size: 26px;
+  font-weight: 800;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  font-family: var(--font);
+}
+
+.report-hero-unit {
+  font-size: 12px;
+  color: var(--texto-suave);
+  font-weight: 600;
+}
+
+.report-growth-chip {
+  font-size: 11px;
+  font-weight: 700;
+  color: #3ac87a;
+  background: rgba(58, 200, 122, 0.12);
+  border: 1px solid rgba(58, 200, 122, 0.28);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.report-hero-sub {
+  font-size: 11.5px;
+  color: var(--texto-suave);
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+/* Progress Glow Bars */
+.report-progress-glow {
+  position: relative;
+  width: 100%;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.report-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.fill-cyan-purple {
+  background: linear-gradient(90deg, #4A9FD4 0%, #9B7AC8 100%);
+  box-shadow: 0 0 10px rgba(74, 159, 212, 0.45);
+}
+
+.fill-purple-pink {
+  background: linear-gradient(90deg, #9B7AC8 0%, #e91e8c 100%);
+  box-shadow: 0 0 10px rgba(155, 122, 200, 0.45);
+}
+
+/* Segmentación de Clientes */
+.report-segment-wrap {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.report-segment-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 11px;
+}
+
+.report-segment-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--texto);
+  font-weight: 600;
+}
+
+.report-segment-val {
+  color: var(--texto-suave);
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Ranking de Productos Más Vendidos */
+.report-ranking-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-ranking-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.report-ranking-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.report-ranking-name {
+  color: var(--texto);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.report-ranking-rank {
+  font-size: 10px;
+  font-family: ui-monospace, monospace;
+  color: var(--cafe-claro);
+  font-weight: 800;
+  background: rgba(74, 159, 212, 0.12);
+  border: 1px solid rgba(74, 159, 212, 0.25);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.report-ranking-units {
+  color: var(--texto-suave);
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+}
+
+/* Ofertas y Promociones */
+.report-promo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.report-promo-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 9px 11px;
+}
+
+.report-promo-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.report-promo-icon {
+  font-size: 15px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.report-promo-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto);
+  margin: 0 0 2px;
+}
+
+.report-promo-desc {
+  font-size: 11px;
+  color: var(--texto-suave);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.report-promo-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-family: ui-monospace, monospace;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Información de Planta (Especificaciones de Negocio) */
+.report-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+@media (max-width: 600px) {
+  .report-specs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.report-spec-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.report-spec-key {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--texto-suave);
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.report-spec-val {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.report-spec-sub {
+  font-size: 10px;
+  color: var(--texto-placeholder);
+}
+
+/* Action button */
+.report-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--cafe-claro);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.3px;
+}
+
+.report-action-btn:hover {
+  background: rgba(74, 159, 212, 0.1);
+  border-color: rgba(74, 159, 212, 0.35);
+  color: #FFFFFF;
+}
