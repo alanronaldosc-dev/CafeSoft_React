@@ -506,18 +506,36 @@ function Clientes({ onCrear, onEditar }) {
                 <strong style={{ color: "#cbd5e1" }}>
                   Domicilio:
                 </strong>{" "}
-                {cliente.domicilio}
-              </p>
+                  {cliente.domicilio}
+                </p>
 
-              <p
-                style={{
-                  color: "#94a3b8",
-                  margin: "4px 0",
-                }}
-              >
-                <strong style={{ color: "#cbd5e1" }}>
-                  Google Maps:
-                </strong>{" "}
+                <p
+                  style={{
+                    color: "#94a3b8",
+                    margin: "4px 0",
+                  }}
+                >
+                  <strong style={{ color: "#cbd5e1" }}>
+                    Teléfono:
+                  </strong>{" "}
+                  {cliente.telefono ? (
+                    <a href={`tel:${cliente.telefono}`} style={{ color: "#60a5fa" }}>
+                      {cliente.telefono}
+                    </a>
+                  ) : (
+                    "Sin especificar"
+                  )}
+                </p>
+
+                <p
+                  style={{
+                    color: "#94a3b8",
+                    margin: "4px 0",
+                  }}
+                >
+                  <strong style={{ color: "#cbd5e1" }}>
+                    Google Maps:
+                  </strong>{" "}
                 {cliente.linkGoogleMaps ? (
                   <a
                     href={cliente.linkGoogleMaps}

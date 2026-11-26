@@ -22,6 +22,7 @@ function EditarCliente({ cliente, onVolver }) {
   const [form, setForm] = useState({
     nombre: cliente?.nombre || "",
     domicilio: cliente?.domicilio || "",
+    telefono: cliente?.telefono || "",
     linkGoogleMaps: cliente?.linkGoogleMaps || "",
     frecuencia: cliente?.frecuencia || "",
     precioPorGarrafon: cliente?.precioPorGarrafon || "",
@@ -78,6 +79,11 @@ function EditarCliente({ cliente, onVolver }) {
       return;
     }
 
+    if (!/^[0-9+\s()-]{7,20}$/.test(form.telefono.trim())) {
+      alert("Ingresa un teléfono válido (7 a 20 dígitos)");
+      return;
+    }
+
     // Validación del enlace de Google Maps antes de guardar
     if (
       form.linkGoogleMaps.trim() !== "" &&
@@ -93,6 +99,7 @@ function EditarCliente({ cliente, onVolver }) {
     const payload = {
       nombre: form.nombre,
       domicilio: form.domicilio,
+      telefono: form.telefono.trim(),
       linkGoogleMaps: form.linkGoogleMaps,
       diasReparto: diasSeleccionados.join(","),
       frecuencia: form.frecuencia,
@@ -138,6 +145,11 @@ function EditarCliente({ cliente, onVolver }) {
         <div>
           <label>Domicilio</label>
           <textarea name="domicilio" value={form.domicilio} onChange={cambiarCampo} rows="3" />
+        </div>
+
+        <div>
+          <label>Teléfono</label>
+          <input type="tel" name="telefono" value={form.telefono} onChange={cambiarCampo} />
         </div>
 
         <div>

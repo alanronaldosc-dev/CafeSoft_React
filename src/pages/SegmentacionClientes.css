@@ -82,6 +82,22 @@
   cursor: wait;
 }
 
+.sc-boton-riesgo {
+  background: linear-gradient(135deg, #b91c1c, #dc2626);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 19px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.sc-boton-riesgo:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
 .sc-boton-secundario {
   background: #253247;
   color: #e2e8f0;

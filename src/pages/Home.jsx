@@ -32,6 +32,7 @@ import CrearProveedor from "./CrearProveedor";
 // HU-011 - CLIENTES
 import Clientes from "./Clientes";
 import SegmentacionClientes from "./SegmentacionClientes";
+import ClientesEnRiesgo from "./ClientesEnRiesgo";
 import CrearCliente from "./CrearCliente";
 import EditarCliente from "./EditarCliente";
 
@@ -76,6 +77,7 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
     // HU-011
     { id: "clientes", texto: "🧑 Clientes" },
     ...(usuario.userTipo === 0 ? [{ id: "segmentacion", texto: "📊 Segmentación de clientes" }] : []),
+    ...(usuario.userTipo === 0 ? [{ id: "clientesEnRiesgo", texto: "🚨 Clientes en riesgo" }] : []),
     // RUTAS
     { id: "rutas", texto: "🗺️ Rutas" },
     // HU-005
@@ -273,7 +275,10 @@ function Home({ usuario, cerrarSesion, tema, toggleTema }) {
       // HU-011 - CLIENTES
       // ============================================
       case "segmentacion":
-        return <SegmentacionClientes />;
+        return <SegmentacionClientes onNavegar={cambiarSeccion} />;
+
+      case "clientesEnRiesgo":
+        return <ClientesEnRiesgo onNavegar={cambiarSeccion} usuario={usuario} />;
 
       case "clientes":
         return (
