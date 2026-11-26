@@ -6,6 +6,11 @@ function InventarioAnalisis({ onCrear, usuario }) {
   const [inventarioVacios, setInventarioVacios] = useState([]);
   const [cargando, setCargando] = useState(true);
 
+  const [mostrarPrediccion, setMostrarPrediccion] = useState(false);
+const [prediccion, setPrediccion] = useState(null);
+const [cargandoPrediccion, setCargandoPrediccion] = useState(false);
+const [errorPrediccion, setErrorPrediccion] = useState("");
+
   useEffect(() => {
     let activo = true;
 
@@ -79,20 +84,83 @@ function InventarioAnalisis({ onCrear, usuario }) {
     };
   }, [usuario]);
 
+const cargarPrediccion = async () => {
+  setMostrarPrediccion(true);
+  setCargandoPrediccion(true);
+  setErrorPrediccion("");
+  setPrediccion(null);
+
+  try {
+    const params = {};
+
+    // Los usuarios que no son administradores consultan
+    // únicamente la información de su sucursal.
+    if (usuario?.userTipo !== 0) {
+      if (!usuario?.sucursalId) {
+        throw new Error("Tu usuario no tiene una sucursal asociada.");
+      }
+
+      params.sucursalId = usuario.sucursalId;
+    }
+
+    const respuesta = await api.get(
+      "/inventario/prediccion-demanda",
+      { params }
+    );
+
+    setPrediccion(respuesta.data);
+  } catch (error) {
+    console.error("Error al obtener la predicción:", error);
+
+    setErrorPrediccion(
+      error.response?.data?.message ||
+      error.message ||
+      "No fue posible obtener la predicción de demanda."
+    );
+  } finally {
+    setCargandoPrediccion(false);
+  }
+};
+
+const formatearCantidad = (valor) =>
+  Number(valor || 0).toLocaleString("es-MX", {
+    maximumFractionDigits: 3,
+  });
+
+const formatearFecha = (valor) =>
+  valor ? String(valor).slice(0, 10) : "—";
+
   const encabezado = (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <div>
-        <h1 style={{ margin: 0 }}>🧂 Insumos</h1>
-        <p style={{ margin: "4px 0 0", color: "var(--texto-suave)", fontSize: "14px" }}>
-          Análisis de inventario y stock
-        </p>
-      </div>
-      {onCrear && (
-        <button onClick={onCrear} style={{ padding: "10px 18px", cursor: "pointer" }}>
-          + Nuevo Insumo
-        </button>
-      )}
-    </div>
+    <div style={{
+  display: "flex",
+  gap: "10px",
+  flexWrap: "wrap",
+  justifyContent: "flex-end"
+}}>
+  <button
+    onClick={cargarPrediccion}
+    style={{
+      padding: "10px 18px",
+      cursor: "pointer",
+      background: "#2563EB",
+      color: "#FFFFFF",
+      border: "none",
+      borderRadius: "6px",
+      fontWeight: "600"
+    }}
+  >
+    📈 Predecir demanda
+  </button>
+
+  {onCrear && (
+    <button
+      onClick={onCrear}
+      style={{ padding: "10px 18px", cursor: "pointer" }}
+    >
+      + Nuevo Insumo
+    </button>
+  )}
+</div>
   );
 
   if (cargando) {
@@ -164,6 +232,209 @@ function InventarioAnalisis({ onCrear, usuario }) {
     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
 
       {encabezado}
+
+      {mostrarPrediccion && (
+        <div style={{
+          background: "var(--fondo-card)",
+          border: "1px solid var(--borde)",
+          borderRadius: "var(--r-md)",
+          padding: "20px",
+        }}>
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "10px",
+            marginBottom: "16px"
+          }}>
+            <div>
+              <h2 style={{ margin: 0, color: "var(--texto)" }}>
+                📈 Predicción de demanda de insumos
+              </h2>
+              <p style={{
+                color: "var(--texto-suave)",
+                fontSize: "13px",
+                margin: "6px 0 0"
+              }}>
+                Estimación basada en el consumo histórico de ventas.
+              </p>
+            </div>
+
+            <button
+              onClick={() => setMostrarPrediccion(false)}
+              style={{ padding: "8px 14px", cursor: "pointer" }}
+            >
+              Cerrar
+            </button>
+          </div>
+
+          {cargandoPrediccion && (
+            <p style={{ color: "var(--texto-suave)" }}>
+              Calculando demanda de insumos...
+            </p>
+          )}
+
+          {!cargandoPrediccion && errorPrediccion && (
+            <p style={{ color: "#E05252" }}>
+              {errorPrediccion}
+            </p>
+          )}
+
+          {!cargandoPrediccion && prediccion && (
+            <>
+              <div style={{
+                background: "var(--fondo)",
+                border: "1px solid var(--borde)",
+                borderRadius: "8px",
+                padding: "14px",
+                marginBottom: "18px"
+              }}>
+                <p style={{ margin: "0 0 8px", color: "var(--texto)" }}>
+                  <strong>Periodo de referencia:</strong>{" "}
+                  {formatearFecha(prediccion.inicioPeriodoReferencia)}
+                  {" al "}
+                  {formatearFecha(prediccion.finPeriodoReferencia)}
+                </p>
+
+                <p style={{ margin: 0, color: "var(--texto)" }}>
+                  <strong>Periodo de predicción:</strong>{" "}
+                  {formatearFecha(prediccion.inicioPeriodoPrediccion)}
+                  {" al "}
+                  {formatearFecha(prediccion.finPeriodoPrediccion)}
+                </p>
+              </div>
+
+              {prediccion.insumos?.length > 0 ? (
+                <>
+                  <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+                    gap: "12px",
+                    marginBottom: "18px"
+                  }}>
+                    <div style={tarjetaStyle("#2563EB")}>
+                      <p style={{ color: "#8D9DB6", fontSize: "12px" }}>
+                        Insumos analizados
+                      </p>
+                      <p style={{ color: "#2563EB", fontSize: "26px", fontWeight: "800" }}>
+                        {prediccion.insumos.length}
+                      </p>
+                    </div>
+
+                    <div style={tarjetaStyle("#E05252")}>
+                      <p style={{ color: "#8D9DB6", fontSize: "12px" }}>
+                        Con stock insuficiente
+                      </p>
+                      <p style={{ color: "#E05252", fontSize: "26px", fontWeight: "800" }}>
+                        {prediccion.insumos.filter(
+                          (item) => item.estadoStock === "Stock insuficiente"
+                        ).length}
+                      </p>
+                    </div>
+
+                    <div style={tarjetaStyle("#3AC87A")}>
+                      <p style={{ color: "#8D9DB6", fontSize: "12px" }}>
+                        Con stock suficiente
+                      </p>
+                      <p style={{ color: "#3AC87A", fontSize: "26px", fontWeight: "800" }}>
+                        {prediccion.insumos.filter(
+                          (item) => item.estadoStock === "Stock suficiente"
+                        ).length}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ overflowX: "auto" }}>
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Insumo</th>
+                          <th>Consumo últimos 30 días</th>
+                          <th>Promedio diario</th>
+                          <th>Stock actual</th>
+                          <th>Demanda próximos 30 días</th>
+                          <th>Faltante</th>
+                          <th>Estado</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {prediccion.insumos.map((item) => {
+                          const insuficiente =
+                            item.estadoStock === "Stock insuficiente";
+
+                          return (
+                            <tr key={item.id}>
+                              <td>
+                                <strong>{item.nombre}</strong>
+                                {item.sucursalNombre && (
+                                  <div style={{
+                                    fontSize: "12px",
+                                    color: "var(--texto-suave)"
+                                  }}>
+                                    {item.sucursalNombre}
+                                  </div>
+                                )}
+                              </td>
+
+                              <td>
+                                {formatearCantidad(item.consumoUltimos30Dias)}
+                                {" "}{item.unidadMedida}
+                              </td>
+
+                              <td>
+                                {formatearCantidad(item.promedioDiario)}
+                                {" "}{item.unidadMedida}
+                              </td>
+
+                              <td>
+                                {formatearCantidad(item.stockActual)}
+                                {" "}{item.unidadMedida}
+                              </td>
+
+                              <td>
+                                <strong>
+                                  {formatearCantidad(item.demandaSiguiente30Dias)}
+                                </strong>
+                                {" "}{item.unidadMedida}
+                              </td>
+
+                              <td style={{
+                                fontWeight: "700",
+                                color: insuficiente ? "#E05252" : "#3AC87A"
+                              }}>
+                                {formatearCantidad(item.faltante)}
+                                {" "}{item.unidadMedida}
+                              </td>
+
+                              <td>
+                                <Badge
+                                  color={insuficiente ? "#E05252" : "#3AC87A"}
+                                  bg={insuficiente ? "#FEF0EE" : "#E8FEF0"}
+                                  texto={item.estadoStock}
+                                />
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              ) : (
+                <p style={{
+                  color: "var(--texto-suave)",
+                  textAlign: "center",
+                  padding: "20px"
+                }}>
+                  No hay insumos asociados a recetas de productos para realizar la predicción.
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {/* ── PANEL GARRAFONES VACÍOS (inventario real) ── */}
       <div style={{
