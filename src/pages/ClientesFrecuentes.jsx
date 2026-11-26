@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "../services/api";
 
 /**
@@ -38,8 +38,6 @@ function DonaFrecuentes({ clientes }) {
   const gap     = 0.015;  // separación entre segmentos (radianes)
   const corner  = 18;    // radio de esquina (efecto 3-D suave)
 
-  let anguloActual = -Math.PI / 2;
-
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "32px", flexWrap: "wrap" }}>
 
@@ -74,9 +72,15 @@ function DonaFrecuentes({ clientes }) {
           {top5.map((cliente, i) => {
             const fraccion = cliente.totalCompras / total;
             const angulo   = fraccion * 2 * Math.PI - gap;
+            const anguloActual = top5
+              .slice(0, i)
+              .reduce(
+                (acumulado, anterior) =>
+                  acumulado + (anterior.totalCompras / total) * 2 * Math.PI,
+                -Math.PI / 2,
+              );
             const inicio   = anguloActual + gap / 2;
             const fin      = inicio + angulo;
-            anguloActual  += fraccion * 2 * Math.PI;
 
             const x1o = Math.cos(inicio) * R;
             const y1o = Math.sin(inicio) * R;
@@ -167,34 +171,40 @@ export default function ClientesFrecuentes() {
   const [cargando,       setCargando]       = useState(false);
   const [error,          setError]          = useState(null);
 
-  // Cargar datos cuando cambia el periodo o el criterio
-  useEffect(() => {
-    cargarClientes();
-  }, [periodo, minimoCompras]);
-
-  const cargarClientes = async () => {
+  const cargarClientes = useCallback(async (signal) => {
     setCargando(true);
     setError(null);
     try {
       const res = await api.get(
-        `/ventas/reporte/clientes-frecuentes?periodo=${periodo}&minimoCompras=${minimoCompras}`
+        `/ventas/reporte/clientes-frecuentes?periodo=${periodo}&minimoCompras=${minimoCompras}`,
+        { signal },
       );
-      setClientes(Array.isArray(res.data) ? res.data : []);
+      if (!Array.isArray(res.data)) {
+        throw new Error("La API devolvió un ranking con formato inválido.");
+      }
+      if (!signal.aborted) setClientes(res.data);
     } catch (err) {
-      setError(
-        err?.response?.data?.mensaje ||
-        err?.response?.data?.message ||
-        "No se pudo cargar la lista de clientes frecuentes."
-      );
-      setClientes([]);
+      if (!signal.aborted) {
+        setError(
+          err?.response?.data?.mensaje ||
+          err?.response?.data?.message ||
+          "No se pudo cargar la lista de clientes frecuentes."
+        );
+        setClientes([]);
+      }
     } finally {
-      setCargando(false);
+      if (!signal.aborted) setCargando(false);
     }
-  };
+  }, [periodo, minimoCompras]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    Promise.resolve().then(() => cargarClientes(controller.signal));
+    return () => controller.abort();
+  }, [cargarClientes]);
 
   // Separar frecuentes y no frecuentes para los contadores
   const frecuentes    = clientes.filter(c => c.esFrecuente);
-  const noFrecuentes  = clientes.filter(c => !c.esFrecuente);
 
   return (
     <section className="panel">
