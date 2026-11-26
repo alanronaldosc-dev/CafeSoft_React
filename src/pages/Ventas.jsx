@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./VentasNavegacion.css";
 import PatronesConsumo from "../components/PatronesConsumo";
-
+import CombinacionesFrecuentes from "../components/CombinacionesFrecuentes";
 import api from "../services/api";
 import DashboardVentas from "../components/DashboardVentas";
 import ProductosMasVendidos from "../components/ProductosMasVendidos";
@@ -242,6 +242,7 @@ function Ventas({ usuario, onNavegar }) {
           { id: "ventas", icono: "🧾", titulo: "Ventas", descripcion: "Resumen general" },
           { id: "horarios", icono: "🕒", titulo: "Por horario", descripcion: "Horas de consumo" },
           { id: "diarios", icono: "📊", titulo: "Por día", descripcion: "Patrones diarios" },
+          { id: "combinaciones", icono: "🛒", titulo: "Combinaciones", descripcion: "Productos comprados juntos" },
         ].map((opcion) => (
           <button
             key={opcion.id}
@@ -262,6 +263,7 @@ function Ventas({ usuario, onNavegar }) {
 
       {vistaVentas === "horarios" && <PatronesConsumo modo="horarios" />}
       {vistaVentas === "diarios" && <PatronesConsumo modo="diarios" />}
+      {vistaVentas === "combinaciones" && <CombinacionesFrecuentes />}
       {vistaVentas === "ventas" && (
         <>
           {errorVentas && (
