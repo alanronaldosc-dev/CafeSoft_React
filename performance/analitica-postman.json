@@ -1,0 +1,73 @@
+{
+  "info": {
+    "name": "CafeSoft Analytics HU-054",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8080" },
+    { "key": "token", "value": "" }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('HTTP 200', function () { pm.response.to.have.status(200); });",
+          "pm.test('Response under 3000 ms', function () { pm.expect(pm.response.responseTime).to.be.below(3000); });",
+          "pm.test('Response is JSON', function () { pm.response.to.be.json; });"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Sales report - today",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/ventas/reporte?periodo=hoy"
+      }
+    },
+    {
+      "name": "Top products - month",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/ventas/reporte/top-productos?periodo=mes"
+      }
+    },
+    {
+      "name": "Frequent customers - month",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3"
+      }
+    },
+    {
+      "name": "Segment summary",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/clientes/segmentos/resumen"
+      }
+    },
+    {
+      "name": "Active customer segments",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/clientes/segmentos?segmento=ACTIVO"
+      }
+    },
+    {
+      "name": "Analytics dashboard - month",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/api/ventas/dashboard?periodo=mes"
+      }
+    }
+  ]
+}
