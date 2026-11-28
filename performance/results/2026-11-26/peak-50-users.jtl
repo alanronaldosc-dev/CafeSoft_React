@@ -1,0 +1,301 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1795717374770,329,Sales report - today,200,,Analytics load 1-1,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,317,0,32
+1795717375102,337,Top products - month,200,,Analytics load 1-1,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,337,0,0
+1795717375586,58,Sales report - today,200,,Analytics load 1-2,text,true,,849,375,2,2,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,58,0,3
+1795717375440,313,Frequent customers - month,200,,Analytics load 1-1,text,true,,12819,411,2,2,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,311,0,0
+1795717375754,98,Segment summary,200,,Analytics load 1-1,text,true,,517,375,2,2,http://127.0.0.1:8080/api/clientes/segmentos/resumen,98,0,0
+1795717375853,58,Segment list - active,200,,Analytics load 1-1,text,true,,433,383,2,2,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,58,0,0
+1795717375645,420,Top products - month,200,,Analytics load 1-2,text,true,,879,389,2,2,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,417,0,0
+1795717375912,607,Analytics dashboard - month,200,,Analytics load 1-1,text,true,,2881,377,2,2,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,607,0,0
+1795717376066,513,Frequent customers - month,200,,Analytics load 1-2,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,512,0,0
+1795717376580,64,Segment summary,200,,Analytics load 1-2,text,true,,517,375,2,2,http://127.0.0.1:8080/api/clientes/segmentos/resumen,63,0,0
+1795717376584,84,Sales report - today,200,,Analytics load 1-3,text,true,,849,375,2,2,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,83,0,2
+1795717376646,47,Segment list - active,200,,Analytics load 1-2,text,true,,433,383,2,2,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,46,0,0
+1795717376669,352,Top products - month,200,,Analytics load 1-3,text,true,,879,389,2,2,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,351,0,0
+1795717376694,350,Analytics dashboard - month,200,,Analytics load 1-2,text,true,,2881,377,2,2,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,349,0,0
+1795717377022,317,Frequent customers - month,200,,Analytics load 1-3,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,317,0,0
+1795717377340,30,Segment summary,200,,Analytics load 1-3,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,30,0,0
+1795717377371,30,Segment list - active,200,,Analytics load 1-3,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,30,0,0
+1795717377582,55,Sales report - today,200,,Analytics load 1-4,text,true,,849,375,2,2,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,55,0,2
+1795717377401,245,Analytics dashboard - month,200,,Analytics load 1-3,text,true,,2881,377,2,2,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,244,0,0
+1795717377638,198,Top products - month,200,,Analytics load 1-4,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,197,0,0
+1795717377837,255,Frequent customers - month,200,,Analytics load 1-4,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,254,0,0
+1795717378093,25,Segment summary,200,,Analytics load 1-4,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,24,0,0
+1795717378118,26,Segment list - active,200,,Analytics load 1-4,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,25,0,0
+1795717378145,230,Analytics dashboard - month,200,,Analytics load 1-4,text,true,,2880,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,230,0,0
+1795717378580,37,Sales report - today,200,,Analytics load 1-5,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,37,0,2
+1795717378618,206,Top products - month,200,,Analytics load 1-5,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,206,0,0
+1795717378825,232,Frequent customers - month,200,,Analytics load 1-5,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,230,0,0
+1795717379058,31,Segment summary,200,,Analytics load 1-5,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,30,0,0
+1795717379089,34,Segment list - active,200,,Analytics load 1-5,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,33,0,0
+1795717379123,263,Analytics dashboard - month,200,,Analytics load 1-5,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,263,0,0
+1795717379580,33,Sales report - today,200,,Analytics load 1-6,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,32,0,2
+1795717379613,223,Top products - month,200,,Analytics load 1-6,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,222,0,0
+1795717379836,249,Frequent customers - month,200,,Analytics load 1-6,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,249,0,0
+1795717380089,27,Segment summary,200,,Analytics load 1-6,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,27,0,0
+1795717380117,29,Segment list - active,200,,Analytics load 1-6,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,29,0,0
+1795717380147,223,Analytics dashboard - month,200,,Analytics load 1-6,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,222,0,0
+1795717380595,32,Sales report - today,200,,Analytics load 1-7,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,32,0,1
+1795717380628,242,Top products - month,200,,Analytics load 1-7,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,242,0,0
+1795717380871,236,Frequent customers - month,200,,Analytics load 1-7,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,236,0,0
+1795717381108,25,Segment summary,200,,Analytics load 1-7,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,24,0,0
+1795717381133,24,Segment list - active,200,,Analytics load 1-7,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,24,0,0
+1795717381157,226,Analytics dashboard - month,200,,Analytics load 1-7,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,225,0,0
+1795717381581,32,Sales report - today,200,,Analytics load 1-8,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,32,0,2
+1795717381613,176,Top products - month,200,,Analytics load 1-8,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,176,0,0
+1795717381790,186,Frequent customers - month,200,,Analytics load 1-8,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,186,0,0
+1795717381976,30,Segment summary,200,,Analytics load 1-8,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,30,0,0
+1795717382006,23,Segment list - active,200,,Analytics load 1-8,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,22,0,0
+1795717382030,194,Analytics dashboard - month,200,,Analytics load 1-8,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,194,0,0
+1795717382581,29,Sales report - today,200,,Analytics load 1-9,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,29,0,1
+1795717382611,333,Top products - month,200,,Analytics load 1-9,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,331,0,0
+1795717382944,247,Frequent customers - month,200,,Analytics load 1-9,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,247,0,0
+1795717383192,25,Segment summary,200,,Analytics load 1-9,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,25,0,0
+1795717383218,20,Segment list - active,200,,Analytics load 1-9,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,20,0,0
+1795717383239,213,Analytics dashboard - month,200,,Analytics load 1-9,text,true,,2880,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,212,0,0
+1795717383579,34,Sales report - today,200,,Analytics load 1-10,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,34,0,1
+1795717383613,207,Top products - month,200,,Analytics load 1-10,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,207,0,0
+1795717383821,218,Frequent customers - month,200,,Analytics load 1-10,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,217,0,0
+1795717384039,25,Segment summary,200,,Analytics load 1-10,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,25,0,0
+1795717384065,25,Segment list - active,200,,Analytics load 1-10,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,25,0,0
+1795717384091,305,Analytics dashboard - month,200,,Analytics load 1-10,text,true,,2880,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,305,0,0
+1795717384579,44,Sales report - today,200,,Analytics load 1-11,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,43,0,2
+1795717384623,185,Top products - month,200,,Analytics load 1-11,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,185,0,0
+1795717384809,243,Frequent customers - month,200,,Analytics load 1-11,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,242,0,0
+1795717385053,39,Segment summary,200,,Analytics load 1-11,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,39,0,0
+1795717385093,30,Segment list - active,200,,Analytics load 1-11,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,29,0,0
+1795717385124,205,Analytics dashboard - month,200,,Analytics load 1-11,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,205,0,0
+1795717385583,31,Sales report - today,200,,Analytics load 1-12,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,31,0,1
+1795717385615,187,Top products - month,200,,Analytics load 1-12,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,186,0,0
+1795717385802,241,Frequent customers - month,200,,Analytics load 1-12,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,241,0,0
+1795717386044,26,Segment summary,200,,Analytics load 1-12,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,26,0,0
+1795717386070,23,Segment list - active,200,,Analytics load 1-12,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,22,0,0
+1795717386093,185,Analytics dashboard - month,200,,Analytics load 1-12,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,185,0,0
+1795717386581,31,Sales report - today,200,,Analytics load 1-13,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,30,0,1
+1795717386612,175,Top products - month,200,,Analytics load 1-13,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,175,0,0
+1795717386787,178,Frequent customers - month,200,,Analytics load 1-13,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,178,0,0
+1795717386966,26,Segment summary,200,,Analytics load 1-13,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,26,0,0
+1795717386992,41,Segment list - active,200,,Analytics load 1-13,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,39,0,0
+1795717387033,274,Analytics dashboard - month,200,,Analytics load 1-13,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,273,0,0
+1795717387583,40,Sales report - today,200,,Analytics load 1-14,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,40,0,1
+1795717387624,173,Top products - month,200,,Analytics load 1-14,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,173,0,0
+1795717387798,226,Frequent customers - month,200,,Analytics load 1-14,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,226,0,0
+1795717388024,21,Segment summary,200,,Analytics load 1-14,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,21,0,0
+1795717388045,22,Segment list - active,200,,Analytics load 1-14,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,22,0,0
+1795717388068,221,Analytics dashboard - month,200,,Analytics load 1-14,text,true,,2880,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,220,0,0
+1795717388581,41,Sales report - today,200,,Analytics load 1-15,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,41,0,2
+1795717388623,253,Top products - month,200,,Analytics load 1-15,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,253,0,0
+1795717388877,197,Frequent customers - month,200,,Analytics load 1-15,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,196,0,0
+1795717389074,22,Segment summary,200,,Analytics load 1-15,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,22,0,0
+1795717389097,20,Segment list - active,200,,Analytics load 1-15,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,20,0,0
+1795717389117,207,Analytics dashboard - month,200,,Analytics load 1-15,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,207,0,0
+1795717389581,29,Sales report - today,200,,Analytics load 1-16,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,29,0,1
+1795717389610,231,Top products - month,200,,Analytics load 1-16,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,229,0,0
+1795717389841,230,Frequent customers - month,200,,Analytics load 1-16,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,229,0,0
+1795717390071,23,Segment summary,200,,Analytics load 1-16,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,23,0,0
+1795717390095,21,Segment list - active,200,,Analytics load 1-16,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,21,0,0
+1795717390116,201,Analytics dashboard - month,200,,Analytics load 1-16,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,200,0,0
+1795717390581,33,Sales report - today,200,,Analytics load 1-17,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,33,0,2
+1795717390614,221,Top products - month,200,,Analytics load 1-17,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,220,0,0
+1795717390835,247,Frequent customers - month,200,,Analytics load 1-17,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,246,0,0
+1795717391082,27,Segment summary,200,,Analytics load 1-17,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,27,0,0
+1795717391109,22,Segment list - active,200,,Analytics load 1-17,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,22,0,0
+1795717391132,196,Analytics dashboard - month,200,,Analytics load 1-17,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,196,0,0
+1795717391579,29,Sales report - today,200,,Analytics load 1-18,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,28,0,1
+1795717391608,166,Top products - month,200,,Analytics load 1-18,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,166,0,0
+1795717391774,175,Frequent customers - month,200,,Analytics load 1-18,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,175,0,0
+1795717391950,20,Segment summary,200,,Analytics load 1-18,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,20,0,0
+1795717391970,22,Segment list - active,200,,Analytics load 1-18,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,21,0,0
+1795717391992,181,Analytics dashboard - month,200,,Analytics load 1-18,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,181,0,0
+1795717392579,31,Sales report - today,200,,Analytics load 1-19,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,31,0,0
+1795717392610,298,Top products - month,200,,Analytics load 1-19,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,297,0,0
+1795717392909,260,Frequent customers - month,200,,Analytics load 1-19,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,260,0,0
+1795717393170,24,Segment summary,200,,Analytics load 1-19,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,23,0,0
+1795717393194,19,Segment list - active,200,,Analytics load 1-19,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,19,0,0
+1795717393214,173,Analytics dashboard - month,200,,Analytics load 1-19,text,true,,2880,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,173,0,0
+1795717393581,31,Sales report - today,200,,Analytics load 1-20,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,31,0,1
+1795717393613,179,Top products - month,200,,Analytics load 1-20,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,179,0,0
+1795717393793,186,Frequent customers - month,200,,Analytics load 1-20,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,185,0,0
+1795717393979,24,Segment summary,200,,Analytics load 1-20,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,24,0,0
+1795717394003,23,Segment list - active,200,,Analytics load 1-20,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,23,0,0
+1795717394027,191,Analytics dashboard - month,200,,Analytics load 1-20,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,189,0,0
+1795717394580,31,Sales report - today,200,,Analytics load 1-21,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,31,0,1
+1795717394612,171,Top products - month,200,,Analytics load 1-21,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,170,0,0
+1795717394784,243,Frequent customers - month,200,,Analytics load 1-21,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,242,0,0
+1795717395027,26,Segment summary,200,,Analytics load 1-21,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,26,0,0
+1795717395054,19,Segment list - active,200,,Analytics load 1-21,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,18,0,0
+1795717395073,190,Analytics dashboard - month,200,,Analytics load 1-21,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,189,0,0
+1795717395582,30,Sales report - today,200,,Analytics load 1-22,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,30,0,1
+1795717395612,166,Top products - month,200,,Analytics load 1-22,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,166,0,0
+1795717395779,182,Frequent customers - month,200,,Analytics load 1-22,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,182,0,0
+1795717395961,23,Segment summary,200,,Analytics load 1-22,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,23,0,0
+1795717395985,22,Segment list - active,200,,Analytics load 1-22,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,21,0,0
+1795717396007,179,Analytics dashboard - month,200,,Analytics load 1-22,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,179,0,0
+1795717396593,31,Sales report - today,200,,Analytics load 1-23,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,30,0,1
+1795717396624,174,Top products - month,200,,Analytics load 1-23,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,174,0,0
+1795717396798,183,Frequent customers - month,200,,Analytics load 1-23,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,183,0,0
+1795717396981,25,Segment summary,200,,Analytics load 1-23,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,24,0,0
+1795717397006,28,Segment list - active,200,,Analytics load 1-23,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,28,0,0
+1795717397035,184,Analytics dashboard - month,200,,Analytics load 1-23,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,184,0,0
+1795717397582,29,Sales report - today,200,,Analytics load 1-24,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,29,0,1
+1795717397611,162,Top products - month,200,,Analytics load 1-24,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,162,0,0
+1795717397774,189,Frequent customers - month,200,,Analytics load 1-24,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,189,0,0
+1795717397964,21,Segment summary,200,,Analytics load 1-24,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,21,0,0
+1795717397986,20,Segment list - active,200,,Analytics load 1-24,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,20,0,0
+1795717398006,177,Analytics dashboard - month,200,,Analytics load 1-24,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,177,0,0
+1795717398579,31,Sales report - today,200,,Analytics load 1-25,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,31,0,1
+1795717398610,196,Top products - month,200,,Analytics load 1-25,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,196,0,0
+1795717398807,185,Frequent customers - month,200,,Analytics load 1-25,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,184,0,0
+1795717398993,20,Segment summary,200,,Analytics load 1-25,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,20,0,0
+1795717399013,22,Segment list - active,200,,Analytics load 1-25,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,22,0,0
+1795717399035,198,Analytics dashboard - month,200,,Analytics load 1-25,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,198,0,0
+1795717399579,29,Sales report - today,200,,Analytics load 1-26,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,29,0,1
+1795717399608,166,Top products - month,200,,Analytics load 1-26,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,166,0,0
+1795717399774,201,Frequent customers - month,200,,Analytics load 1-26,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,201,0,0
+1795717399976,20,Segment summary,200,,Analytics load 1-26,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,20,0,0
+1795717399996,21,Segment list - active,200,,Analytics load 1-26,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,20,0,0
+1795717400017,196,Analytics dashboard - month,200,,Analytics load 1-26,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,196,0,0
+1795717400590,30,Sales report - today,200,,Analytics load 1-27,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,30,0,2
+1795717400621,191,Top products - month,200,,Analytics load 1-27,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,190,0,0
+1795717400812,208,Frequent customers - month,200,,Analytics load 1-27,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,207,0,0
+1795717401020,22,Segment summary,200,,Analytics load 1-27,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,21,0,0
+1795717401042,22,Segment list - active,200,,Analytics load 1-27,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,22,0,0
+1795717401064,206,Analytics dashboard - month,200,,Analytics load 1-27,text,true,,2880,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,205,0,0
+1795717401582,28,Sales report - today,200,,Analytics load 1-28,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,28,0,1
+1795717401610,176,Top products - month,200,,Analytics load 1-28,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,175,0,0
+1795717401786,178,Frequent customers - month,200,,Analytics load 1-28,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,178,0,0
+1795717401965,20,Segment summary,200,,Analytics load 1-28,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,19,0,0
+1795717401985,20,Segment list - active,200,,Analytics load 1-28,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,20,0,0
+1795717402005,177,Analytics dashboard - month,200,,Analytics load 1-28,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,176,0,0
+1795717402579,31,Sales report - today,200,,Analytics load 1-29,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,31,0,1
+1795717402611,340,Top products - month,200,,Analytics load 1-29,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,338,0,0
+1795717402952,231,Frequent customers - month,200,,Analytics load 1-29,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,231,0,0
+1795717403183,22,Segment summary,200,,Analytics load 1-29,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,22,0,0
+1795717403205,25,Segment list - active,200,,Analytics load 1-29,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,25,0,0
+1795717403230,207,Analytics dashboard - month,200,,Analytics load 1-29,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,207,0,0
+1795717403582,42,Sales report - today,200,,Analytics load 1-30,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,41,0,1
+1795717403625,215,Top products - month,200,,Analytics load 1-30,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,214,0,0
+1795717403840,232,Frequent customers - month,200,,Analytics load 1-30,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,232,0,0
+1795717404073,21,Segment summary,200,,Analytics load 1-30,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,21,0,0
+1795717404094,28,Segment list - active,200,,Analytics load 1-30,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,28,0,0
+1795717404122,259,Analytics dashboard - month,200,,Analytics load 1-30,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,258,0,0
+1795717404580,31,Sales report - today,200,,Analytics load 1-31,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,30,0,1
+1795717404611,171,Top products - month,200,,Analytics load 1-31,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,171,0,0
+1795717404783,209,Frequent customers - month,200,,Analytics load 1-31,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,208,0,0
+1795717404992,24,Segment summary,200,,Analytics load 1-31,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,23,0,0
+1795717405016,25,Segment list - active,200,,Analytics load 1-31,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,25,0,0
+1795717405041,178,Analytics dashboard - month,200,,Analytics load 1-31,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,178,0,0
+1795717405580,31,Sales report - today,200,,Analytics load 1-32,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,31,0,1
+1795717405611,170,Top products - month,200,,Analytics load 1-32,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,169,0,0
+1795717405781,178,Frequent customers - month,200,,Analytics load 1-32,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,178,0,0
+1795717405960,20,Segment summary,200,,Analytics load 1-32,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,19,0,0
+1795717405980,20,Segment list - active,200,,Analytics load 1-32,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,20,0,0
+1795717406001,183,Analytics dashboard - month,200,,Analytics load 1-32,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,181,0,0
+1795717406580,34,Sales report - today,200,,Analytics load 1-33,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,34,0,2
+1795717406615,173,Top products - month,200,,Analytics load 1-33,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,173,0,0
+1795717406789,171,Frequent customers - month,200,,Analytics load 1-33,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,171,0,0
+1795717406961,22,Segment summary,200,,Analytics load 1-33,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,21,0,0
+1795717406983,20,Segment list - active,200,,Analytics load 1-33,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,20,0,0
+1795717407003,180,Analytics dashboard - month,200,,Analytics load 1-33,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,180,0,0
+1795717407579,28,Sales report - today,200,,Analytics load 1-34,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,28,0,1
+1795717407608,171,Top products - month,200,,Analytics load 1-34,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,171,0,0
+1795717407780,193,Frequent customers - month,200,,Analytics load 1-34,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,193,0,0
+1795717407974,20,Segment summary,200,,Analytics load 1-34,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,20,0,0
+1795717407995,20,Segment list - active,200,,Analytics load 1-34,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,20,0,0
+1795717408015,184,Analytics dashboard - month,200,,Analytics load 1-34,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,184,0,0
+1795717408578,34,Sales report - today,200,,Analytics load 1-35,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,34,0,1
+1795717408613,170,Top products - month,200,,Analytics load 1-35,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,169,0,0
+1795717408783,176,Frequent customers - month,200,,Analytics load 1-35,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,176,0,0
+1795717408960,18,Segment summary,200,,Analytics load 1-35,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,18,0,0
+1795717408978,21,Segment list - active,200,,Analytics load 1-35,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,21,0,0
+1795717409000,197,Analytics dashboard - month,200,,Analytics load 1-35,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,197,0,0
+1795717409580,29,Sales report - today,200,,Analytics load 1-36,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,29,0,2
+1795717409609,180,Top products - month,200,,Analytics load 1-36,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,179,0,0
+1795717409789,207,Frequent customers - month,200,,Analytics load 1-36,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,207,0,0
+1795717409996,26,Segment summary,200,,Analytics load 1-36,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,26,0,0
+1795717410023,32,Segment list - active,200,,Analytics load 1-36,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,31,0,0
+1795717410056,286,Analytics dashboard - month,200,,Analytics load 1-36,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,285,0,0
+1795717410580,74,Sales report - today,200,,Analytics load 1-37,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,73,0,3
+1795717410655,471,Top products - month,200,,Analytics load 1-37,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,471,0,0
+1795717411126,400,Frequent customers - month,200,,Analytics load 1-37,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,400,0,0
+1795717411527,37,Segment summary,200,,Analytics load 1-37,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,37,0,0
+1795717411565,46,Segment list - active,200,,Analytics load 1-37,text,true,,433,383,2,2,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,46,0,0
+1795717411580,84,Sales report - today,200,,Analytics load 1-38,text,true,,849,375,2,2,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,83,0,2
+1795717411612,330,Analytics dashboard - month,200,,Analytics load 1-37,text,true,,2881,377,2,2,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,330,0,0
+1795717411665,320,Top products - month,200,,Analytics load 1-38,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,320,0,0
+1795717411986,272,Frequent customers - month,200,,Analytics load 1-38,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,271,0,0
+1795717412258,29,Segment summary,200,,Analytics load 1-38,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,29,0,0
+1795717412287,32,Segment list - active,200,,Analytics load 1-38,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,30,0,0
+1795717412320,263,Analytics dashboard - month,200,,Analytics load 1-38,text,true,,2881,377,2,2,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,261,0,0
+1795717412579,41,Sales report - today,200,,Analytics load 1-39,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,41,0,2
+1795717412621,377,Top products - month,200,,Analytics load 1-39,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,376,0,0
+1795717412999,322,Frequent customers - month,200,,Analytics load 1-39,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,322,0,0
+1795717413322,19,Segment summary,200,,Analytics load 1-39,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,19,0,0
+1795717413341,22,Segment list - active,200,,Analytics load 1-39,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,22,0,0
+1795717413363,248,Analytics dashboard - month,200,,Analytics load 1-39,text,true,,2881,377,2,2,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,247,0,0
+1795717413581,46,Sales report - today,200,,Analytics load 1-40,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,46,0,1
+1795717413628,178,Top products - month,200,,Analytics load 1-40,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,177,0,0
+1795717413806,183,Frequent customers - month,200,,Analytics load 1-40,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,183,0,0
+1795717413989,21,Segment summary,200,,Analytics load 1-40,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,21,0,0
+1795717414011,20,Segment list - active,200,,Analytics load 1-40,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,20,0,0
+1795717414032,209,Analytics dashboard - month,200,,Analytics load 1-40,text,true,,2880,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,209,0,0
+1795717414578,32,Sales report - today,200,,Analytics load 1-41,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,32,0,1
+1795717414611,174,Top products - month,200,,Analytics load 1-41,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,173,0,0
+1795717414785,197,Frequent customers - month,200,,Analytics load 1-41,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,197,0,0
+1795717414983,36,Segment summary,200,,Analytics load 1-41,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,35,0,0
+1795717415020,27,Segment list - active,200,,Analytics load 1-41,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,27,0,0
+1795717415047,183,Analytics dashboard - month,200,,Analytics load 1-41,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,182,0,0
+1795717415583,33,Sales report - today,200,,Analytics load 1-42,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,33,0,1
+1795717415616,171,Top products - month,200,,Analytics load 1-42,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,170,0,0
+1795717415788,184,Frequent customers - month,200,,Analytics load 1-42,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,184,0,0
+1795717415973,25,Segment summary,200,,Analytics load 1-42,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,24,0,0
+1795717415998,27,Segment list - active,200,,Analytics load 1-42,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,27,0,0
+1795717416025,225,Analytics dashboard - month,200,,Analytics load 1-42,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,225,0,0
+1795717416579,30,Sales report - today,200,,Analytics load 1-43,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,30,0,1
+1795717416609,170,Top products - month,200,,Analytics load 1-43,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,170,0,0
+1795717416780,184,Frequent customers - month,200,,Analytics load 1-43,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,184,0,0
+1795717416965,26,Segment summary,200,,Analytics load 1-43,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,25,0,0
+1795717416991,24,Segment list - active,200,,Analytics load 1-43,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,24,0,0
+1795717417015,176,Analytics dashboard - month,200,,Analytics load 1-43,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,175,0,0
+1795717417580,30,Sales report - today,200,,Analytics load 1-44,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,30,0,1
+1795717417611,191,Top products - month,200,,Analytics load 1-44,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,191,0,0
+1795717417803,189,Frequent customers - month,200,,Analytics load 1-44,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,188,0,0
+1795717417992,31,Segment summary,200,,Analytics load 1-44,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,31,0,0
+1795717418024,36,Segment list - active,200,,Analytics load 1-44,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,35,0,0
+1795717418060,185,Analytics dashboard - month,200,,Analytics load 1-44,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,184,0,0
+1795717418579,32,Sales report - today,200,,Analytics load 1-45,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,32,0,1
+1795717418611,181,Top products - month,200,,Analytics load 1-45,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,180,0,0
+1795717418792,175,Frequent customers - month,200,,Analytics load 1-45,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,175,0,0
+1795717418967,20,Segment summary,200,,Analytics load 1-45,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,20,0,0
+1795717418987,19,Segment list - active,200,,Analytics load 1-45,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,19,0,0
+1795717419007,186,Analytics dashboard - month,200,,Analytics load 1-45,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,186,0,0
+1795717419581,48,Sales report - today,200,,Analytics load 1-46,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,47,0,2
+1795717419630,265,Top products - month,200,,Analytics load 1-46,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,264,0,0
+1795717419895,279,Frequent customers - month,200,,Analytics load 1-46,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,279,0,0
+1795717420174,24,Segment summary,200,,Analytics load 1-46,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,23,0,0
+1795717420198,26,Segment list - active,200,,Analytics load 1-46,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,26,0,0
+1795717420225,266,Analytics dashboard - month,200,,Analytics load 1-46,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,266,0,0
+1795717420579,44,Sales report - today,200,,Analytics load 1-47,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,44,0,1
+1795717420623,305,Top products - month,200,,Analytics load 1-47,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,304,0,0
+1795717420928,269,Frequent customers - month,200,,Analytics load 1-47,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,269,0,0
+1795717421198,30,Segment summary,200,,Analytics load 1-47,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,30,0,0
+1795717421228,28,Segment list - active,200,,Analytics load 1-47,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,26,0,0
+1795717421256,281,Analytics dashboard - month,200,,Analytics load 1-47,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,280,0,0
+1795717421578,39,Sales report - today,200,,Analytics load 1-48,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,39,0,1
+1795717421618,291,Top products - month,200,,Analytics load 1-48,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,290,0,0
+1795717421909,297,Frequent customers - month,200,,Analytics load 1-48,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,296,0,0
+1795717422206,20,Segment summary,200,,Analytics load 1-48,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,20,0,0
+1795717422227,19,Segment list - active,200,,Analytics load 1-48,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,19,0,0
+1795717422246,200,Analytics dashboard - month,200,,Analytics load 1-48,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,199,0,0
+1795717422579,29,Sales report - today,200,,Analytics load 1-49,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,29,0,1
+1795717422609,275,Top products - month,200,,Analytics load 1-49,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,274,0,0
+1795717422885,287,Frequent customers - month,200,,Analytics load 1-49,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,287,0,0
+1795717423172,20,Segment summary,200,,Analytics load 1-49,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,20,0,0
+1795717423193,19,Segment list - active,200,,Analytics load 1-49,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,19,0,0
+1795717423212,202,Analytics dashboard - month,200,,Analytics load 1-49,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,202,0,0
+1795717423578,34,Sales report - today,200,,Analytics load 1-50,text,true,,849,375,1,1,http://127.0.0.1:8080/api/ventas/reporte?periodo=hoy,34,0,1
+1795717423612,167,Top products - month,200,,Analytics load 1-50,text,true,,879,389,1,1,http://127.0.0.1:8080/api/ventas/reporte/top-productos?periodo=mes,166,0,0
+1795717423779,186,Frequent customers - month,200,,Analytics load 1-50,text,true,,12819,411,1,1,http://127.0.0.1:8080/api/ventas/reporte/clientes-frecuentes?periodo=mes&minimoCompras=3,185,0,0
+1795717423965,21,Segment summary,200,,Analytics load 1-50,text,true,,517,375,1,1,http://127.0.0.1:8080/api/clientes/segmentos/resumen,21,0,0
+1795717423986,19,Segment list - active,200,,Analytics load 1-50,text,true,,433,383,1,1,http://127.0.0.1:8080/api/clientes/segmentos?segmento=ACTIVO,19,0,0
+1795717424006,178,Analytics dashboard - month,200,,Analytics load 1-50,text,true,,2881,377,1,1,http://127.0.0.1:8080/api/ventas/dashboard?periodo=mes,178,0,0
